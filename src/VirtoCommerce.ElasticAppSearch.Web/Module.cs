@@ -1,26 +1,33 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Data.Repositories;
+using VirtoCommerce.ElasticAppSearch.Core.Models;
+using VirtoCommerce.ElasticAppSearch.Data.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.ElasticAppSearch.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IHasConfiguration
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
 
+        public IConfiguration Configuration { get; set; }
+
         public void Initialize(IServiceCollection serviceCollection)
         {
-            // database initialization
-            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            var connectionString = configuration.GetConnectionString("VirtoCommerce.ElasticAppSearch") ?? configuration.GetConnectionString("VirtoCommerce");
-            serviceCollection.AddDbContext<ElasticAppSearchDbContext>(options => options.UseSqlServer(connectionString));
+            var provider = Configuration.GetValue<string>("Search:Provider");
+
+            if (provider.EqualsInvariant("ElasticAppSearch"))
+            {
+                serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection("Search:ElasticAppSearch"));
+                serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
+            }
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -32,22 +39,12 @@ namespace VirtoCommerce.ElasticAppSearch.Web
             // register permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
-                new Permission()
+                new Permission
                 {
                     GroupName = "ElasticAppSearch",
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
-
-            // Ensure that any pending migrations are applied
-            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
-            {
-                using (var dbContext = serviceScope.ServiceProvider.GetRequiredService<ElasticAppSearchDbContext>())
-                {
-                    dbContext.Database.EnsureCreated();
-                    dbContext.Database.Migrate();
-                }
-            }
         }
 
         public void Uninstall()
