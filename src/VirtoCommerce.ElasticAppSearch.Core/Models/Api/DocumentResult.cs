@@ -1,8 +1,6 @@
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 
-public record DocumentResult
+public record DocumentResult: Result
 {
     public string Id { get; set; }
-
-    public string[] Errors { get; set; }
 }

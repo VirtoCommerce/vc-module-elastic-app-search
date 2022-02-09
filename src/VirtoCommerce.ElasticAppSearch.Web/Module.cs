@@ -41,23 +41,23 @@ public class Module : IModule, IHasConfiguration
                 var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
                 httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
-
+                
                 httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
 
                 if (elasticAppSearchOptions.EnableHttpCompression)
                 {
                     httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
                 }
-            //}).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-            //{
-            //    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            {
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-            //    var handler = new HttpClientHandler
-            //    {
-            //        AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
-            //    };
+                var handler = new HttpClientHandler
+                {
+                    AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
+                };
 
-            //    return handler;
+                return handler;
             });
         }
     }

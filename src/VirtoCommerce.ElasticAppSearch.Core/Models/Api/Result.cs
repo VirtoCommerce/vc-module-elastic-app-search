@@ -1,7 +1,6 @@
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 
-public enum EngineType
+public record Result
 {
-    Default,
-    Meta
+    public string[] Errors { get; set; }
 }

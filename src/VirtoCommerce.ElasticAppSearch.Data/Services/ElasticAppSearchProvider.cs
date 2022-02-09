@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -14,31 +11,20 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
 public class ElasticAppSearchProvider: ISearchProvider
 {
-    private readonly ElasticAppSearchOptions _elasticAppSearchOptions;
     private readonly SearchOptions _searchOptions;
-    private readonly ISettingsManager _settingsManager;
     private readonly ApiClient _elasticAppSearch;
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
-        IOptions<ElasticAppSearchOptions> elasticAppSearchOptions,
-        ISettingsManager settingsManager,
         ApiClient elasticAppSearch)
     {
         if (searchOptions == null)
         {
             throw new ArgumentNullException(nameof(searchOptions));
         }
-
-        if (elasticAppSearchOptions == null)
-        {
-            throw new ArgumentNullException(nameof(elasticAppSearchOptions));
-        }
-
-        _elasticAppSearchOptions = elasticAppSearchOptions.Value;
+        
         _searchOptions = searchOptions.Value;
-
-        _settingsManager = settingsManager;
+        
         _elasticAppSearch = elasticAppSearch;
     }
 
@@ -56,8 +42,19 @@ public class ElasticAppSearchProvider: ISearchProvider
             await CreateEngineAsync(engineName);
         }
 
-        var temporarySimplifiedDocuments = documents.Select(x => new TemporaryDoc { Id = x.Id, Test = "test" }).ToArray();
-        var documentResults = await CreateOrUpdateDocumentsAsync(engineName, temporarySimplifiedDocuments);
+        #region Temporary proof-of-concept
+
+        var simplifiedDocuments = documents.Select(x => new { id = x.Id, test = "test" }).ToArray();
+
+        var documentResults = new List<DocumentResult>();
+        for (var i = 0; i < simplifiedDocuments.Length; i += 100)
+        {
+            var range = new Range(i, Math.Min(simplifiedDocuments.Length - 1, i + 100 - 1));
+            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, simplifiedDocuments[range]));
+        }
+
+        #endregion
+
         var result = new IndexingResult
         {
             Items = documentResults.Select(documentResult => new IndexingResultItem
@@ -67,6 +64,7 @@ public class ElasticAppSearchProvider: ISearchProvider
                 ErrorMessage = string.Join(Environment.NewLine, documentResult.Errors)
             }).ToArray()
         };
+
         return result;
     }
 
@@ -98,14 +96,5 @@ public class ElasticAppSearchProvider: ISearchProvider
     protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents)
     {
         return await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents);
-    }
-
-    private class TemporaryDoc
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("test")]
-        public string Test { get; set; }
     }
 }
