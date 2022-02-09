@@ -33,7 +33,7 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
             serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-            serviceCollection.AddSingleton<Data.Services.ElasticAppSearchApiClient>();
+            serviceCollection.AddSingleton<ApiClient>();
             serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
@@ -41,22 +41,23 @@ public class Module : IModule, IHasConfiguration
                 var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
                 httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
-                
+
                 httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
 
                 if (elasticAppSearchOptions.EnableHttpCompression)
                 {
                     httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
                 }
-            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-            {
-                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+            //}).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            //{
+            //    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-                var handler = new HttpClientHandler();
+            //    var handler = new HttpClientHandler
+            //    {
+            //        AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
+            //    };
 
-                handler.AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None;
-
-                return handler;
+            //    return handler;
             });
         }
     }
@@ -72,7 +73,7 @@ public class Module : IModule, IHasConfiguration
         permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
             new Permission
             {
-                GroupName = "ElasticAppSearch",
+                GroupName = ModuleConstants.ModuleName,
                 ModuleId = ModuleInfo.Id,
                 Name = x
             }).ToArray());
