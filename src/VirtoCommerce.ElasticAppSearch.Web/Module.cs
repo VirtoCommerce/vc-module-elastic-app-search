@@ -1,7 +1,12 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
@@ -11,45 +16,70 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Services;
 
-namespace VirtoCommerce.ElasticAppSearch.Web
+namespace VirtoCommerce.ElasticAppSearch.Web;
+
+public class Module : IModule, IHasConfiguration
 {
-    public class Module : IModule, IHasConfiguration
+    public ManifestModuleInfo ModuleInfo { get; set; }
+
+    public IConfiguration Configuration { get; set; }
+
+    public void Initialize(IServiceCollection serviceCollection)
     {
-        public ManifestModuleInfo ModuleInfo { get; set; }
+        var provider = Configuration.GetValue<string>("Search:Provider");
 
-        public IConfiguration Configuration { get; set; }
-
-        public void Initialize(IServiceCollection serviceCollection)
+        if (provider.EqualsInvariant(ModuleConstants.ModuleName))
         {
-            var provider = Configuration.GetValue<string>("Search:Provider");
+            serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
+            serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-            if (provider.EqualsInvariant("ElasticAppSearch"))
+            serviceCollection.AddSingleton<Data.Services.ElasticAppSearchApiClient>();
+            serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
+
+            serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
             {
-                serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection("Search:ElasticAppSearch"));
-                serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
-            }
-        }
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-        public void PostInitialize(IApplicationBuilder appBuilder)
-        {
-            // register settings
-            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+                httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+                
+                httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
 
-            // register permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
-                new Permission
+                if (elasticAppSearchOptions.EnableHttpCompression)
                 {
-                    GroupName = "ElasticAppSearch",
-                    ModuleId = ModuleInfo.Id,
-                    Name = x
-                }).ToArray());
-        }
+                    httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
+                }
+            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            {
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-        public void Uninstall()
-        {
-            // do nothing in here
+                var handler = new HttpClientHandler();
+
+                handler.AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None;
+
+                return handler;
+            });
         }
+    }
+
+    public void PostInitialize(IApplicationBuilder appBuilder)
+    {
+        // register settings
+        var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+        settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
+        // register permissions
+        var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+        permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+            new Permission
+            {
+                GroupName = "ElasticAppSearch",
+                ModuleId = ModuleInfo.Id,
+                Name = x
+            }).ToArray());
+    }
+
+    public void Uninstall()
+    {
+        // do nothing in here
     }
 }

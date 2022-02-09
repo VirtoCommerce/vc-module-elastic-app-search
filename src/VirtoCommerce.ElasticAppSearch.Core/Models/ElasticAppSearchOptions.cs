@@ -1,9 +1,8 @@
-namespace VirtoCommerce.ElasticAppSearch.Core.Models
+namespace VirtoCommerce.ElasticAppSearch.Core.Models;
+
+public class ElasticAppSearchOptions
 {
-    public class ElasticAppSearchOptions
-    {
-        public string Server { get; set; }
-        public string PrivateApiKey { get; set; }
-        public string EnableHttpCompression { get; set; }
-    }
+    public string Endpoint { get; set; }
+    public string PrivateApiKey { get; set; }
+    public bool EnableHttpCompression { get; set; }
 }
