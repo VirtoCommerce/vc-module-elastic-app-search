@@ -68,14 +68,14 @@ public class ElasticAppSearchProvider: ISearchProvider
         return result;
     }
 
-    public async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> documents)
+    public Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> documents)
     {
-        return new IndexingResult();
+        return Task.FromResult(new IndexingResult());
     }
 
-    public async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
+    public Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
     {
-        return new SearchResponse();
+        return Task.FromResult(new SearchResponse());
     }
 
     protected virtual string GetEngineName(string documentType)

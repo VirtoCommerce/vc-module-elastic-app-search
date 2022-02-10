@@ -10,6 +10,8 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
 public class ApiClient
 {
+    private const string EnginesEndpoint = "engines";
+
     private readonly HttpClient _httpClient;
 
     public ApiClient(IHttpClientFactory httpClientFactory)
@@ -35,7 +37,7 @@ public class ApiClient
 
     public async Task CreateEngineAsync(string name, string language = null)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetEnginesEndpoint(), new Engine
+        var response = await _httpClient.PostAsJsonAsync(EnginesEndpoint, new Engine
         {
             Name = name,
             Type = EngineType.Default,
@@ -54,14 +56,9 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<DocumentResult[]>();
     }
 
-    private static string GetEnginesEndpoint()
-    {
-        return "engines";
-    }
-
     private static string GetEngineEndpoint(string engineName)
     {
-        return $"{GetEnginesEndpoint()}/{engineName}";
+        return $"{EnginesEndpoint}/{engineName}";
     }
 
     private static string GetDocumentsEndpoint(string engineName)
