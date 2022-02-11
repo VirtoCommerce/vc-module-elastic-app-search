@@ -28,6 +28,15 @@ public static class ModuleConstants
             public const string Thai = "th";
             public const string Universal = null;
         }
+
+        public static class FieldNames
+        {
+            public const string Id = "id";
+
+            public static readonly string[] Reserved = new[] { "external_id", "engine_id", "highlight", "or", "and", "not", "any", "all", "non" };
+
+            public const int MaximumLength = 64;
+        }
     }
 
     public static class Security

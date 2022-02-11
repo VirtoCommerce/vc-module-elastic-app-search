@@ -35,7 +35,7 @@ public class ApiClient
         return await _httpClient.GetFromJsonAsync<Engine>(GetEngineEndpoint(name));
     }
 
-    public async Task CreateEngineAsync(string name, string language = null)
+    public async Task CreateEngineAsync(string name, string language)
     {
         var response = await _httpClient.PostAsJsonAsync(EnginesEndpoint, new Engine
         {

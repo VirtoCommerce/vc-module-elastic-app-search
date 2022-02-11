@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -13,6 +15,12 @@ public class ElasticAppSearchProvider: ISearchProvider
 {
     private readonly SearchOptions _searchOptions;
     private readonly ApiClient _elasticAppSearch;
+
+    protected virtual string ReservedFieldNamesPrefix => "field_";
+
+    protected virtual string PrivateFieldPrefix => "privatefield_";
+
+    protected virtual string WhitespaceReplacement => "_";
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
@@ -42,15 +50,15 @@ public class ElasticAppSearchProvider: ISearchProvider
             await CreateEngineAsync(engineName);
         }
 
-        #region Temporary proof-of-concept
-
-        var simplifiedDocuments = documents.Select(x => new { id = x.Id, test = "test" }).ToArray();
-
         var documentResults = new List<DocumentResult>();
-        for (var i = 0; i < simplifiedDocuments.Length; i += 100)
+        var providerDocuments = documents.Select(ConvertDocument).ToArray();
+
+        #region Temporary workaround
+
+        for (var i = 0; i < providerDocuments.Length; i += 100)
         {
-            var range = new Range(i, Math.Min(simplifiedDocuments.Length - 1, i + 100 - 1));
-            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, simplifiedDocuments[range]));
+            var range = new Range(i, Math.Min(providerDocuments.Length - 1, i + 100 - 1));
+            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, providerDocuments[range]));
         }
 
         #endregion
@@ -90,11 +98,52 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     protected virtual async Task CreateEngineAsync(string name)
     {
-        await _elasticAppSearch.CreateEngineAsync(name);
+        await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.ElasticSearchApi.Languages.Universal);
     }
 
-    protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents)
+    protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, SearchDocument[] documents)
     {
         return await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents);
+    }
+
+    protected virtual SearchDocument ConvertDocument(IndexDocument document)
+    {
+        var result = new SearchDocument { Id = document.Id };
+
+        result.Add(ModuleConstants.ElasticSearchApi.FieldNames.Id, document.Id);
+
+        var fieldsByNames = document.Fields.Select(field => new { FieldName = ConvertFieldName(field.Name), Field = field }).OrderBy(x => x.FieldName).ToArray();
+        foreach (var fieldByName in fieldsByNames)
+        {
+            var fieldName = fieldByName.FieldName;
+            var field = fieldByName.Field;
+            
+            if (field.Name.Length <= ModuleConstants.ElasticSearchApi.FieldNames.MaximumLength)
+            {
+                result.Add(fieldName, field.IsCollection ? field.Values : field.Value);
+            }
+        }
+
+        return result;
+    }
+
+    protected virtual string ConvertFieldName(string name)
+    {
+        // Only lowercase letters allowed
+        var result = name.ToLowerInvariant();
+
+        // Replace private field prefix (double underscore) because field name cannot have leading underscore
+        result = Regex.Replace(result, @"^__", PrivateFieldPrefix);
+
+        // Replace whitespaces because field name cannot contain whitespace
+        result = Regex.Replace(result, @"\W", WhitespaceReplacement);
+
+        // Add special prefix if field name is reserved
+        if (ModuleConstants.ElasticSearchApi.FieldNames.Reserved.Contains(result))
+        {
+            result = $"{ReservedFieldNamesPrefix}{result}";
+        }
+
+        return result;
     }
 }
