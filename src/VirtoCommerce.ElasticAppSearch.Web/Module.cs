@@ -1,58 +1,86 @@
+using System;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Data.Repositories;
+using VirtoCommerce.ElasticAppSearch.Core.Models;
+using VirtoCommerce.ElasticAppSearch.Data.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Services;
 
-namespace VirtoCommerce.ElasticAppSearch.Web
+namespace VirtoCommerce.ElasticAppSearch.Web;
+
+public class Module : IModule, IHasConfiguration
 {
-    public class Module : IModule
+    public ManifestModuleInfo ModuleInfo { get; set; }
+
+    public IConfiguration Configuration { get; set; }
+
+    public void Initialize(IServiceCollection serviceCollection)
     {
-        public ManifestModuleInfo ModuleInfo { get; set; }
+        var provider = Configuration.GetValue<string>("Search:Provider");
 
-        public void Initialize(IServiceCollection serviceCollection)
+        if (provider.EqualsInvariant(ModuleConstants.ModuleName))
         {
-            // database initialization
-            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            var connectionString = configuration.GetConnectionString("VirtoCommerce.ElasticAppSearch") ?? configuration.GetConnectionString("VirtoCommerce");
-            serviceCollection.AddDbContext<ElasticAppSearchDbContext>(options => options.UseSqlServer(connectionString));
-        }
+            serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
+            serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-        public void PostInitialize(IApplicationBuilder appBuilder)
-        {
-            // register settings
-            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+            serviceCollection.AddSingleton<ApiClient>();
+            serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
 
-            // register permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
-                new Permission()
-                {
-                    GroupName = "ElasticAppSearch",
-                    ModuleId = ModuleInfo.Id,
-                    Name = x
-                }).ToArray());
-
-            // Ensure that any pending migrations are applied
-            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
             {
-                using (var dbContext = serviceScope.ServiceProvider.GetRequiredService<ElasticAppSearchDbContext>())
-                {
-                    dbContext.Database.EnsureCreated();
-                    dbContext.Database.Migrate();
-                }
-            }
-        }
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-        public void Uninstall()
-        {
-            // do nothing in here
+                httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+                
+                httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
+
+                if (elasticAppSearchOptions.EnableHttpCompression)
+                {
+                    httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
+                }
+            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            {
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+
+                var handler = new HttpClientHandler
+                {
+                    AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
+                };
+
+                return handler;
+            });
         }
+    }
+
+    public void PostInitialize(IApplicationBuilder appBuilder)
+    {
+        // register settings
+        var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+        settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
+        // register permissions
+        var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+        permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+            new Permission
+            {
+                GroupName = ModuleConstants.ModuleName,
+                ModuleId = ModuleInfo.Id,
+                Name = x
+            }).ToArray());
+    }
+
+    public void Uninstall()
+    {
+        // do nothing in here
     }
 }

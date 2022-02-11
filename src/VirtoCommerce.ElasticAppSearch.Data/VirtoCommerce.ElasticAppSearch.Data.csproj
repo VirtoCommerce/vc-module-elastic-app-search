@@ -18,17 +18,18 @@
     <Folder Include="ExportImport\" />
     <Folder Include="Handlers\" />
     <Folder Include="Models\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.200.0" />
+    <PackageReference Include="VirtoCommerce.SearchModule.Core" Version="3.200.0" />
   </ItemGroup>
 
 </Project>

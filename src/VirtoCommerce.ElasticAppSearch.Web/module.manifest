@@ -5,11 +5,11 @@
     <version-tag></version-tag>
     <platformVersion>3.200.0</platformVersion>
     <dependencies>
-<!--        <dependency id="VirtoCommerce.Core" version="3.200.0" /> -->
+        <dependency id="VirtoCommerce.Search" version="3.200.0" />
     </dependencies>
 
-    <title>VirtoCommerce ElasticAppSearch extension module</title>
-    <description>VirtoCommerce ElasticAppSearch extension module</description>
+    <title>Elastic App Search module</title>
+    <description>Indexing functionality with Elastic App Search service</description>
 
     <authors>
         <author>VirtoCommerce</author>
@@ -18,13 +18,18 @@
         <owner>VirtoCommerce</owner>
     </owners>
 
+    <projectUrl>https://github.com/VirtoCommerce/vc-module-elastic-app-search</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.ElasticAppSearch)/Content/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+
     <assemblyFile>VirtoCommerce.ElasticAppSearch.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.ElasticAppSearch.Web.Module, VirtoCommerce.ElasticAppSearch.Web</moduleType>
 
     <releaseNotes>First version.</releaseNotes>
     <copyright>Copyright © 2022 VirtoCommerce. All rights reserved</copyright>
-    <tags>extension module</tags>
+    <tags>elastic app search</tags>
 
+    <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
 </module>
 
 
