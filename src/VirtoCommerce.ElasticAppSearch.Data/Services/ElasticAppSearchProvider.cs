@@ -61,7 +61,8 @@ public class ElasticAppSearchProvider: ISearchProvider
             documentSchemas.Add(documentSchema);
         }
 
-        var schema = new Schema(documentSchemas);
+        var schema = new Schema();
+        schema.Merge(documentSchemas);
 
         var documentResults = new List<DocumentResult>();
 
@@ -87,7 +88,7 @@ public class ElasticAppSearchProvider: ISearchProvider
         return result;
     }
 
-    public Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> documents)
+    public Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
         return Task.FromResult(new IndexingResult());
     }
@@ -139,7 +140,7 @@ public class ElasticAppSearchProvider: ISearchProvider
             if (field.Name.Length <= ModuleConstants.ElasticSearchApi.FieldNames.MaximumLength)
             {
                 document.Content.Add(fieldName, field.IsCollection ? field.Values : field.Value);
-                schema.Add(fieldName, ConvertFieldType(field.ValueType));
+                schema.Fields.Add(fieldName, ConvertFieldType(field.ValueType));
             }
         }
 

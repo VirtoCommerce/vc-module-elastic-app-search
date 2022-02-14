@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Models;
 
-public class Document
+public record Document
 {
     [JsonProperty("id")]
     public virtual string Id { get; set; }
