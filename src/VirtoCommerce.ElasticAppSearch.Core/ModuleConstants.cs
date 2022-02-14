@@ -31,8 +31,6 @@ public static class ModuleConstants
 
         public static class FieldNames
         {
-            public const string Id = "id";
-
             public static readonly string[] Reserved = { "external_id", "engine_id", "highlight", "or", "and", "not", "any", "all", "none" };
 
             public const int MaximumLength = 64;

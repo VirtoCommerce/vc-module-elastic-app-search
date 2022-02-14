@@ -36,12 +36,14 @@ public class ElasticAppSearchProvider: ISearchProvider
         _elasticAppSearch = elasticAppSearch;
     }
 
+    #region ISearchProvider implementation
+
     public async Task DeleteIndexAsync(string documentType)
     {
         await Task.CompletedTask;
     }
 
-    public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> documents)
+    public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
         var engineName = GetEngineName(documentType);
         var engineExists = await GetEngineExistsAsync(engineName);
@@ -50,18 +52,27 @@ public class ElasticAppSearchProvider: ISearchProvider
             await CreateEngineAsync(engineName);
         }
 
-        var documentResults = new List<DocumentResult>();
-        var providerDocuments = documents.Select(ConvertDocument).ToArray();
-
-        #region Temporary workaround
-
-        for (var i = 0; i < providerDocuments.Length; i += 100)
+        var documents = new List<Document>();
+        var documentSchemas = new List<Schema>();
+        foreach (var indexDocument in indexDocuments)
         {
-            var range = new Range(i, Math.Min(providerDocuments.Length - 1, i + 100 - 1));
-            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, providerDocuments[range]));
+            var (document, documentSchema) = ConvertIndexDocument(indexDocument);
+            documents.Add(document);
+            documentSchemas.Add(documentSchema);
         }
 
-        #endregion
+        var schema = new Schema(documentSchemas);
+
+        var documentResults = new List<DocumentResult>();
+
+        // Elastic App Search doesn't allow to create or update more than 100 documents at once and this restriction isn't configurable
+        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += 100)
+        {
+            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, 100);
+            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray()));
+        }
+
+        await UpdateSchema(engineName, schema);
 
         var result = new IndexingResult
         {
@@ -86,6 +97,10 @@ public class ElasticAppSearchProvider: ISearchProvider
         return Task.FromResult(new SearchResponse());
     }
 
+    #endregion
+
+    #region Engines
+
     protected virtual string GetEngineName(string documentType)
     {
         return string.Join("-", _searchOptions.Scope, documentType).ToLowerInvariant();
@@ -101,18 +116,21 @@ public class ElasticAppSearchProvider: ISearchProvider
         await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.ElasticSearchApi.Languages.Universal);
     }
 
-    protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, SearchDocument[] documents)
+    #endregion
+
+    #region Documents
+
+    protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
         return await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents);
     }
 
-    protected virtual SearchDocument ConvertDocument(IndexDocument document)
+    protected virtual (Document, Schema) ConvertIndexDocument(IndexDocument indexDocument)
     {
-        var result = new SearchDocument { Id = document.Id };
+        var document = new Document { Id = indexDocument.Id };
+        var schema = new Schema();
 
-        result.Add(ModuleConstants.ElasticSearchApi.FieldNames.Id, document.Id);
-
-        var fieldsByNames = document.Fields.Select(field => new { FieldName = ConvertFieldName(field.Name), Field = field }).OrderBy(x => x.FieldName).ToArray();
+        var fieldsByNames = indexDocument.Fields.Select(field => new { FieldName = ConvertFieldName(field.Name), Field = field }).OrderBy(x => x.FieldName).ToArray();
         foreach (var fieldByName in fieldsByNames)
         {
             var fieldName = fieldByName.FieldName;
@@ -120,11 +138,12 @@ public class ElasticAppSearchProvider: ISearchProvider
             
             if (field.Name.Length <= ModuleConstants.ElasticSearchApi.FieldNames.MaximumLength)
             {
-                result.Add(fieldName, field.IsCollection ? field.Values : field.Value);
+                document.Content.Add(fieldName, field.IsCollection ? field.Values : field.Value);
+                schema.Add(fieldName, ConvertFieldType(field.ValueType));
             }
         }
 
-        return result;
+        return (document, schema);
     }
 
     protected virtual string ConvertFieldName(string name)
@@ -146,4 +165,36 @@ public class ElasticAppSearchProvider: ISearchProvider
 
         return result;
     }
+
+    #endregion
+
+    #region Schema
+
+    protected virtual async Task UpdateSchema(string engineName, Schema schema)
+    {
+        await _elasticAppSearch.UpdateSchema(engineName, schema);
+    }
+
+    protected virtual FieldType ConvertFieldType(IndexDocumentFieldValueType indexFieldType)
+    {
+        switch (indexFieldType)
+        {
+            case IndexDocumentFieldValueType.Byte:
+            case IndexDocumentFieldValueType.Short:
+            case IndexDocumentFieldValueType.Integer:
+            case IndexDocumentFieldValueType.Long:
+            case IndexDocumentFieldValueType.Float:
+            case IndexDocumentFieldValueType.Double:
+            case IndexDocumentFieldValueType.Decimal:
+                return FieldType.Number;
+            case IndexDocumentFieldValueType.DateTime:
+                return FieldType.Date;
+            case IndexDocumentFieldValueType.GeoPoint:
+                return FieldType.Geolocation;
+            default:
+                return FieldType.Text;
+        }
+    }
+
+    #endregion
 }
