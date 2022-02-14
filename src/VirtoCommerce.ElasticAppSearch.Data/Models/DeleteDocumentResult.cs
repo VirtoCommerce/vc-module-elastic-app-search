@@ -1,6 +1,8 @@
 namespace VirtoCommerce.ElasticAppSearch.Data.Models;
 
-public record DocumentResult: Result
+public record DeleteDocumentResult
 {
     public string Id { get; set; }
+
+    public bool Deleted { get; set; }
 }

@@ -37,18 +37,13 @@ public class ApiClient
         var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
         if (response.StatusCode != HttpStatusCode.NotFound)
         {
-            await response.EnsureSuccessStatusCodeAsync();
+            await response.EnsureSuccessStatusCodeAsync<Result>(JsonSerializerSettings);
         }
 
         return response.StatusCode != HttpStatusCode.NotFound;
     }
 
-    public async Task<Engine> GetEngineAsync(string name)
-    {
-        return await _httpClient.GetFromJsonAsync<Engine>(GetEngineEndpoint(name), JsonSerializerSettings);
-    }
-
-    public async Task CreateEngineAsync(string name, string language)
+    public async Task<Engine> CreateEngineAsync(string name, string language)
     {
         var response = await _httpClient.PostAsJsonAsync(EnginesEndpoint, new Engine
         {
@@ -57,23 +52,34 @@ public class ApiClient
             Language = language
         }, JsonSerializerSettings);
 
-        await response.EnsureSuccessStatusCodeAsync();
+        await response.EnsureSuccessStatusCodeAsync<Result>(JsonSerializerSettings);
+
+        return await response.Content.ReadFromJsonAsync<Engine>(JsonSerializerSettings);
     }
 
-    public async Task<DocumentResult[]> CreateOrUpdateDocuments<T>(string engineName, T[] documents)
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocuments<T>(string engineName, T[] documents)
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, JsonSerializerSettings);
 
-        await response.EnsureSuccessStatusCodeAsync();
+        response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<DocumentResult[]>(JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(JsonSerializerSettings);
+    }
+
+    public async Task<DeleteDocumentResult[]> DeleteDocuments(string engineName, string[] ids)
+    {
+        var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, JsonSerializerSettings);
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(JsonSerializerSettings);
     }
 
     public async Task<Schema> UpdateSchema(string engineName, Schema schema)
     {
         var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, JsonSerializerSettings);
 
-        await response.EnsureSuccessStatusCodeAsync();
+        response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<Schema>(JsonSerializerSettings);
     }

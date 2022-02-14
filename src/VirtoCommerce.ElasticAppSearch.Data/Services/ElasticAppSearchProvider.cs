@@ -64,33 +64,28 @@ public class ElasticAppSearchProvider: ISearchProvider
         var schema = new Schema();
         schema.Merge(documentSchemas);
 
-        var documentResults = new List<DocumentResult>();
+        var indexingResultItems = new List<IndexingResultItem>();
 
         // Elastic App Search doesn't allow to create or update more than 100 documents at once and this restriction isn't configurable
         for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += 100)
         {
             var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, 100);
-            documentResults.AddRange(await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray()));
+            indexingResultItems.AddRange(await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray()));
         }
 
         await UpdateSchema(engineName, schema);
 
-        var result = new IndexingResult
-        {
-            Items = documentResults.Select(documentResult => new IndexingResultItem
-            {
-                Id = documentResult.Id,
-                Succeeded = documentResult.Errors.Length == 0,
-                ErrorMessage = string.Join(Environment.NewLine, documentResult.Errors)
-            }).ToArray()
-        };
+        var indexingResult = new IndexingResult { Items = indexingResultItems };
 
-        return result;
+        return indexingResult;
     }
 
-    public Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
+    public async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
-        return Task.FromResult(new IndexingResult());
+        var engineName = GetEngineName(documentType);
+        var indexingItems = await DeleteDocumentsAsync(engineName, indexDocuments.Select(indexDocument => indexDocument.Id).ToArray());
+        var indexingResult = new IndexingResult { Items = indexingItems };
+        return indexingResult;
     }
 
     public Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
@@ -121,9 +116,11 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     #region Documents
 
-    protected virtual async Task<DocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
+    #region Create or update
+
+    protected virtual async Task<IndexingResultItem[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
-        return await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents);
+        return ConvertCreateOrUpdateDocumentResults(await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents));
     }
 
     protected virtual (Document, Schema) ConvertIndexDocument(IndexDocument indexDocument)
@@ -166,6 +163,52 @@ public class ElasticAppSearchProvider: ISearchProvider
 
         return result;
     }
+
+    protected virtual IndexingResultItem[] ConvertCreateOrUpdateDocumentResults(CreateOrUpdateDocumentResult[] createOrUpdateDocumentResults)
+    {
+        return createOrUpdateDocumentResults.SelectMany(documentResult =>
+        {
+            var succeeded = !documentResult.Errors.Any();
+            if (succeeded)
+            {
+                return new[]
+                {
+                    new IndexingResultItem
+                    {
+                        Id = documentResult.Id,
+                        Succeeded = true
+                    }
+                };
+            }
+
+            return documentResult.Errors.Select(error => new IndexingResultItem
+            {
+                Id = documentResult.Id,
+                Succeeded = false,
+                ErrorMessage = error
+            });
+        }).ToArray();
+    }
+
+    #endregion
+
+    #region Delete
+
+    protected virtual async Task<IndexingResultItem[]> DeleteDocumentsAsync(string engineName, string[] documentIds)
+    {
+        return ConvertDeleteDocumentResults(await _elasticAppSearch.DeleteDocuments(engineName, documentIds));
+    }
+
+    protected virtual IndexingResultItem[] ConvertDeleteDocumentResults(DeleteDocumentResult[] deleteDocumentResults)
+    {
+        return deleteDocumentResults.Select(deleteDocumentResult => new IndexingResultItem
+        {
+            Id = deleteDocumentResult.Id,
+            Succeeded = deleteDocumentResult.Deleted
+        }).ToArray();
+    }
+
+    #endregion
 
     #endregion
 
