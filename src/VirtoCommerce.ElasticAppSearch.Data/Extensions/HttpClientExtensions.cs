@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Data.Models;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Extensions;

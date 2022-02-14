@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+namespace VirtoCommerce.ElasticAppSearch.Data.Models;
 
 public class Document
 {

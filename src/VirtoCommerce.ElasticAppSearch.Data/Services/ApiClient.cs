@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
+using VirtoCommerce.ElasticAppSearch.Data.Models;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 

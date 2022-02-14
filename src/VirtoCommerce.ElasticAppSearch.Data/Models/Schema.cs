@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+namespace VirtoCommerce.ElasticAppSearch.Data.Models;
 
 public class Schema: Dictionary<string, FieldType>
 {
