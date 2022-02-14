@@ -1,24 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Data.Models;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Extensions;
 
 public static class HttpClientExtensions
 {
-    private static readonly JsonSerializerSettings JsonSerializerSettings = new()
-    {
-        ContractResolver = new CamelCasePropertyNamesContractResolver(),
-        Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) }
-    };
+    private static readonly JsonSerializerSettings JsonSerializerSettings = new();
 
     public static async Task<TValue> GetFromJsonAsync<TValue>(this HttpClient client, string requestUri,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
@@ -36,25 +29,25 @@ public static class HttpClientExtensions
     public static async Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PostAsync(requestUri, value.ToJson(), cancellationToken);
+        return await client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
     public static async Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PostAsync(requestUri, value.ToJson(), cancellationToken);
+        return await client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
     public static async Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PutAsync(requestUri, value.ToJson(), cancellationToken);
+        return await client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
     public static async Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PutAsync(requestUri, value.ToJson(), cancellationToken);
+        return await client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
     public static async Task<TValue> ReadFromJsonAsync<TValue>(this HttpContent httpContent,
