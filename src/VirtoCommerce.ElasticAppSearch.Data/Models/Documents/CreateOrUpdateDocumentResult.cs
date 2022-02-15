@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models;
+namespace VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
 
 public record CreateOrUpdateDocumentResult
 {

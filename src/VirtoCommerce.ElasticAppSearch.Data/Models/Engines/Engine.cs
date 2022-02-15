@@ -1,4 +1,4 @@
-namespace VirtoCommerce.ElasticAppSearch.Data.Models;
+namespace VirtoCommerce.ElasticAppSearch.Data.Models.Engines;
 
 public record Engine
 {

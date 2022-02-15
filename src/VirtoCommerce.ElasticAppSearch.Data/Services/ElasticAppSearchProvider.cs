@@ -5,7 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Data.Models;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Schema;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -15,6 +16,8 @@ public class ElasticAppSearchProvider: ISearchProvider
 {
     private readonly SearchOptions _searchOptions;
     private readonly ApiClient _elasticAppSearch;
+    private readonly ElasticAppSearchQueryBuilder _searchQueryBuilder;
+    private readonly ElasticAppSearchResponseBuilder _searchResponseBuilder;
 
     protected virtual string ReservedFieldNamesPrefix => "field_";
 
@@ -24,7 +27,9 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
-        ApiClient elasticAppSearch)
+        ApiClient elasticAppSearch,
+        ElasticAppSearchQueryBuilder searchQueryBuilder,
+        ElasticAppSearchResponseBuilder searchResponseBuilder)
     {
         if (searchOptions == null)
         {
@@ -34,6 +39,9 @@ public class ElasticAppSearchProvider: ISearchProvider
         _searchOptions = searchOptions.Value;
         
         _elasticAppSearch = elasticAppSearch;
+
+        _searchQueryBuilder = searchQueryBuilder;
+        _searchResponseBuilder = searchResponseBuilder;
     }
 
     #region ISearchProvider implementation
@@ -88,9 +96,13 @@ public class ElasticAppSearchProvider: ISearchProvider
         return indexingResult;
     }
 
-    public Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
+    public async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
     {
-        return Task.FromResult(new SearchResponse());
+        var engineName = GetEngineName(documentType);
+        var searchQuery = _searchQueryBuilder.ToSearchQuery(request);
+        var searchResult = await _elasticAppSearch.SearchAsync(engineName, searchQuery);
+        var searchResponse = _searchResponseBuilder.ToSearchResponse(searchResult);
+        return searchResponse;
     }
 
     #endregion
@@ -120,7 +132,7 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     protected virtual async Task<IndexingResultItem[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
-        return ConvertCreateOrUpdateDocumentResults(await _elasticAppSearch.CreateOrUpdateDocuments(engineName, documents));
+        return ConvertCreateOrUpdateDocumentResults(await _elasticAppSearch.CreateOrUpdateDocumentsAsync(engineName, documents));
     }
 
     protected virtual (Document, Schema) ConvertIndexDocument(IndexDocument indexDocument)
@@ -136,7 +148,7 @@ public class ElasticAppSearchProvider: ISearchProvider
             
             if (field.Name.Length <= ModuleConstants.ElasticSearchApi.FieldNames.MaximumLength)
             {
-                document.Content.Add(fieldName, field.IsCollection ? field.Values : field.Value);
+                document.Fields.Add(fieldName, field.IsCollection ? field.Values : field.Value);
                 schema.Fields.Add(fieldName, ConvertFieldType(field.ValueType));
             }
         }
@@ -196,7 +208,7 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     protected virtual async Task<IndexingResultItem[]> DeleteDocumentsAsync(string engineName, string[] documentIds)
     {
-        return ConvertDeleteDocumentResults(await _elasticAppSearch.DeleteDocuments(engineName, documentIds));
+        return ConvertDeleteDocumentResults(await _elasticAppSearch.DeleteDocumentsAsync(engineName, documentIds));
     }
 
     protected virtual IndexingResultItem[] ConvertDeleteDocumentResults(DeleteDocumentResult[] deleteDocumentResults)
@@ -216,7 +228,7 @@ public class ElasticAppSearchProvider: ISearchProvider
 
     protected virtual async Task UpdateSchema(string engineName, Schema schema)
     {
-        await _elasticAppSearch.UpdateSchema(engineName, schema);
+        await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
     }
 
     protected virtual FieldType ConvertFieldType(IndexDocumentFieldValueType indexFieldType)

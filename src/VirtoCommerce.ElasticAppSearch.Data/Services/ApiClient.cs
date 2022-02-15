@@ -8,6 +8,10 @@ using Newtonsoft.Json.Serialization;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.ElasticAppSearch.Data.Models;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Engines;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Schema;
+using VirtoCommerce.ElasticAppSearch.Data.Models.Search;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
@@ -19,7 +23,7 @@ public class ApiClient
     private static readonly JsonSerializerSettings JsonSerializerSettings = new()
     {
         // Elastic App Search API use camelCase in JSON
-        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+        ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() },
         Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) },
 
         // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 specification support)
@@ -57,7 +61,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<Engine>(JsonSerializerSettings);
     }
 
-    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocuments<T>(string engineName, T[] documents)
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents)
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, JsonSerializerSettings);
 
@@ -66,7 +70,7 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(JsonSerializerSettings);
     }
 
-    public async Task<DeleteDocumentResult[]> DeleteDocuments(string engineName, string[] ids)
+    public async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids)
     {
         var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, JsonSerializerSettings);
 
@@ -75,13 +79,22 @@ public class ApiClient
         return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(JsonSerializerSettings);
     }
 
-    public async Task<Schema> UpdateSchema(string engineName, Schema schema)
+    public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema)
     {
         var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, JsonSerializerSettings);
 
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadFromJsonAsync<Schema>(JsonSerializerSettings);
+    }
+
+    public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
+    {
+        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, JsonSerializerSettings);
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<SearchResult>(JsonSerializerSettings);
     }
 
     private static string GetEngineEndpoint(string engineName)
@@ -97,5 +110,10 @@ public class ApiClient
     private static string GetSchemaEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/schema";
+    }
+
+    private static string GetSearchEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/search";
     }
 }

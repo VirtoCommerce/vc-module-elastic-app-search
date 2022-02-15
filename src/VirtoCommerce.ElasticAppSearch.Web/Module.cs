@@ -34,6 +34,8 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
             serviceCollection.AddSingleton<ApiClient>();
+            serviceCollection.AddSingleton<ElasticAppSearchQueryBuilder>();
+            serviceCollection.AddSingleton<ElasticAppSearchResponseBuilder>();
             serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
