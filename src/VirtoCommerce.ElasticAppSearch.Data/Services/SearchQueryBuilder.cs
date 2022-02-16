@@ -10,7 +10,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     {
         var searchQuery = new SearchQuery
         {
-            Query = string.Empty,
+            Query = request.SearchKeywords ?? string.Empty,
             Page = new SearchQueryPage
             {
                 Current = (request.Skip / request.Take) + 1,
