@@ -30,10 +30,13 @@ public record SearchResultDocument: Document
         foreach (var (fieldName, value) in RawFields)
         {
             var raw = value["raw"];
-            var rawValue = raw as JValue;
-            var rawObject = raw as JObject;
-            var rawArray = raw as JArray;
-            var fieldValue = rawValue?.Value ?? rawObject?.ToObject<object>() ?? rawArray?.ToObject<object[]>();
+
+            var rawValue = (raw as JValue)?.Value;
+            var rawObject = (raw as JObject)?.ToObject<object>();
+            var rawArray = (raw as JArray)?.ToObject<object[]>();
+
+            var fieldValue = rawValue ?? rawObject ?? rawArray;
+
             Fields.Add(fieldName, fieldValue);
         }
     }

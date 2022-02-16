@@ -30,6 +30,7 @@ public class DocumentConverter: IDocumentConverter
             })
             .OrderBy(x => x.FieldName)
             .ToArray();
+
         foreach (var fieldByName in fieldsByNames)
         {
             var fieldName = fieldByName.FieldName;
@@ -47,23 +48,13 @@ public class DocumentConverter: IDocumentConverter
     
     protected virtual FieldType ToProviderFieldType(IndexDocumentFieldValueType indexFieldType)
     {
-        switch (indexFieldType)
+        return indexFieldType switch
         {
-            case IndexDocumentFieldValueType.Byte:
-            case IndexDocumentFieldValueType.Short:
-            case IndexDocumentFieldValueType.Integer:
-            case IndexDocumentFieldValueType.Long:
-            case IndexDocumentFieldValueType.Float:
-            case IndexDocumentFieldValueType.Double:
-            case IndexDocumentFieldValueType.Decimal:
-                return FieldType.Number;
-            case IndexDocumentFieldValueType.DateTime:
-                return FieldType.Date;
-            case IndexDocumentFieldValueType.GeoPoint:
-                return FieldType.Geolocation;
-            default:
-                return FieldType.Text;
-        }
+            IndexDocumentFieldValueType.Byte or IndexDocumentFieldValueType.Short or IndexDocumentFieldValueType.Integer or IndexDocumentFieldValueType.Long or IndexDocumentFieldValueType.Float or IndexDocumentFieldValueType.Double or IndexDocumentFieldValueType.Decimal => FieldType.Number,
+            IndexDocumentFieldValueType.DateTime => FieldType.Date,
+            IndexDocumentFieldValueType.GeoPoint => FieldType.Geolocation,
+            _ => FieldType.Text,
+        };
     }
 
     public SearchDocument ToSearchDocument(SearchResultDocument searchResultDocument)
