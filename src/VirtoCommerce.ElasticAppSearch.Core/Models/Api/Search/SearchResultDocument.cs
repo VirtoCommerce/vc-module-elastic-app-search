@@ -23,6 +23,10 @@ public record SearchResultDocument: Document
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context)
     {
+        var rawId = RawFields["id"]["raw"];
+        RawFields.Remove("id");
+        Id = rawId.Value<string>();
+
         foreach (var (fieldName, value) in RawFields)
         {
             var raw = value["raw"];
