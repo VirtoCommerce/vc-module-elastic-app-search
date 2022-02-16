@@ -1,6 +1,6 @@
 using System;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 
 public record Result
 {

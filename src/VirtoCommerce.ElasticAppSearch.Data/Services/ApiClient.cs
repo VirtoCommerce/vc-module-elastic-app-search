@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
-using VirtoCommerce.ElasticAppSearch.Data.Models;
-using VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
-using VirtoCommerce.ElasticAppSearch.Data.Models.Engines;
-using VirtoCommerce.ElasticAppSearch.Data.Models.Schema;
-using VirtoCommerce.ElasticAppSearch.Data.Models.Search;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 

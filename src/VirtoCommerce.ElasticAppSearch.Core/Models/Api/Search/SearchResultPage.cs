@@ -1,4 +1,4 @@
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Search;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultPage
 {

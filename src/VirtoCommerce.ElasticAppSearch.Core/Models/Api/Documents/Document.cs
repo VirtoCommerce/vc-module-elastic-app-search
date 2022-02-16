@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
 [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
 public record Document

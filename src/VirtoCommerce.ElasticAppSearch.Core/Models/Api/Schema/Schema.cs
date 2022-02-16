@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Schema;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 
 public record Schema
 {

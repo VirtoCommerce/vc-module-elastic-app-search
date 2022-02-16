@@ -1,6 +1,6 @@
-using VirtoCommerce.ElasticAppSearch.Data.Models.Engines;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Search;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultMetadata
 {

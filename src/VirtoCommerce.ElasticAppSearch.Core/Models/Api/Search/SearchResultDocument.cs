@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Search;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultDocument: Document
 {

@@ -1,4 +1,4 @@
-namespace VirtoCommerce.ElasticAppSearch.Data.Models.Documents;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
 public record DeleteDocumentResult
 {
