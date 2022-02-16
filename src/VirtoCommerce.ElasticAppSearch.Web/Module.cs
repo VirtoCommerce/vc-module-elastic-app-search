@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
+using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -34,6 +35,10 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
             serviceCollection.AddSingleton<ApiClient>();
+            serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
+            serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
+            serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
+            serviceCollection.AddSingleton<ISearchResponseBuilder, SearchResponseBuilder>();
             serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>

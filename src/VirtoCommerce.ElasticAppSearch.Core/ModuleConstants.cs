@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ElasticAppSearch.Core;
@@ -8,7 +9,7 @@ public static class ModuleConstants
 {
     public const string ModuleName = "ElasticAppSearch";
 
-    public static class ElasticSearchApi
+    public static class Api
     {
         public static class Languages
         {
@@ -32,6 +33,15 @@ public static class ModuleConstants
         public static class FieldNames
         {
             public static readonly string[] Reserved = { "external_id", "engine_id", "highlight", "or", "and", "not", "any", "all", "none" };
+
+            public const string ReservedFieldNamesPrefix = "field_";
+
+            public const string PrivateFieldPrefix = "privatefield_";
+
+            public static readonly ReadOnlyDictionary<string, string> Replacements = new(new Dictionary<string, string>
+            {
+                { "-", "_hyphen_" }
+            });
 
             public const int MaximumLength = 64;
         }

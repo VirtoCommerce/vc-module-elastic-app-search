@@ -1,4 +1,4 @@
-namespace VirtoCommerce.ElasticAppSearch.Data.Models;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 
 public enum FieldType
 {
