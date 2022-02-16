@@ -2,11 +2,11 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultPage
 {
-    public int Current { get; set; }
+    public int Current { get; init; }
 
-    public int TotalPages { get; set; }
+    public int TotalPages { get; init; }
     
-    public int TotalResults { get; set; }
+    public int TotalResults { get; init; }
 
-    public int Size { get; set; }
+    public int Size { get; init; }
 }

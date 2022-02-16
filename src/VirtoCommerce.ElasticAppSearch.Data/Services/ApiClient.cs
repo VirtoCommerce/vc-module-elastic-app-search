@@ -83,7 +83,7 @@ public class ApiClient
     {
         var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, JsonSerializerSettings);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<Result>();
 
         return await response.Content.ReadFromJsonAsync<Schema>(JsonSerializerSettings);
     }

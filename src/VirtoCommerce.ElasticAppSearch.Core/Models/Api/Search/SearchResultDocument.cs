@@ -2,20 +2,19 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
-public record SearchResultDocument: Document
+public record SearchResultDocument
 {
     [JsonIgnore]
-    public override string Id { get; set; }
+    public virtual string Id { get; private set; }
 
     [JsonIgnore]
-    public override Dictionary<string, object> Fields { get; } = new();
+    public virtual Dictionary<string, object> Fields { get; } = new();
 
     [JsonProperty("_meta")]
-    public virtual SearchResultDocumentMetadata Meta { get; set; }
+    public virtual SearchResultDocumentMetadata Meta { get; init; }
 
     [JsonExtensionData]
     protected virtual Dictionary<string, JToken> RawFields { get; } = new();

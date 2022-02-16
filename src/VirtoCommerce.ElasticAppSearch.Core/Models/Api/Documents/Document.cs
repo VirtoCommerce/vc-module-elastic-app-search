@@ -8,7 +8,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 public record Document
 {
     [JsonProperty("id")]
-    public virtual string Id { get; set; }
+    public virtual string Id { get; init; }
 
     [JsonExtensionData]
     public virtual Dictionary<string, object> Fields { get; } = new();

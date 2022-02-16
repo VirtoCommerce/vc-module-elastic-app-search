@@ -4,15 +4,15 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultMetadata
 {
-    public string[] Alerts { get; set; }
+    public string[] Alerts { get; init; }
 
-    public string[] Warnings { get; set; }
+    public string[] Warnings { get; init; }
 
-    public int Precision { get; set; }
+    public int Precision { get; init; }
 
-    public SearchResultPage Page { get; set; }
+    public SearchResultPage Page { get; init; }
 
-    public Engine Engine { get; set; }
+    public Engine Engine { get; init; }
     
-    public string RequestId { get; set; }
+    public string RequestId { get; init; }
 }

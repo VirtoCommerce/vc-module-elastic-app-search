@@ -5,8 +5,8 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResult
 {
-    public SearchResultMetadata Meta { get; set; }
+    public SearchResultMetadata Meta { get; init; }
 
     [JsonProperty(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    public SearchResultDocument[] Results { get; set; }
+    public SearchResultDocument[] Results { get; init; }
 }

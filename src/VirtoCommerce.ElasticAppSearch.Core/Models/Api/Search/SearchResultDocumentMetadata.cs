@@ -2,9 +2,9 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 public record SearchResultDocumentMetadata
 {
-    public string Engine { get; set; }
+    public string Engine { get; init; }
 
-    public double Score { get; set; }
+    public double Score { get; init; }
 
-    public string Id { get; set; }
+    public string Id { get; init; }
 }

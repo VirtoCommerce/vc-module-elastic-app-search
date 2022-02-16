@@ -5,9 +5,9 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
 public record CreateOrUpdateDocumentResult
 {
-    public string Id { get; set; }
+    public string Id { get; init; }
 
-    public string[] Errors { get; set; }
+    public string[] Errors { get; init; }
 
     public override string ToString()
     {

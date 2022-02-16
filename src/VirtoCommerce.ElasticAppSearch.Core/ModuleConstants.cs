@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ElasticAppSearch.Core;
@@ -36,6 +37,11 @@ public static class ModuleConstants
             public const string ReservedFieldNamesPrefix = "field_";
 
             public const string PrivateFieldPrefix = "privatefield_";
+
+            public static readonly ReadOnlyDictionary<string, string> Replacements = new(new Dictionary<string, string>
+            {
+                { "-", "_hyphen_" }
+            });
 
             public const int MaximumLength = 64;
         }
