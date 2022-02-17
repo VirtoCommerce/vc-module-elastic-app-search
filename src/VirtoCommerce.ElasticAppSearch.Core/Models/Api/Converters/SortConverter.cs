@@ -48,7 +48,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
             return result;
         }
 
-        private void WriteObject(JsonWriter writer, SearchQuerySortField item)
+        private static void WriteObject(JsonWriter writer, SearchQuerySortField item)
         {
             writer.WriteStartObject();
             writer.WritePropertyName(item.Field);
