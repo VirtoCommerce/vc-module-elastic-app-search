@@ -8,7 +8,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
 {
     /// <summary>
     /// Custom JSON converter for Sort property: the sort JSON object cannot have more than one key
-    /// If more than two sort files are passed need to wrap them into array
+    /// If more than two sort fields are passed need to wrap them into array
     /// </summary>
     public class SortConverter : JsonConverter
     {
