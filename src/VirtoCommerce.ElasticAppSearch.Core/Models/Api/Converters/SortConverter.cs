@@ -52,7 +52,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
         {
             writer.WriteStartObject();
             writer.WritePropertyName(item.Field);
-            writer.WriteValue(item.Order);
+            writer.WriteValue(item.Order.ToString().ToLower());
             writer.WriteEndObject();
         }
     }

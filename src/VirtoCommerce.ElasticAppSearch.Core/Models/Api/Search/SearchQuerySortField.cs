@@ -1,10 +1,9 @@
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search
 {
-    public class SearchQuerySortField
+    public record SearchQuerySortField
     {
         public string Field { get; set; }
 
-        // asc, desc
-        public string Order { get; set; }
+        public SearchQuerySortOrder Order { get; set; }
     }
 }

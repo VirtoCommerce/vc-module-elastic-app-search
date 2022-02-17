@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -43,7 +43,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             .Select(x => new SearchQuerySortField()
             {
                 Field = _fieldNameConverter.ToProviderFieldName(x.FieldName),
-                Order = x.IsDescending ? "desc" : "asc"
+                Order = x.IsDescending ? SearchQuerySortOrder.Desc : SearchQuerySortOrder.Asc
             })
             .ToList();
 
