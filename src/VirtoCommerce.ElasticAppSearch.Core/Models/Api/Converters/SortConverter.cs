@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
 {
@@ -13,17 +14,17 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var dictionary = value as Dictionary<string, string>;
+            var list = value as IList<SearchQuerySortField>;
 
-            if (dictionary.Count == 1)
+            if (list.Count == 1)
             {
-                var item = dictionary.First();
+                var item = list.First();
                 WriteObject(writer, item);
             }
-            else if (dictionary.Count > 1)
+            else if (list.Count > 1)
             {
                 writer.WriteStartArray();
-                foreach (var item in dictionary)
+                foreach (var item in list)
                 {
                     WriteObject(writer, item);
                 }
@@ -43,15 +44,15 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Converters
 
         public override bool CanConvert(Type objectType)
         {
-            var result = objectType == typeof(Dictionary<string, string>);
+            var result = objectType == typeof(IList<SearchQuerySortField>);
             return result;
         }
 
-        private void WriteObject(JsonWriter writer, KeyValuePair<string, string> item)
+        private void WriteObject(JsonWriter writer, SearchQuerySortField item)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName(item.Key);
-            writer.WriteValue(item.Value);
+            writer.WritePropertyName(item.Field);
+            writer.WriteValue(item.Order);
             writer.WriteEndObject();
         }
     }

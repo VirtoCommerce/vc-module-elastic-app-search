@@ -9,7 +9,7 @@ public record SearchQuery
     public string Query { get; set; }
 
     [JsonConverter(typeof(SortConverter))]
-    public Dictionary<string, string> Sort { get; set; }
+    public IList<SearchQuerySortField> Sort { get; set; }
 
     // Conditional property for sort: Sort cannot be empty or null
     public bool ShouldSerializeSort()

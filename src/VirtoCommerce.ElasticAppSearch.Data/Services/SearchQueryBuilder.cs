@@ -38,13 +38,15 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return searchQuery;
     }
 
-    protected virtual Dictionary<string, string> GetSorting(IEnumerable<SortingField> sortingFields)
+    protected virtual IList<SearchQuerySortField> GetSorting(IEnumerable<SortingField> sortingFields)
     {
-        var result = new Dictionary<string, string>();
-
-        result = sortingFields?
-            .DistinctBy(x => x.FieldName, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(k => _fieldNameConverter.ToProviderFieldName(k.FieldName), v => v.IsDescending ? "desc" : "asc");
+        var result = sortingFields?
+            .Select(x => new SearchQuerySortField()
+            {
+                Field = _fieldNameConverter.ToProviderFieldName(x.FieldName),
+                Order = x.IsDescending ? "desc" : "asc"
+            })
+            .ToList();
 
         return result;
     }
