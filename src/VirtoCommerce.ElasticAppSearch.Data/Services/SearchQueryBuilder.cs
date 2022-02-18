@@ -23,8 +23,6 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             throw new NotSupportedException("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
         }
 
-        var searchFields = request.SearchFields?.ToDictionary(x => _fieldNameConverter.ToProviderFieldName(x), y => new object());
-
         var searchQuery = new SearchQuery
         {
             Query = request.SearchKeywords ?? string.Empty,
@@ -34,7 +32,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 Current = (request.Skip / request.Take) + 1,
                 Size = request.Take
             },
-            SearchFields = searchFields,
+            SearchFields = GetSearchFields(request.SearchFields),
         };
 
         return searchQuery;
@@ -49,6 +47,13 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 Order = x.IsDescending ? SearchQuerySortOrder.Desc : SearchQuerySortOrder.Asc
             })
             .ToList();
+
+        return result;
+    }
+
+    protected virtual Dictionary<string, object> GetSearchFields(IEnumerable<string> searchFields)
+    {
+        var result = searchFields?.ToDictionary(x => _fieldNameConverter.ToProviderFieldName(x), y => new object());
 
         return result;
     }
