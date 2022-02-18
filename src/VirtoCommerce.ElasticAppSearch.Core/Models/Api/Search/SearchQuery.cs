@@ -18,4 +18,6 @@ public record SearchQuery
     }
 
     public SearchQueryPage Page { get; set; }
+
+    public Dictionary<string, object> SearchFields { get; set; }
 }
