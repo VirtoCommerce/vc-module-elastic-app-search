@@ -34,5 +34,25 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             // Assert
             Assert.Equal(result, serializedQuerySearchFields);
         }
+
+        [Fact]
+        public void NullSearchFields()
+        {
+            // Arrange
+            var fieldNameConverterMock = new Mock<IFieldNameConverter>();
+
+            var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverterMock.Object);
+
+            var request = new SearchRequest { SearchFields = null, };
+
+            // Act
+
+            var result = searchQueryBuilder.ToSearchQuery(request);
+
+            // Assert
+
+            Assert.NotNull(result);
+            Assert.Null(result.SearchFields);
+        }
     }
 }
