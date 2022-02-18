@@ -23,9 +23,6 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             throw new NotSupportedException("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
         }
 
-        var searchFields = request.SearchFields.Select(x => _fieldNameConverter.ToProviderFieldName(x))
-            .ToDictionary(x => x, y => new object());
-
         var searchQuery = new SearchQuery
         {
             Query = request.SearchKeywords ?? string.Empty,
