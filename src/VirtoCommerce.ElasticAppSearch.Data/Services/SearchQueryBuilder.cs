@@ -31,7 +31,8 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             {
                 Current = (request.Skip / request.Take) + 1,
                 Size = request.Take
-            }
+            },
+            SearchFields = GetSearchFields(request.SearchFields),
         };
 
         return searchQuery;
@@ -46,6 +47,13 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 Order = x.IsDescending ? SearchQuerySortOrder.Desc : SearchQuerySortOrder.Asc
             })
             .ToList();
+
+        return result;
+    }
+
+    protected virtual Dictionary<string, object> GetSearchFields(IEnumerable<string> searchFields)
+    {
+        var result = searchFields?.ToDictionary(x => _fieldNameConverter.ToProviderFieldName(x), y => new object());
 
         return result;
     }

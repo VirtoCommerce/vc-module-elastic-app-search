@@ -28,7 +28,7 @@ public class ApiClient
 
         // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 specification support)
         DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
-        DateTimeZoneHandling = DateTimeZoneHandling.Utc
+        DateTimeZoneHandling = DateTimeZoneHandling.Utc,
     };
 
     public ApiClient(IHttpClientFactory httpClientFactory)

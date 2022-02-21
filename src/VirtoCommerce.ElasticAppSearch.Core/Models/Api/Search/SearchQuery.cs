@@ -18,4 +18,7 @@ public record SearchQuery
     }
 
     public SearchQueryPage Page { get; set; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public Dictionary<string, object> SearchFields { get; set; }
 }
