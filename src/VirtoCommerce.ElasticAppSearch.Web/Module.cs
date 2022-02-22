@@ -1,10 +1,10 @@
 using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ElasticAppSearch.Core;
@@ -34,7 +34,7 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
             serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-            serviceCollection.AddSingleton<ApiClient>();
+            serviceCollection.AddSingleton<IElasticAppApiClient, ApiClient>();
             serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
             serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
             serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
@@ -46,7 +46,7 @@ public class Module : IModule, IHasConfiguration
                 var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
                 httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
-                
+
                 httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
 
                 if (elasticAppSearchOptions.EnableHttpCompression)

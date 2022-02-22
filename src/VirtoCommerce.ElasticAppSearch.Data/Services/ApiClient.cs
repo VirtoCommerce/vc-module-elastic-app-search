@@ -15,7 +15,7 @@ using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ApiClient
+public class ApiClient : IElasticAppApiClient
 {
     private const string EnginesEndpoint = "engines";
 
@@ -91,6 +91,15 @@ public class ApiClient
     public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
     {
         var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, JsonSerializerSettings);
+
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<SearchResult>(JsonSerializerSettings);
+    }
+
+    public async Task<SearchResult> SearchAsync(string engineName, string rawQuery)
+    {
+        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), rawQuery);
 
         response.EnsureSuccessStatusCode();
 

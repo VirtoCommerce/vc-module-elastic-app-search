@@ -6,23 +6,24 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppSearchProvider: ISearchProvider
+public class ElasticAppSearchProvider : ISearchProvider
 {
     private readonly SearchOptions _searchOptions;
-    private readonly ApiClient _elasticAppSearch;
+    private readonly IElasticAppApiClient _elasticAppSearch;
     private readonly IDocumentConverter _documentConverter;
     private readonly ISearchQueryBuilder _searchQueryBuilder;
     private readonly ISearchResponseBuilder _searchResponseBuilder;
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
-        ApiClient elasticAppSearch,
+        IElasticAppApiClient elasticAppSearch,
         IDocumentConverter documentConverter,
         ISearchQueryBuilder searchQueryBuilder,
         ISearchResponseBuilder searchResponseBuilder)
@@ -31,9 +32,9 @@ public class ElasticAppSearchProvider: ISearchProvider
         {
             throw new ArgumentNullException(nameof(searchOptions));
         }
-        
+
         _searchOptions = searchOptions.Value;
-        
+
         _elasticAppSearch = elasticAppSearch;
         _documentConverter = documentConverter;
 
@@ -98,8 +99,19 @@ public class ElasticAppSearchProvider: ISearchProvider
     public async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
     {
         var engineName = GetEngineName(documentType);
-        var searchQuery = _searchQueryBuilder.ToSearchQuery(request);
-        var searchResult = await _elasticAppSearch.SearchAsync(engineName, searchQuery);
+
+        SearchResult searchResult;
+
+        if (string.IsNullOrEmpty(request.RawQuery))
+        {
+            var searchQuery = _searchQueryBuilder.ToSearchQuery(request);
+            searchResult = await _elasticAppSearch.SearchAsync(engineName, searchQuery);
+        }
+        else
+        {
+            searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
+        }
+
         var searchResponse = _searchResponseBuilder.ToSearchResponse(searchResult);
         return searchResponse;
     }

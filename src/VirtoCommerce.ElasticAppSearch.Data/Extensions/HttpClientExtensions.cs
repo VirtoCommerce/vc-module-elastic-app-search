@@ -84,7 +84,7 @@ public static class HttpClientExtensions
 
     private static StringContent ToJson<TValue>(this TValue value, JsonSerializerSettings jsonSerializerSettings = null)
     {
-        var content = JsonConvert.SerializeObject(value, jsonSerializerSettings);
+        var content = value is string ? value as string : JsonConvert.SerializeObject(value, jsonSerializerSettings);
         return new StringContent(content, Encoding.UTF8, "application/json");
     }
 }
