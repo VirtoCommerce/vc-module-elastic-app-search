@@ -16,14 +16,14 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 public class ElasticAppSearchProvider : ISearchProvider
 {
     private readonly SearchOptions _searchOptions;
-    private readonly IElasticAppApiClient _elasticAppSearch;
+    private readonly IElasticAppSearchApiClient _elasticAppSearch;
     private readonly IDocumentConverter _documentConverter;
     private readonly ISearchQueryBuilder _searchQueryBuilder;
     private readonly ISearchResponseBuilder _searchResponseBuilder;
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
-        IElasticAppApiClient elasticAppSearch,
+        IElasticAppSearchApiClient elasticAppSearch,
         IDocumentConverter documentConverter,
         ISearchQueryBuilder searchQueryBuilder,
         ISearchResponseBuilder searchResponseBuilder)

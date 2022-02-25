@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -11,11 +13,12 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 {
     public class ElasticAppSearchProviderTests
     {
-        [Fact]
-        public async Task TestRawQuerySearch()
+        [Theory]
+        [ClassData(typeof(QueryTestData))]
+        public async Task TestRawQuerySearch(string testQuery, Times rawQueryTimesCall, Times regularSearchQueryTimesCall)
         {
             // Arrange
-            var appSearchClient = new Mock<IElasticAppApiClient>();
+            var appSearchClient = new Mock<IElasticAppSearchApiClient>();
 
             var searchOptions = Options.Create(new SearchOptions());
             var documentConverter = new Mock<IDocumentConverter>();
@@ -32,44 +35,29 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             var searchRequest = new SearchRequest
             {
-                RawQuery = "testQuery",
+                RawQuery = testQuery,
             };
 
             // Act
             var response = await appSearchProvider.SearchAsync("testDocumentType", searchRequest);
 
             // Assert
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<SearchQuery>()), Times.Never);
+            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>()), rawQueryTimesCall);
+            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<SearchQuery>()), regularSearchQueryTimesCall);
         }
 
-        [Fact]
-        public async Task TestRegularSearchCall()
+        private class QueryTestData : IEnumerable<object[]>
         {
-            // Arrange
-            var appSearchClient = new Mock<IElasticAppApiClient>();
+            public IEnumerator<object[]> GetEnumerator()
+            {
+                yield return new object[] { "testQuery", Times.Once(), Times.Never() };
+                yield return new object[] { null, Times.Never(), Times.Once() };
+            }
 
-            var searchOptions = Options.Create(new SearchOptions());
-            var documentConverter = new Mock<IDocumentConverter>();
-            var searchQueryBuilder = new Mock<ISearchQueryBuilder>();
-            var searchResponseBuilder = new Mock<ISearchResponseBuilder>();
-
-            var appSearchProvider = new ElasticAppSearchProvider(
-                searchOptions,
-                appSearchClient.Object,
-                documentConverter.Object,
-                searchQueryBuilder.Object,
-                searchResponseBuilder.Object
-            );
-
-            var searchRequest = new SearchRequest();
-
-            // Act
-            var response = await appSearchProvider.SearchAsync("testDocumentType", searchRequest);
-
-            // Assert
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<SearchQuery>()), Times.Once);
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
     }
 }

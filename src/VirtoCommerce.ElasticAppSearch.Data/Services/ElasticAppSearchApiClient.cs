@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,11 +12,12 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppApiClient : IElasticAppApiClient
+public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 {
     private const string EnginesEndpoint = "engines";
 
@@ -31,7 +33,7 @@ public class ElasticAppApiClient : IElasticAppApiClient
         DateTimeZoneHandling = DateTimeZoneHandling.Utc,
     };
 
-    public ElasticAppApiClient(IHttpClientFactory httpClientFactory)
+    public ElasticAppSearchApiClient(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
     }
@@ -99,7 +101,8 @@ public class ElasticAppApiClient : IElasticAppApiClient
 
     public async Task<SearchResult> SearchAsync(string engineName, string rawQuery)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), rawQuery);
+        var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content);
 
         response.EnsureSuccessStatusCode();
 

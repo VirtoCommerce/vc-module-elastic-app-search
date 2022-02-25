@@ -34,7 +34,7 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
             serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-            serviceCollection.AddSingleton<IElasticAppApiClient, ElasticAppApiClient>();
+            serviceCollection.AddSingleton<IElasticAppSearchApiClient, ElasticAppSearchApiClient>();
             serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
             serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
             serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
