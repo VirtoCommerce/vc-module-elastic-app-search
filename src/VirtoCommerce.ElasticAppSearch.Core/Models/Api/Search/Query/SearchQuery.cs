@@ -17,10 +17,13 @@ public record SearchQuery
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public IFilters Filters { get; init; }
-    
+
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
     public Dictionary<string, SearchFieldValue> SearchFields { get; init; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public Dictionary<string, object> ResultFields { get; set; }
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public Page Page { get; init; }

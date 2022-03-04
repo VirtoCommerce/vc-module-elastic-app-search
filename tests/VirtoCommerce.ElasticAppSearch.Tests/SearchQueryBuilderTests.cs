@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Moq;
+using Newtonsoft.Json;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -84,6 +85,82 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         public void ToSearchQuery_ConvertValidSearchFields_Successfully(string[] searchFields, object expectedResult)
         {
             Test(() => new SearchRequest { SearchFields = searchFields }, searchQuery => searchQuery.SearchFields, expectedResult);
+        }
+
+        [Theory]
+        [InlineData(new object[] { new[] { "test" }, "{\"test\":{}}" })]
+        [InlineData(new object[] { new[] { "test1", "test2" }, "{\"test1\":{},\"test2\":{}}" })]
+        public void TestSearchFields(string[] searchField, string result)
+        {
+            // Arrange
+            var searchQueryBuilder = new SearchQueryBuilder(GetFieldNameConverter(), GetSearchFiltersBuilder());
+
+            var request = new SearchRequest
+            {
+                SearchFields = new List<string>(searchField),
+            };
+
+            // Act
+            var searchQuery = searchQueryBuilder.ToSearchQuery(request, GetSchema());
+            var serializedQuerySearchFields = JsonConvert.SerializeObject(searchQuery.SearchFields);
+
+            // Assert
+            Assert.Equal(result, serializedQuerySearchFields);
+        }
+
+        [Fact]
+        public void NullSearchFields()
+        {
+            // Arrange
+            var searchQueryBuilder = new SearchQueryBuilder(GetFieldNameConverter(), GetSearchFiltersBuilder());
+
+            var request = new SearchRequest { SearchFields = null, };
+
+            // Act
+
+            var result = searchQueryBuilder.ToSearchQuery(request, GetSchema());
+
+            // Assert
+
+            Assert.NotNull(result);
+            Assert.Null(result.SearchFields);
+        }
+
+        [Theory]
+        [InlineData(new object[] { new[] { "test" }, "{\"test\":{\"raw\":{}}}" })]
+        [InlineData(new object[] { new[] { "test1", "test2" }, "{\"test1\":{\"raw\":{}},\"test2\":{\"raw\":{}}}" })]
+        public void TestReturnFields(string[] includeFields, string expectedResult)
+        {
+            // Arrange
+            var searchQueryBuilder = new SearchQueryBuilder(GetFieldNameConverter(), GetSearchFiltersBuilder());
+
+            var request = new SearchRequest
+            {
+                IncludeFields = new List<string>(includeFields),
+            };
+
+            // Act
+            var searchQuery = searchQueryBuilder.ToSearchQuery(request, GetSchema());
+            var serializedSearchQueryReturnFields = JsonConvert.SerializeObject(searchQuery.ResultFields);
+
+            // Assert
+
+            Assert.Equal(expectedResult, serializedSearchQueryReturnFields);
+        }
+
+        [Fact]
+        public void TestNullReturnFields()
+        {
+            // Arrange
+            var searchQueryBuilder = new SearchQueryBuilder(GetFieldNameConverter(), GetSearchFiltersBuilder());
+            var request = new SearchRequest { IncludeFields = null };
+
+            // Act
+            var result = searchQueryBuilder.ToSearchQuery(request, GetSchema());
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Null(result.SearchFields);
         }
 
         private static void Test(Func<SearchRequest> searchRequest, Func<SearchQuery, object> actualResultSelector, object expectedResult)

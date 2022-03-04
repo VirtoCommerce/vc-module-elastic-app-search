@@ -36,6 +36,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             Sort = GetSorting(request.Sorting),
             Filters = GetFilters(request.Filter, schema),
             SearchFields = GetSearchFields(request.SearchFields),
+            ResultFields = GetResultFields(request.IncludeFields),
             Page = new Page
             {
                 Current = request.Skip / request.Take + 1,
@@ -67,5 +68,12 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     protected virtual IFilters GetFilters(ISearchFilter filter, Schema schema)
     {
         return _searchFiltersBuilder.ToFilters(filter, schema);
+    }
+
+    protected virtual Dictionary<string, object> GetResultFields(IEnumerable<string> includeFields)
+    {
+        var result = includeFields?.ToDictionary(x => _fieldNameConverter.ToProviderFieldName(x), y => (object)(new { raw = new object() }));
+
+        return result;
     }
 }
