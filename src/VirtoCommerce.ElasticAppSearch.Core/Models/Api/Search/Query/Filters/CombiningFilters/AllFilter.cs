@@ -1,6 +1,6 @@
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.CombiningFilters;
 
-public sealed record AllFilter : Filter<IFilter[]>
+public sealed record AllFilter : Filter<IFilter[]>, ICombiningFilter
 {
     public override string FieldName => "all";
 
