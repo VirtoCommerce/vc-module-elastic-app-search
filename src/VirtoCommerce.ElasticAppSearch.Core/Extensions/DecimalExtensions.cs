@@ -9,17 +9,17 @@ public static class DecimalExtensions
     private const int IntegerPartsCount = 3;
     private const byte MaxScale = 28;
 
-    public static decimal NearestLower(this decimal value)
+    public static decimal GetNearestLower(this decimal value)
     {
-        return Nearest(value, addition => value - addition);
+        return GetNearest(value, addition => value - addition);
     }
 
-    public static decimal NearestHigher(this decimal value)
+    public static decimal GetNearestHigher(this decimal value)
     {
-        return Nearest(value, addition => value + addition);
+        return GetNearest(value, addition => value + addition);
     }
 
-    private static decimal Nearest(decimal value, Func<decimal, decimal> valueConverter)
+    private static decimal GetNearest(decimal value, Func<decimal, decimal> valueConverter)
     {
         var parts = decimal.GetBits(value);
 

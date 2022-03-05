@@ -5,7 +5,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.Ra
 public record DoubleRangeFilter : RangeFilter<double>
 {
     public DoubleRangeFilter(string fieldName, RangeFilterBound<double> from, RangeFilterBound<double> to):
-        base(fieldName, from, fromValue => fromValue.NearestLower(), to, toValue => toValue.NearestHigher())
+        base(fieldName, from, fromValue => fromValue.GetNearestLower(), to, toValue => toValue.GetNearestHigher())
     {
     }
 }

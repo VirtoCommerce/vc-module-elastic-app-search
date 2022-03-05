@@ -5,7 +5,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.Ra
 public record DecimalRangeFilter : RangeFilter<decimal>
 {
     public DecimalRangeFilter(string fieldName, RangeFilterBound<decimal> from, RangeFilterBound<decimal> to):
-        base(fieldName, from, fromValue => fromValue.NearestLower(), to, toValue => toValue.NearestHigher())
+        base(fieldName, from, fromValue => fromValue.GetNearestLower(), to, toValue => toValue.GetNearestHigher())
     {
     }
 }
