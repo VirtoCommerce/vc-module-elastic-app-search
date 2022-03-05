@@ -6,10 +6,13 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
+using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
+using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
+using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
