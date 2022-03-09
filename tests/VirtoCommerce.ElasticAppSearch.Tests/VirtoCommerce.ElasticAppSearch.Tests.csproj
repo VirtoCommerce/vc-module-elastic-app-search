@@ -26,13 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Api\Json\Documents\Empty.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Api\Json\Documents\Fields.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Api\Json\Documents\Id.json">
+    <None Update="Api\Json\**\*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

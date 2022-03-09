@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Newtonsoft.Json;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Tests.Extensions;
@@ -7,7 +9,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests.Api;
 
 public class SerializationTestsBase
 {
-    public virtual void Entity_Serialize_Correct<T>(T actual, string expectedJsonFileName)
+    public virtual void Serialize_Entity_CorrectlySerializes<T>(T actual, string expectedJsonFileName)
     {
         // Arrange
         var expectedJson = JsonHelper.LoadFrom(GetJsonPath(expectedJsonFileName)).ReplaceLineEndings(string.Empty).ReplaceWhitespaces(string.Empty);
@@ -18,8 +20,21 @@ public class SerializationTestsBase
         // Assert
         Assert.Equal(expectedJson, actualJson, ignoreLineEndingDifferences: true, ignoreWhiteSpaceDifferences: true);
     }
+
+    protected void Serialize_InvalidData_ThrowsException<T>(T actual)
+    {
+        // Arrange
+        void Serialize()
+        {
+            // Act
+            JsonConvert.SerializeObject(actual, ModuleConstants.Api.JsonSerializerSettings);
+        }
+
+        // Assert
+        Assert.Throws<JsonSerializationException>(Serialize);
+    }
     
-    public virtual void Json_Deserialize_Correct<T>(T expected, string actualJsonFileName)
+    public virtual void Deserialize_Json_CorrectlyDeserializes<T>(T expected, string actualJsonFileName)
     {
         // Arrange
         var actualJson = JsonHelper.LoadFrom(GetJsonPath(actualJsonFileName));
@@ -33,11 +48,11 @@ public class SerializationTestsBase
 
     protected virtual string GetJsonPath()
     {
-        return @"Api\Json";
+        return Path.Combine("Api", "Json");
     }
 
     protected virtual string GetJsonPath(string fileName)
     {
-        return $"{GetJsonPath()}\\{fileName}";
+        return Path.Combine(GetJsonPath(), fileName);
     }
 }

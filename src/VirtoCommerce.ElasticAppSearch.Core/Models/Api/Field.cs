@@ -1,8 +1,12 @@
+using Newtonsoft.Json;
+
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 
-public record Field<TFieldValue>
+public abstract record Field<TFieldValue>
 {
+    [JsonRequired]
     public virtual string FieldName { get; init; }
 
+    [JsonRequired]
     public virtual TFieldValue Value { get; init; }
 }

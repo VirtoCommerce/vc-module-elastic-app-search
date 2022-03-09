@@ -8,6 +8,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
 public record Document<TFieldValue>
 {
+    [JsonRequired]
     [JsonProperty(ModuleConstants.Api.FieldNames.Id)]
     public virtual TFieldValue Id { get; init; }
 

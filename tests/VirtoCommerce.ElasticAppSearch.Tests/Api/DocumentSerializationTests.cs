@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using Xunit;
 
@@ -30,20 +32,19 @@ public class DocumentSerializationTests: SerializationTestsBase
 
     [Theory]
     [MemberData(nameof(SerializationData))]
-    public override void Entity_Serialize_Correct<T>(T actual, string expectedJsonFileName)
+    public override void Serialize_Entity_CorrectlySerializes<T>(T actual, string expectedJsonFileName)
     {
-        base.Entity_Serialize_Correct(actual, expectedJsonFileName);
+        base.Serialize_Entity_CorrectlySerializes(actual, expectedJsonFileName);
     }
 
-    //[Theory]
-    //[MemberData(nameof(SerializationData))]
-    //public override void Json_Deserialize_Correct<T>(T expected, string actualJsonFileName)
-    //{
-    //    base.Json_Deserialize_Correct(expected, actualJsonFileName);
-    //}
+    [Fact]
+    public void Serialize_WithoutRequiredFields_ThrowsException()
+    {
+        Serialize_InvalidData_ThrowsException(new Documents { new() });
+    }
 
     protected override string GetJsonPath()
     {
-        return $"{base.GetJsonPath()}\\Documents";
+        return Path.Combine(base.GetJsonPath(), "Documents");
     }
 }

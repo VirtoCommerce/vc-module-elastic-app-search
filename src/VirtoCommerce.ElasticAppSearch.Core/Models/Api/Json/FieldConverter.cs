@@ -5,32 +5,49 @@ using Newtonsoft.Json.Linq;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class FieldConverter<TField, TValue>: JsonConverter<TField>
-    where TField: Field<TValue>, new()
+public class FieldConverter: JsonConverter
 {
-    public override TField ReadJson(JsonReader reader, Type objectType, TField existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType.IsAssignableFrom(typeof(Field<>));
+    }
+
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         var token = JToken.Load(reader);
         if (token.Type != JTokenType.Null)
         {
             var jObject = (JObject)token;
             var property = jObject.Properties().Single();
-            return new TField
-            {
-                FieldName = property.Name,
-                Value = property.Value.ToObject<TValue>(serializer)
-            };
+
+            var result = Activator.CreateInstance(objectType);
+
+            var fieldNameProperty = objectType.GetProperty(nameof(Field<object>.FieldName))!;
+            fieldNameProperty.SetValue(result, property.Name);
+
+            var valueProperty = objectType.GetProperty(nameof(Field<object>.Value))!;
+            valueProperty.SetValue(result, property.Value.ToObject(valueProperty.GetType(), serializer));
+
+            return result;
         }
         return null;
     }
 
-    public override void WriteJson(JsonWriter writer, TField value, JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         if (value != null)
         {
+            var objectType = value.GetType();
+
+            var fieldNameProperty = objectType.GetProperty(nameof(Field<object>.FieldName))!;
+            var fieldName = (string)fieldNameProperty.GetValue(value)!;
+
+            var valueProperty = objectType.GetProperty(nameof(Field<object>.Value))!;
+            var fieldValue = valueProperty.GetValue(value);
+
             writer.WriteStartObject();
-            writer.WritePropertyName(value.FieldName);
-            serializer.Serialize(writer, value.Value);
+            writer.WritePropertyName(fieldName);
+            serializer.Serialize(writer, fieldValue);
             writer.WriteEndObject();
         }
         else

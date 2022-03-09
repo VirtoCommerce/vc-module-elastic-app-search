@@ -4,6 +4,8 @@ using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -45,25 +47,25 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return searchQuery;
     }
 
-    protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields)
+    protected virtual Sort GetSorting(IEnumerable<SortingField> sortingFields)
     {
-        var result = sortingFields?
-            .Select(sortingField => new Field<SortOrder>
+        var result = new Sort(sortingFields?
+            .Select(sortingField => new SortField
             {
                 FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
                 Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
             })
-            .ToArray();
+            .ToArray());
 
         return result;
     }
 
-    protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
+    protected virtual SearchFields GetSearchFields(IEnumerable<string> searchFields)
     {
-        var result = searchFields?.ToDictionary(
+        var result = new SearchFields(searchFields?.ToDictionary(
             searchField => _fieldNameConverter.ToProviderFieldName(searchField),
             _ => new SearchFieldValue()
-        );
+        ));
 
         return result;
     }
