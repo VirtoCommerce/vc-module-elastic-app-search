@@ -43,7 +43,7 @@ public class SerializationTestsBase
         var actual = JsonConvert.DeserializeObject<T>(actualJson, ModuleConstants.Api.JsonSerializerSettings);
 
         // Assert
-        expected.Should().BeEquivalentTo(actual);
+        actual.Should().BeEquivalentTo(expected, options => options.ComparingRecordsByMembers());
     }
 
     protected virtual string GetJsonPath()

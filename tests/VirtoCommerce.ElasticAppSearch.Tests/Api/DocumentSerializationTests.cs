@@ -42,6 +42,13 @@ public class DocumentSerializationTests: SerializationTestsBase
         Serialize_InvalidData_ThrowsException(new Documents { new() });
     }
 
+    [Theory]
+    [MemberData(nameof(SerializationData))]
+    public override void Deserialize_Json_CorrectlyDeserializes<T>(T expected, string actualJsonFileName)
+    {
+        base.Deserialize_Json_CorrectlyDeserializes(expected, actualJsonFileName);
+    }
+
     protected override string GetJsonPath()
     {
         return Path.Combine(base.GetJsonPath(), "Documents");

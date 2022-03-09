@@ -16,5 +16,5 @@ public record Document<TFieldValue>
     public virtual Dictionary<string, TFieldValue> Fields { get; set; } = new();
 
     [JsonExtensionData]
-    public virtual Dictionary<string, JToken> RawFields { get; set; } = new();
+    protected internal virtual Dictionary<string, JToken> RawFields { get; set; } = new();
 };
