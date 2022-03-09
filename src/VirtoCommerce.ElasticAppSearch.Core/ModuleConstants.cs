@@ -21,9 +21,9 @@ public static class ModuleConstants
             ContractResolver = new CustomContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() },
             Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) },
 
-            // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 specification support)
-            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc
+            // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'sszzz",
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
         };
 
         public static class Languages
