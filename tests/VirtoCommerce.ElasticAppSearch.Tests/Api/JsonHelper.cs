@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace VirtoCommerce.ElasticAppSearch.Tests;
+namespace VirtoCommerce.ElasticAppSearch.Tests.Api;
 
 public static class JsonHelper
 {

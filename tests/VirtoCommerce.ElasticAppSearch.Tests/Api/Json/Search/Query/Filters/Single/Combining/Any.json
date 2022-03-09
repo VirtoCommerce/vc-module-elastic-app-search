@@ -1,0 +1,13 @@
+{
+  "query": "test",
+  "filters": {
+    "any": [
+      {
+        "field1": [ "test1" ]
+      },
+      {
+        "field2": [ "test2" ]
+      }
+    ]
+  }
+}

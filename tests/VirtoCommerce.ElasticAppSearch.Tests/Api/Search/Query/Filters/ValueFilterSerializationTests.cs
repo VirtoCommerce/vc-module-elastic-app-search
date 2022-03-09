@@ -1,21 +1,15 @@
 using System.Collections.Generic;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using Xunit;
 
-namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query;
+namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Filters;
 
-public class FiltersSerializationTests: SerializationTestsBase
+public class ValueFilterSerializationTests: SerializationTestsBase
 {
 
     public static IEnumerable<object[]> SerializationData => new[]
     {
-        new object[] { new SearchQuery
-        {
-            Query = "test",
-            Filters = new Filters()
-        }, @"..\Default.json" },
         new object[] { new SearchQuery
         {
             Query = "test",
@@ -24,7 +18,7 @@ public class FiltersSerializationTests: SerializationTestsBase
                 FieldName = "field",
                 Value = new []{ "test" }
             }
-        }, @"Single\Value\String.json" },
+        }, "String.json" },
         new object[] { new SearchQuery
         {
             Query = "test",
@@ -33,7 +27,7 @@ public class FiltersSerializationTests: SerializationTestsBase
                 FieldName = "field",
                 Value = new []{ 1.01 }
             }
-        }, @"Single\Value\Number.json" },
+        }, "Number.json" },
         new object[] { new SearchQuery
         {
             Query = "test",
@@ -42,16 +36,7 @@ public class FiltersSerializationTests: SerializationTestsBase
                 FieldName = "field",
                 Value = new []{ true }
             }
-        }, @"Single\Value\Bool.json" },
-        new object[] { new SearchQuery
-        {
-            Query = "test",
-            Filters = new ValueFilter<string>
-            {
-                FieldName = "field",
-                Value = new []{ "test1", "test2" }
-            }
-        }, @"Single\Value\Array.json" },
+        }, "Bool.json" },
     };
 
     [Theory]
@@ -63,6 +48,6 @@ public class FiltersSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Filters";
+        return $@"{base.GetJsonPath()}\Search\Query\Filters\Single\Value";
     }
 }

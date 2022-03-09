@@ -1,6 +1,6 @@
 {
   "query": "test",
   "filters": {
-    "field": 1.01
+    "field": [ 1.01 ]
   } 
 }

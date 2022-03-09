@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using Xunit;
@@ -19,7 +20,7 @@ public class SortSerializationTests: SerializationTestsBase
             Query = "test",
             Sort = new Sort(new []
             {
-                new SortField
+                new Field<SortOrder>
                 {
                     FieldName = "test",
                     Value = SortOrder.Asc
@@ -31,12 +32,12 @@ public class SortSerializationTests: SerializationTestsBase
             Query = "test",
             Sort = new Sort(new []
             {
-                new SortField
+                new Field<SortOrder>
                 {
                     FieldName = "test1",
                     Value = SortOrder.Asc
                 },
-                new SortField
+                new Field<SortOrder>
                 {
                     FieldName = "test2",
                     Value = SortOrder.Desc

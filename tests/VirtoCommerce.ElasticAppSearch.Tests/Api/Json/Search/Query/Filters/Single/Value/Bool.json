@@ -1,6 +1,6 @@
 {
   "query": "test",
   "filters": {
-    "field": true
+    "field": [ true ]
   } 
 }

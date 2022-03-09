@@ -1,6 +1,0 @@
-{
-  "query": "test",
-  "filters": {
-    "field": [ "test1", "test2" ]
-  } 
-}
