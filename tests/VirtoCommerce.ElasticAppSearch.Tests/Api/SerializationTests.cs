@@ -14,7 +14,7 @@ public class SerializationTests: SerializationTestsBase
         new object[] { new NoChanges { Property = Array.Empty<string>() }, "PropertyEmpty.json" },
         new object[] { new IgnoreNullValue { Property = null }, "Empty.json" },
         new object[] { new IgnoreEmptyValue { Property = Array.Empty<string>() }, "Empty.json" },
-        new object[] { new IgnoreEmptyValue { Property = new[] { string.Empty } }, "PropertyEmpty.json" },
+        new object[] { new IgnoreEmptyValue { Property = new[] { string.Empty } }, "PropertyArrayWithEmptyString.json" },
         new object[] { new SingleValueAsObject { Property = new[] { "test" } }, "PropertyValue.json" },
         new object[] { new SingleValueAsObject { Property = new[] { "test1", "test2" } }, "PropertyArray.json" }
     };

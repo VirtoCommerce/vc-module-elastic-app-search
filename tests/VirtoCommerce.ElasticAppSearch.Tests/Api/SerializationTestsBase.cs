@@ -1,4 +1,5 @@
 using System.IO;
+using FluentAssertions;
 using Newtonsoft.Json;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Tests.Extensions;
@@ -42,7 +43,7 @@ public class SerializationTestsBase
         var actual = JsonConvert.DeserializeObject<T>(actualJson, ModuleConstants.Api.JsonSerializerSettings);
 
         // Assert
-        Assert.Equal(expected, actual);
+        expected.Should().BeEquivalentTo(actual);
     }
 
     protected virtual string GetJsonPath()

@@ -43,7 +43,7 @@ public class FieldConverter: JsonConverter
             var fieldName = (string)fieldNameProperty.GetValue(value)!;
 
             var valueProperty = objectType.GetProperty(nameof(Field<object>.Value))!;
-            var fieldValue = valueProperty.GetValue(value);
+            var fieldValue = valueProperty.GetValue(value)!;
 
             writer.WriteStartObject();
             writer.WritePropertyName(fieldName);
