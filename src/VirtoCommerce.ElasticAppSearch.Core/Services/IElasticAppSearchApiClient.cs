@@ -13,7 +13,7 @@ public interface IElasticAppSearchApiClient
 
     Task<Engine> CreateEngineAsync(string name, string language);
 
-    Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents);
+    Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Documents documents);
 
     Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids);
 

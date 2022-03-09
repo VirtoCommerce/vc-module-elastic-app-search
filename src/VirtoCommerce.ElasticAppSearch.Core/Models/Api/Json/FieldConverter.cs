@@ -35,7 +35,7 @@ public class FieldConverter<TField, TValue>: JsonConverter<TField>
         }
         else
         {
-            serializer.Serialize(writer, null, typeof(TField));
+            writer.WriteNull();
         }
     }
 }

@@ -1,9 +1,5 @@
-using Newtonsoft.Json;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
-
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
-[JsonConverter(typeof(DocumentConverter<object>))]
 public record Document: Document<object>
 {
 }

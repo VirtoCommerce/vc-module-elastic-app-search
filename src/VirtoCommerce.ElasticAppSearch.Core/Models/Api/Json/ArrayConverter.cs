@@ -30,7 +30,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json
             _singleValueHandling = singleValueHandling;
             _itemConverter = itemConverterType != null
                 ? (JsonConverter)Activator.CreateInstance(itemConverterType, itemConverterParameters)
-                : new DefaultJsonConverter();
+                : new DefaultJsonConverter<object>();
         }
 
         public override bool CanConvert(Type objectType)

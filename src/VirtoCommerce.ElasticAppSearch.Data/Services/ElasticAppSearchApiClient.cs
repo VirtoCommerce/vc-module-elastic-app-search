@@ -50,7 +50,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
-    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents)
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Documents documents)
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
 

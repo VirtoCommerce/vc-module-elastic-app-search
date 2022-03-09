@@ -25,4 +25,20 @@
     <ProjectReference Include="..\..\src\VirtoCommerce.ElasticAppSearch.Web\VirtoCommerce.ElasticAppSearch.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Api\Json\Documents\Empty.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Api\Json\Documents\Fields.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Api\Json\Documents\Id.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
 </Project>

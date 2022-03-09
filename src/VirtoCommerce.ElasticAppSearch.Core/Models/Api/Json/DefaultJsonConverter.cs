@@ -1,23 +1,18 @@
 using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class DefaultJsonConverter: JsonConverter
+public class DefaultJsonConverter<T>: JsonConverter<T>
 {
-    public override bool CanConvert(Type objectType)
+    public override T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
-        return true;
+        var result = hasExistingValue ? existingValue : (T)serializer.Deserialize(reader, objectType);
+        return result;
     }
 
-    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer)
     {
-        return JToken.Load(reader).ToObject(objectType, serializer);
-    }
-
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-    {
-        JToken.FromObject(value, serializer).WriteTo(writer);
+        serializer.Serialize(writer, value);
     }
 }

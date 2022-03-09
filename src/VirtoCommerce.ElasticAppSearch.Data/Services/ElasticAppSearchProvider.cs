@@ -79,7 +79,7 @@ public class ElasticAppSearchProvider : ISearchProvider
         for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += 100)
         {
             var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, 100);
-            var createOrUpdateDocumentsResult = await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray());
+            var createOrUpdateDocumentsResult = await CreateOrUpdateDocumentsAsync(engineName, new Documents(documents.GetRange(currentRangeIndex, currentRangeSize)));
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
 
@@ -144,7 +144,7 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     #region Create or update
 
-    protected virtual async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
+    protected virtual async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Documents documents)
     {
         return await _elasticAppSearch.CreateOrUpdateDocumentsAsync(engineName, documents);
     }
