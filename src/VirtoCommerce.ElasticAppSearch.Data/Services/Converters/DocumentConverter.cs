@@ -62,7 +62,8 @@ public class DocumentConverter: IDocumentConverter
         foreach (var (providerFieldName, value) in searchResultDocument.Fields)
         {
             var indexFieldName = _fieldNameConverter.ToIndexFieldName(providerFieldName);
-            searchDocument.Add(indexFieldName, value.Raw);
+            var indexFieldValue = value.Raw;
+            searchDocument.Add(indexFieldName, indexFieldValue);
         }
 
         return searchDocument;

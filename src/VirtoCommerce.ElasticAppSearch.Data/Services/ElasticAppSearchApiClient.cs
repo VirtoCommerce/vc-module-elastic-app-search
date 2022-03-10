@@ -81,19 +81,24 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, ModuleConstants.Api.JsonSerializerSettings);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
     }
 
     public async Task<SearchResult> SearchAsync(string engineName, string rawQuery)
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+
         var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
     }
 
     private static string GetEngineEndpoint(string engineName)
