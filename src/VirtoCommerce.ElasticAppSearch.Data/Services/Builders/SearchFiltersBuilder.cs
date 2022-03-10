@@ -33,14 +33,6 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
         return ToFilter(filter);
     }
 
-    //protected virtual IApiFilter[] ToFilterRecursive(IList<ISearchFilter> searchFilters, int depth)
-    //{
-    //    if (depth > ModuleConstants.Api.Search.MaxDepth)
-    //    {
-    //        throw new NotSupportedException("Elastic App Search supports up to 5 levels of nesting.");
-    //    }
-    //}
-
     protected virtual IApiFilter ToFilter(ISearchFilter searchFilter)
     {
         var result = searchFilter switch
@@ -53,6 +45,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
             AndFilter andFilter => ToAllFilter(andFilter),
             OrFilter orFilter => ToAnyFilter(orFilter),
             NotFilter notFilter => ToNoneFilter(notFilter),
+            null => null,
             _ => throw new NotSupportedException("Unknown filter")
         };
         return result;
@@ -165,10 +158,5 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
             Value = new []{ ToFilter(notFilter.ChildFilter) }
         };
         return result;
-    }
-
-    private static bool IsLogicFilter(ISearchFilter filter)
-    {
-        return filter is AndFilter | filter is OrFilter | filter is NotFilter;
     }
 }

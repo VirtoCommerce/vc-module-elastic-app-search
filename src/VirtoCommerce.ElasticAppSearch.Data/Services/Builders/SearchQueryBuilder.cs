@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -49,23 +50,27 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     protected virtual Sort GetSorting(IEnumerable<SortingField> sortingFields)
     {
-        var result = new Sort(sortingFields?
-            .Select(sortingField => new Field<SortOrder>
-            {
-                FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
-                Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
-            })
-            .ToArray());
+        var result = sortingFields != null
+            ? new Sort(sortingFields
+                .Select(sortingField => new Field<SortOrder>
+                {
+                    FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
+                    Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
+                })
+                .ToArray())
+            : null;
 
         return result;
     }
 
     protected virtual SearchFields GetSearchFields(IEnumerable<string> searchFields)
     {
-        var result = new SearchFields(searchFields?.ToDictionary(
-            searchField => _fieldNameConverter.ToProviderFieldName(searchField),
-            _ => new SearchFieldValue()
-        ));
+        var result = searchFields != null
+            ? new SearchFields(searchFields.ToDictionary(
+                searchField => _fieldNameConverter.ToProviderFieldName(searchField),
+                _ => new SearchFieldValue()
+            ))
+            : null;
 
         return result;
     }
