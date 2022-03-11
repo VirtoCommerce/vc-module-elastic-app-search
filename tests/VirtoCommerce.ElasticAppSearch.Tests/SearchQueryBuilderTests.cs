@@ -21,44 +21,44 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             new object[] { new SortingField[] { new ("test1"), new ("test2", true) }, @"""sort"":[{""test1"":""asc""},{""test2"":""desc""}]," }
         };
 
-        [Theory(Skip = "Temporary")]
-        [MemberData(nameof(SortData))]
-        public void TestSort(SortingField[] sortingFields, string expectedResult)
-        {
-            // Arrange
-            var fieldNameConverter = GetFieldNameConverter();
-            var searchFiltersBuilder = GetSearchFiltersBuilder();
-            var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverter, searchFiltersBuilder);
-            var request = new SearchRequest { Sorting = sortingFields };
+        //[Theory(Skip = "Temporary")]
+        //[MemberData(nameof(SortData))]
+        //public void TestSort(SortingField[] sortingFields, string expectedResult)
+        //{
+        //    // Arrange
+        //    var fieldNameConverter = GetFieldNameConverter();
+        //    var searchFiltersBuilder = GetSearchFiltersBuilder();
+        //    var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverter, searchFiltersBuilder);
+        //    var request = new SearchRequest { Sorting = sortingFields };
 
-            // Act
-            var searchQuery = searchQueryBuilder.ToSearchQuery(request);
-            var serializedQuerySearchFields = JsonConvert.SerializeObject(searchQuery, ModuleConstants.Api.JsonSerializerSettings);
+        //    // Act
+        //    var searchQuery = searchQueryBuilder.ToSearchQuery(request);
+        //    var serializedQuerySearchFields = JsonConvert.SerializeObject(searchQuery, ModuleConstants.Api.JsonSerializerSettings);
 
-            // Assert
-            Assert.Equal(WrapWithDefaultSearchQuery(expectedResult), serializedQuerySearchFields);
-        }
+        //    // Assert
+        //    Assert.Equal(WrapWithDefaultSearchQuery(expectedResult), serializedQuerySearchFields);
+        //}
 
-        [Theory(Skip = "Temporary")]
-        [InlineData(null, "")]
-        [InlineData(new string[] {}, @"""search_fields"":{},")]
-        [InlineData(new[] { "test" }, @"""search_fields"":{""test"":{}},")]
-        [InlineData(new[] { "test1", "test2" }, @"""search_fields"":{""test1"":{},""test2"":{}},")]
-        public void TestSearchFields(string[] searchField, string expectedResult)
-        {
-            // Arrange
-            var fieldNameConverter = GetFieldNameConverter();
-            var searchFiltersBuilder = GetSearchFiltersBuilder();
-            var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverter, searchFiltersBuilder);
-            var request = new SearchRequest { SearchFields = searchField };
+        //[Theory(Skip = "Temporary")]
+        //[InlineData(null, "")]
+        //[InlineData(new string[] {}, @"""search_fields"":{},")]
+        //[InlineData(new[] { "test" }, @"""search_fields"":{""test"":{}},")]
+        //[InlineData(new[] { "test1", "test2" }, @"""search_fields"":{""test1"":{},""test2"":{}},")]
+        //public void TestSearchFields(string[] searchField, string expectedResult)
+        //{
+        //    // Arrange
+        //    var fieldNameConverter = GetFieldNameConverter();
+        //    var searchFiltersBuilder = GetSearchFiltersBuilder();
+        //    var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverter, searchFiltersBuilder);
+        //    var request = new SearchRequest { SearchFields = searchField };
 
-            // Act
-            var searchQuery = searchQueryBuilder.ToSearchQuery(request);
-            var serializedSearchFields = JsonConvert.SerializeObject(searchQuery, ModuleConstants.Api.JsonSerializerSettings);
+        //    // Act
+        //    var searchQuery = searchQueryBuilder.ToSearchQuery(request);
+        //    var serializedSearchFields = JsonConvert.SerializeObject(searchQuery, ModuleConstants.Api.JsonSerializerSettings);
 
-            // Assert
-            Assert.Equal(WrapWithDefaultSearchQuery(expectedResult), serializedSearchFields);
-        }
+        //    // Assert
+        //    Assert.Equal(WrapWithDefaultSearchQuery(expectedResult), serializedSearchFields);
+        //}
 
         private static IFieldNameConverter GetFieldNameConverter()
         {

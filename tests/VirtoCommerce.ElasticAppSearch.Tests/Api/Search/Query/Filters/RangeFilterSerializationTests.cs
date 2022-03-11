@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using Xunit;
 

@@ -17,6 +17,8 @@ public interface IElasticAppSearchApiClient
 
     Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids);
 
+    Task<Schema> GetSchemaAsync(string engineName);
+
     Task<Schema> UpdateSchemaAsync(string engineName, Schema schema);
 
     Task<SearchResult> SearchAsync(string engineName, SearchQuery query);

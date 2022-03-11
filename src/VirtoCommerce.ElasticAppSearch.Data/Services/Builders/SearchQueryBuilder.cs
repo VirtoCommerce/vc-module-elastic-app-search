@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
@@ -25,7 +25,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         _searchFiltersBuilder = searchFiltersBuilder;
     }
 
-    public virtual SearchQuery ToSearchQuery(SearchRequest request)
+    public virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema)
     {
         if (request.IsFuzzySearch)
         {
@@ -36,7 +36,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         {
             Query = request.SearchKeywords ?? string.Empty,
             Sort = GetSorting(request.Sorting),
-            Filters = GetFilters(request.Filter),
+            Filters = GetFilters(request.Filter, schema),
             SearchFields = GetSearchFields(request.SearchFields),
             Page = new Page
             {
@@ -75,8 +75,8 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
-    protected virtual IFilters GetFilters(IFilter filter)
+    protected virtual IFilters GetFilters(IFilter filter, Schema schema)
     {
-        return _searchFiltersBuilder.ToFilters(filter);
+        return _searchFiltersBuilder.ToFilters(filter, schema);
     }
 }

@@ -83,7 +83,7 @@ public class ElasticAppSearchProvider : ISearchProvider
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
 
-        await UpdateSchema(engineName, schema);
+        await UpdateSchemaAsync(engineName, schema);
 
         var indexingResult = new IndexingResult { Items = indexingResultItems };
 
@@ -103,11 +103,13 @@ public class ElasticAppSearchProvider : ISearchProvider
     {
         var engineName = GetEngineName(documentType);
 
+        var schema = await GetSchemaAsync(engineName);
+
         SearchResult searchResult;
 
         if (string.IsNullOrEmpty(request.RawQuery))
         {
-            var searchQuery = _searchQueryBuilder.ToSearchQuery(request);
+            var searchQuery = _searchQueryBuilder.ToSearchQuery(request, schema);
             searchResult = await _elasticAppSearch.SearchAsync(engineName, searchQuery);
         }
         else
@@ -199,7 +201,12 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     #region Schema
 
-    protected virtual async Task UpdateSchema(string engineName, Schema schema)
+    protected virtual async Task<Schema> GetSchemaAsync(string engineName)
+    {
+        return await _elasticAppSearch.GetSchemaAsync(engineName);
+    }
+
+    protected virtual async Task UpdateSchemaAsync(string engineName, Schema schema)
     {
         await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
     }

@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 
-[JsonArray(ItemConverterType = typeof(DocumentConverter<Document, object>))]
+[JsonArray(AllowNullItems = false)]
 public class Documents: List<Document>
 {
     public Documents()

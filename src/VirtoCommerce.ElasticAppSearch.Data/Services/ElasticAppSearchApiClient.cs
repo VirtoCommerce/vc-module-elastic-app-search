@@ -25,6 +25,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
     }
 
+    #region Engine
+
     public async Task<bool> GetEngineExistsAsync(string name)
     {
         var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
@@ -50,6 +52,10 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
+    #endregion
+
+    #region Documents
+
     public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Documents documents)
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
@@ -68,6 +74,21 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
+    #endregion
+
+    #region Schema
+
+    public async Task<Schema> GetSchemaAsync(string engineName)
+    {
+        var response = await _httpClient.GetAsync(GetSchemaEndpoint(engineName));
+
+        await response.EnsureSuccessStatusCodeAsync<Result>();
+
+        var result = await response.Content.ReadFromJsonAsync<Schema>();
+
+        return result;
+    }
+
     public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema)
     {
         var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings);
@@ -76,6 +97,10 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         return await response.Content.ReadFromJsonAsync<Schema>(ModuleConstants.Api.JsonSerializerSettings);
     }
+
+    #endregion
+
+    #region Search
 
     public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
     {
@@ -100,6 +125,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         return result;
     }
+
+    #endregion
 
     private static string GetEngineEndpoint(string engineName)
     {

@@ -1,17 +1,17 @@
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.CombiningFilters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFilter;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 using IApiFilter = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.IFilter;
@@ -28,30 +28,54 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
         _fieldNameConverter = fieldNameConverter;
     }
 
-    public virtual IFilters ToFilters(ISearchFilter filter)
+    public virtual IFilters ToFilters(ISearchFilter filter, Schema schema)
     {
-        return ToFilter(filter);
+        return ToFilter(filter, schema);
     }
 
-    protected virtual IApiFilter ToFilter(ISearchFilter searchFilter)
+    protected virtual IApiFilter ToFilter(ISearchFilter searchFilter, Schema schema)
     {
-        var result = searchFilter switch
+        IApiFilter result;
+        switch (searchFilter)
         {
-            IdsFilter idsFilter => ToValueFilter(idsFilter),
-            TermFilter termFilter => ToValueFilter(termFilter),
-            WildCardTermFilter => throw new NotSupportedException("Elastic App Search doesn't support wildcard queries"),
-            RangeFilter rangeFilter => ToRangeFilter(rangeFilter),
-            GeoDistanceFilter geoDistanceFilter => ToGeoFilter(geoDistanceFilter),
-            AndFilter andFilter => ToAllFilter(andFilter),
-            OrFilter orFilter => ToAnyFilter(orFilter),
-            NotFilter notFilter => ToNoneFilter(notFilter),
-            null => null,
-            _ => throw new NotSupportedException("Unknown filter")
-        };
+            case IdsFilter idsFilter:
+                result = ToValueFilter(idsFilter);
+                break;
+            case TermFilter termFilter:
+                result = ToValueFilter(termFilter, schema);
+                break;
+            case WildCardTermFilter:
+                Debug.WriteLine("Elastic App Search doesn't support wildcard queries.");
+                result = GetNothingFilter();
+                break;
+            case RangeFilter rangeFilter:
+                result = ToRangeFilter(rangeFilter, schema);
+                break;
+            case GeoDistanceFilter geoDistanceFilter:
+                result = ToGeoFilter(geoDistanceFilter, schema);
+                break;
+            case AndFilter andFilter:
+                result = ToAllFilter(andFilter, schema);
+                break;
+            case OrFilter orFilter:
+                result = ToAnyFilter(orFilter, schema);
+                break;
+            case NotFilter notFilter:
+                result = ToNoneFilter(notFilter, schema);
+                break;
+            case null:
+                result = null;
+                break;
+            default:
+                Debug.WriteLine("Unknown filter");
+                result = GetNothingFilter();
+                break;
+        }
+
         return result;
     }
 
-    protected virtual ValueFilter<string> ToValueFilter(IdsFilter idsFilter)
+    protected virtual IApiFilter ToValueFilter(IdsFilter idsFilter)
     {
         var result = new ValueFilter<string>
         {
@@ -61,101 +85,129 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
         return result;
     }
 
-    protected virtual ValueFilter<string> ToValueFilter(TermFilter termFilter)
+    protected virtual IApiFilter ToValueFilter(TermFilter termFilter, Schema schema)
     {
-        var result = new ValueFilter<string>
+        var fieldName = termFilter.FieldName;
+        var result = ToFilterOrNothingFilter(() => new ValueFilter<string>
         {
-            FieldName = _fieldNameConverter.ToProviderFieldName(termFilter.FieldName),
+            FieldName = _fieldNameConverter.ToProviderFieldName(fieldName),
             Value = termFilter.Values.ToArray()
-        };
+        }, schema, fieldName);
         return result;
     }
 
-    protected virtual IApiFilter ToRangeFilter(RangeFilter rangeFilter)
+    protected virtual IApiFilter ToRangeFilter(RangeFilter rangeFilter, Schema schema)
     {
         var result = new AllFilter
         {
             Value = rangeFilter.Values
-                .Select(rangeFilterValue => ParseRangeFilter(_fieldNameConverter.ToProviderFieldName(rangeFilter.FieldName), rangeFilterValue))
+                .Select(rangeFilterValue => ToRangeFilter(_fieldNameConverter.ToProviderFieldName(rangeFilter.FieldName), rangeFilterValue, schema))
                 .ToArray()
         };
 
         return result;
     }
 
-    protected virtual IApiFilter ParseRangeFilter(string fieldName, RangeFilterValue rangeFilterValue)
+    protected virtual IApiFilter ToRangeFilter(string fieldName, RangeFilterValue rangeFilterValue, Schema schema)
     {
-        var isDecimalRangeFilter = RangeFilterExtensions.TryParse(fieldName,
-            rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
-            rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
-            out DecimalRangeFilter decimalRangeFilter);
+        var fieldType = schema.Fields.FirstOrDefault(field => field.Key == fieldName).Value;
 
-        if (isDecimalRangeFilter)
+        switch (fieldType)
         {
-            return decimalRangeFilter;
+            case FieldType.Number:
+                var isDecimalRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                    rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
+                    rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
+                    out DecimalRangeFilter decimalRangeFilter);
+
+                if (isDecimalRangeFilter)
+                {
+                    return decimalRangeFilter;
+                }
+
+                var isDoubleRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                    rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
+                    rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
+                    out DoubleRangeFilter doubleRangeFilter);
+
+                if (isDoubleRangeFilter)
+                {
+                    return doubleRangeFilter;
+                }
+
+                return GetNothingFilter();
+            case FieldType.Date:
+                var isDateTimeRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                    rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
+                    rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
+                    out DateTimeRangeFilter dateTimeRangeFilter);
+                return isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
+            default:
+                Debug.WriteLine("Elastic App Search supports number and date ranges only.");
+                return GetNothingFilter();
         }
-
-        var isDoubleRangeFilter = RangeFilterExtensions.TryParse(fieldName,
-            rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
-            rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
-            out DoubleRangeFilter doubleRangeFilter);
-
-        if (isDoubleRangeFilter)
-        {
-            return doubleRangeFilter;
-        }
-
-        var isDateTimeRangeFilter = RangeFilterExtensions.TryParse(fieldName,
-            rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
-            rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
-            out DateTimeRangeFilter dateTimeRangeFilter);
-
-        if (isDateTimeRangeFilter)
-        {
-            return dateTimeRangeFilter;
-        }
-
-        throw new NotSupportedException("Elastic App Search supports number and date ranges only.");
     }
 
-    protected virtual GeoFilter ToGeoFilter(GeoDistanceFilter geoDistanceFilter)
+    protected virtual IApiFilter ToGeoFilter(GeoDistanceFilter geoDistanceFilter, Schema schema)
     {
-        var result = new GeoFilter
+        var fieldName = geoDistanceFilter.FieldName;
+        var result = ToFilterOrNothingFilter(() => new GeoFilter
         {
-            FieldName = _fieldNameConverter.ToProviderFieldName(geoDistanceFilter.FieldName),
+            FieldName = _fieldNameConverter.ToProviderFieldName(fieldName),
             Value = new GeoFilterValue
             {
                 Center = new ApiGeoPoint(geoDistanceFilter.Location),
                 Distance = geoDistanceFilter.Distance,
                 Unit = MeasurementUnit.Km
             }
-        };
+        }, schema, fieldName, FieldType.Geolocation);
         return result;
     }
 
-    protected virtual AllFilter ToAllFilter(AndFilter andFilter)
+    protected virtual IApiFilter ToAllFilter(AndFilter andFilter, Schema schema)
     {
         var result = new AllFilter
         {
-            Value = andFilter.ChildFilters.Select(ToFilter).ToArray()
+            Value = andFilter.ChildFilters.Select(searchFilter => ToFilter(searchFilter, schema)).ToArray()
         };
         return result;
     }
 
-    protected virtual AnyFilter ToAnyFilter(OrFilter orFilter)
+    protected virtual IApiFilter ToAnyFilter(OrFilter orFilter, Schema schema)
     {
         var result = new AnyFilter
         {
-            Value = orFilter.ChildFilters.Select(ToFilter).ToArray()
+            Value = orFilter.ChildFilters.Select(searchFilter => ToFilter(searchFilter, schema)).ToArray()
         };
         return result;
     }
 
-    protected virtual NoneFilter ToNoneFilter(NotFilter notFilter)
+    protected virtual IApiFilter ToNoneFilter(NotFilter notFilter, Schema schema)
     {
         var result = new NoneFilter
         {
-            Value = new []{ ToFilter(notFilter.ChildFilter) }
+            Value = new []{ ToFilter(notFilter.ChildFilter, schema) }
+        };
+        return result;
+    }
+
+    protected virtual IApiFilter ToFilterOrNothingFilter(Func<IApiFilter> getFilter, Schema schema, string requestedFieldName, FieldType? allowedFieldType = null)
+    {
+        var isAllowedField = schema.Fields.Any(field =>
+        {
+            var (fieldName, fieldType) = field;
+            return fieldName == requestedFieldName && (allowedFieldType == null || allowedFieldType == fieldType);
+        });
+        var result = isAllowedField ? getFilter() : GetNothingFilter();
+        return result;
+    }
+
+    protected virtual ValueFilter<string> GetNothingFilter()
+    {
+        var result = new ValueFilter<string>
+        {
+            FieldName = ModuleConstants.Api.FieldNames.Id,
+            Value = new[] { string.Empty }
         };
         return result;
     }
