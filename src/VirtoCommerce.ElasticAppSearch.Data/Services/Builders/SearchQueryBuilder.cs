@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
@@ -10,7 +10,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
-using IFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
+using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
@@ -29,7 +29,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     {
         if (request.IsFuzzySearch)
         {
-            throw new NotSupportedException("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
+            Debug.WriteLine("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
         }
 
         var searchQuery = new SearchQuery
@@ -75,7 +75,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
-    protected virtual IFilters GetFilters(IFilter filter, Schema schema)
+    protected virtual IFilters GetFilters(ISearchFilter filter, Schema schema)
     {
         return _searchFiltersBuilder.ToFilters(filter, schema);
     }

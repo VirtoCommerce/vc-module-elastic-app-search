@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Moq;
-using Newtonsoft.Json;
-using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
-using VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 using VirtoCommerce.SearchModule.Core.Model;
-using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests
 {

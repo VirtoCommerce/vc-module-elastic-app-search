@@ -12,7 +12,6 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFil
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 using IApiFilter = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.IFilter;
