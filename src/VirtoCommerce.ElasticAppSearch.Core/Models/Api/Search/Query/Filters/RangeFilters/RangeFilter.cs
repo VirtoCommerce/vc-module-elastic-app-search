@@ -15,8 +15,8 @@ public abstract record RangeFilter<TValue> : Filter<RangeFilterValue<TValue>>
 
     protected RangeFilter(
         string fieldName,
-        RangeFilterBound<TValue> from, Func<TValue, TValue> fromExcludeConverter,
-        RangeFilterBound<TValue> to, Func<TValue, TValue> toIncludeConverter)
+        RangeFilterBound<TValue> from, Func<TValue?, TValue?> fromExcludeConverter,
+        RangeFilterBound<TValue> to, Func<TValue?, TValue?> toIncludeConverter)
     {
         FieldName = fieldName;
         Value = new RangeFilterValue<TValue>

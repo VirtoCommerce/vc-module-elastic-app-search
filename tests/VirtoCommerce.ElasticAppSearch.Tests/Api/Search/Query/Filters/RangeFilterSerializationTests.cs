@@ -14,19 +14,6 @@ public class RangeFilterSerializationTests: SerializationTestsBase
         new object[] { new SearchQuery
         {
             Query = "test",
-            Filters = new DecimalRangeFilter
-            {
-                FieldName = "field",
-                Value = new RangeFilterValue<decimal>
-                {
-                    From = 0.1m,
-                    To = 10.0m
-                }
-            }
-        }, "Decimal.json" },
-        new object[] { new SearchQuery
-        {
-            Query = "test",
             Filters = new NumberRangeFilter
             {
                 FieldName = "field",

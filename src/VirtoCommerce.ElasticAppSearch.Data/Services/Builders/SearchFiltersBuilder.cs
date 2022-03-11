@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
@@ -88,12 +89,43 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
 
     protected virtual IApiFilter ToValueFilter(TermFilter termFilter, Schema schema)
     {
-        var fieldName = termFilter.FieldName;
-        var result = ToFilterOrNothingFilter(() => new ValueFilter<string>
+        var fieldName = _fieldNameConverter.ToProviderFieldName(termFilter.FieldName);
+        var fieldType = schema.Fields.ContainsKey(fieldName) ? (FieldType?)schema.Fields[fieldName] : null;
+
+        IApiFilter result;
+        switch (fieldType)
         {
-            FieldName = _fieldNameConverter.ToProviderFieldName(fieldName),
-            Value = termFilter.Values.ToArray()
-        }, schema, fieldName);
+
+            case null:
+                result = GetNothingFilter();
+                break;
+            case FieldType.Text:
+                result = new ValueFilter<string>
+                {
+                    FieldName = fieldName,
+                    Value = termFilter.Values.ToArray()
+                };
+                break;
+            case FieldType.Number:
+                result = new ValueFilter<double>
+                {
+                    FieldName = fieldName,
+                    Value = termFilter.Values.Select(value => double.Parse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)).ToArray()
+                };
+                break;
+            case FieldType.Date:
+                result = new ValueFilter<DateTime>
+                {
+                    FieldName = fieldName,
+                    Value = termFilter.Values.Select(value => DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal)).ToArray()
+                };
+                break;
+            default:
+                Debug.WriteLine("Elastic App Search supports value filter for fields with text, number and date field types only.");
+                result = GetNothingFilter();
+                break;
+        }
+
         return result;
     }
 
@@ -112,41 +144,64 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
     {
         var fieldType = schema.Fields.ContainsKey(fieldName) ? (FieldType?)schema.Fields[fieldName] : null;
 
+        IApiFilter result;
         switch (fieldType)
         {
+            case null:
+                result = GetNothingFilter();
+                break;
             case FieldType.Number:
                 var isNumberRangeFilter = RangeFilterExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
                     out NumberRangeFilter doubleRangeFilter);
-                return isNumberRangeFilter ? doubleRangeFilter : GetNothingFilter();
+                result = isNumberRangeFilter ? doubleRangeFilter : GetNothingFilter();
+                break;
             case FieldType.Date:
                 var isDateTimeRangeFilter = RangeFilterExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
                     out DateTimeRangeFilter dateTimeRangeFilter);
-                return isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
-            case null:
-                return GetNothingFilter();
+                result = isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
+                break;
             default:
                 Debug.WriteLine("Elastic App Search supports number and date ranges only.");
-                return GetNothingFilter();
+                result = GetNothingFilter();
+                break;
         }
+        return result;
     }
 
     protected virtual IApiFilter ToGeoFilter(GeoDistanceFilter geoDistanceFilter, Schema schema)
     {
-        var fieldName = geoDistanceFilter.FieldName;
-        var result = ToFilterOrNothingFilter(() => new GeoFilter
+        var fieldName = _fieldNameConverter.ToProviderFieldName(geoDistanceFilter.FieldName);
+        var fieldType = schema.Fields.ContainsKey(fieldName) ? (FieldType?)schema.Fields[fieldName] : null;
+
+        IApiFilter result;
+        switch (fieldType)
         {
-            FieldName = _fieldNameConverter.ToProviderFieldName(fieldName),
-            Value = new GeoFilterValue
-            {
-                Center = new ApiGeoPoint(geoDistanceFilter.Location),
-                Distance = geoDistanceFilter.Distance,
-                Unit = MeasurementUnit.Km
-            }
-        }, schema, fieldName, FieldType.Geolocation);
+
+            case null:
+                result = GetNothingFilter();
+                break;
+            case FieldType.Geolocation:
+                result = new GeoFilter
+                {
+                    FieldName = fieldName,
+                    Value = new GeoFilterValue
+                    {
+                        Center = new ApiGeoPoint(geoDistanceFilter.Location),
+                        Distance = geoDistanceFilter.Distance,
+                        Unit = MeasurementUnit.Km
+                    }
+                };
+                break;
+            default:
+                Debug.WriteLine("Elastic App Search supports geo filter for fields with geolocation field type only.");
+                result = GetNothingFilter();
+                break;
+        }
+
         return result;
     }
 
@@ -174,17 +229,6 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
         {
             Value = new []{ ToFilter(notFilter.ChildFilter, schema) }
         };
-        return result;
-    }
-
-    protected virtual IApiFilter ToFilterOrNothingFilter(Func<IApiFilter> getFilter, Schema schema, string requestedFieldName, FieldType? allowedFieldType = null)
-    {
-        var isAllowedField = schema.Fields.Any(field =>
-        {
-            var (fieldName, fieldType) = field;
-            return fieldName == requestedFieldName && (allowedFieldType == null || allowedFieldType == fieldType);
-        });
-        var result = isAllowedField ? getFilter() : GetNothingFilter();
         return result;
     }
 

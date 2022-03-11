@@ -9,7 +9,7 @@ public record NumberRangeFilter : RangeFilter<double>
     }
 
     public NumberRangeFilter(string fieldName, RangeFilterBound<double> from, RangeFilterBound<double> to):
-        base(fieldName, from, fromValue => fromValue.GetNearestLower(), to, toValue => toValue.GetNearestHigher())
+        base(fieldName, from, fromValue => fromValue?.GetNearestLower(), to, toValue => toValue?.GetNearestHigher())
     {
     }
 }

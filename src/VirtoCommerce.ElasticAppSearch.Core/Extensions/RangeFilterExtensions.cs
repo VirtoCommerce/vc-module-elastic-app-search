@@ -5,7 +5,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Extensions;
 
 public static class RangeFilterExtensions
 {
-    private delegate bool TryParseDelegate<TValue>(bool include, string value, out RangeFilterBound<TValue> result);
+    private delegate bool TryParseDelegate<TValue>(bool include, string value, out RangeFilterBound<TValue> result) where TValue: struct;
     
     public static bool TryParse(string fieldName, bool includeFrom, string fromValue, bool includeTo, string toValue, out NumberRangeFilter result)
     {
@@ -28,6 +28,7 @@ public static class RangeFilterExtensions
         bool includeTo, string toValue, TryParseDelegate<TValue> tryParseFrom,
         Func< RangeFilterBound<TValue>, RangeFilterBound<TValue>, TFilter> filterFactory, out TFilter result)
         where TFilter: class
+        where TValue: struct
     {
         var isValidFromBound = tryParseFrom(includeFrom, fromValue, out var from);
         var isValidToBound = tryParseTo(includeTo, toValue, out var to);
