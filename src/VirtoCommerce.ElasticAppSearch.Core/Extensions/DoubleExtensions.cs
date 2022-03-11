@@ -19,7 +19,7 @@ public static class DoubleExtensions
             throw new ArgumentException("Can't create double lower than minimum value", nameof(value));
         }
 
-        return GetNearest(value, (sign, significand) =>
+        var result = GetNearest(value, (sign, significand) =>
         {
             if (significand == 0)
             {
@@ -30,6 +30,8 @@ public static class DoubleExtensions
 
             return (sign, significand);
         });
+
+        return result;
     }
 
     public static double GetNearestHigher(this double value)
@@ -39,7 +41,7 @@ public static class DoubleExtensions
             throw new ArgumentException("Can't create double higher than maximum value", nameof(value));
         }
 
-        return GetNearest(value, (sign, significand) =>
+        var result = GetNearest(value, (sign, significand) =>
         {
             significand = sign ? significand - 1 : significand + 1;
             
@@ -50,6 +52,8 @@ public static class DoubleExtensions
 
             return (sign, significand);
         });
+
+        return result;
     }
 
     private static double GetNearest(double value, Func<bool, ulong,(bool, ulong)> significandConverter)
@@ -60,21 +64,25 @@ public static class DoubleExtensions
         var sign = GetSign(bits);
         (sign, significand) = significandConverter(sign, significand);
         bits = ((sign ? 1ul : 0ul) << SignShift) + ((ulong)exponent << ExponentShift) + significand;
-        return BitConverter.UInt64BitsToDouble(bits);
+        var result = BitConverter.UInt64BitsToDouble(bits);
+        return result;
     }
 
     private static bool GetSign(ulong bits)
     {
-        return (bits & SignMask) >> SignShift != 0;
+        var result = (bits & SignMask) >> SignShift != 0;
+        return result;
     }
 
     private static int GetExponent(ulong bits)
     {
-        return (int)((bits & ExponentMask) >> ExponentShift);
+        var result = (int)((bits & ExponentMask) >> ExponentShift);
+        return result;
     }
 
     private static ulong GetSignificand(ulong bits)
     {
-        return bits & SignificandMask;
+        var result = bits & SignificandMask;
+        return result;
     }
 }

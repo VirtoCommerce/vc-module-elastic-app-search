@@ -30,7 +30,8 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
 
     public virtual IFilters ToFilters(ISearchFilter filter, Schema schema)
     {
-        return ToFilter(filter, schema);
+        var result = ToFilter(filter, schema);
+        return result;
     }
 
     protected virtual IApiFilter ToFilter(ISearchFilter searchFilter, Schema schema)
@@ -98,11 +99,10 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
 
     protected virtual IApiFilter ToRangeFilter(RangeFilter rangeFilter, Schema schema)
     {
+        var fieldName = _fieldNameConverter.ToProviderFieldName(rangeFilter.FieldName);
         var result = new AllFilter
         {
-            Value = rangeFilter.Values
-                .Select(rangeFilterValue => ToRangeFilter(_fieldNameConverter.ToProviderFieldName(rangeFilter.FieldName), rangeFilterValue, schema))
-                .ToArray()
+            Value = rangeFilter.Values.Select(rangeFilterValue => ToRangeFilter(fieldName, rangeFilterValue, schema)).ToArray()
         };
 
         return result;
@@ -110,38 +110,24 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
 
     protected virtual IApiFilter ToRangeFilter(string fieldName, RangeFilterValue rangeFilterValue, Schema schema)
     {
-        var fieldType = schema.Fields.FirstOrDefault(field => field.Key == fieldName).Value;
+        var fieldType = schema.Fields.ContainsKey(fieldName) ? (FieldType?)schema.Fields[fieldName] : null;
 
         switch (fieldType)
         {
             case FieldType.Number:
-                var isDecimalRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                var isNumberRangeFilter = RangeFilterExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
-                    out DecimalRangeFilter decimalRangeFilter);
-
-                if (isDecimalRangeFilter)
-                {
-                    return decimalRangeFilter;
-                }
-
-                var isDoubleRangeFilter = RangeFilterExtensions.TryParse(fieldName,
-                    rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
-                    rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
-                    out DoubleRangeFilter doubleRangeFilter);
-
-                if (isDoubleRangeFilter)
-                {
-                    return doubleRangeFilter;
-                }
-
-                return GetNothingFilter();
+                    out NumberRangeFilter doubleRangeFilter);
+                return isNumberRangeFilter ? doubleRangeFilter : GetNothingFilter();
             case FieldType.Date:
                 var isDateTimeRangeFilter = RangeFilterExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
                     out DateTimeRangeFilter dateTimeRangeFilter);
                 return isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
+            case null:
+                return GetNothingFilter();
             default:
                 Debug.WriteLine("Elastic App Search supports number and date ranges only.");
                 return GetNothingFilter();

@@ -27,7 +27,7 @@ public class GeoFilterSerializationTests: SerializationTestsBase
         new object[] { new SearchQuery
         {
             Query = "test",
-            Filters = new DoubleRangeFilter
+            Filters = new NumberRangeFilter
             {
                 FieldName = "field",
                 Value = new RangeFilterValue<double>
