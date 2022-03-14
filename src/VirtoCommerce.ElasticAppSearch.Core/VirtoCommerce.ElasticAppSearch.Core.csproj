@@ -17,6 +17,7 @@
     <Folder Include="Events\" />
     <Folder Include="Models\Api\Search\Query\Filters\GeoFilter\" />
     <Folder Include="Models\Api\Search\Query\Filters\CombiningFilters\" />
+    <Folder Include="Models\Api\Search\Query\SearchFields\" />
     <Folder Include="Notifications\" />
   </ItemGroup>
 

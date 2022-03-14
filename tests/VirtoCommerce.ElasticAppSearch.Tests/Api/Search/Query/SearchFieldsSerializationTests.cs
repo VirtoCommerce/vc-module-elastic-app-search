@@ -14,7 +14,7 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                SearchFields = new SearchFields()
+                SearchFields = new Dictionary<string, SearchFieldValue>()
             },
             @"..\Default.json"
         },
@@ -23,13 +23,13 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                SearchFields = new SearchFields(new Dictionary<string, SearchFieldValue>
+                SearchFields = new Dictionary<string, SearchFieldValue>
                 {
                     {
                         "test",
                         new SearchFieldValue()
                     }
-                })
+                }
             },
             "WithoutWeight.json"
         },
@@ -38,13 +38,13 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                SearchFields = new SearchFields(new Dictionary<string, SearchFieldValue>
+                SearchFields = new Dictionary<string, SearchFieldValue>
                 {
                     {
                         "test",
                         new SearchFieldValue { Weight = 1 }
                     }
-                })
+                }
             },
             "WithWeight.json"
         },
@@ -64,10 +64,10 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
         Serialize_InvalidData_ThrowsException(new SearchQuery
         {
             Query = "test",
-            SearchFields = new SearchFields(new Dictionary<string, SearchFieldValue>
+            SearchFields = new Dictionary<string, SearchFieldValue>
             {
                 { "test", null }
-            })
+            }
         });
     }
 

@@ -63,14 +63,12 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
-    protected virtual SearchFields GetSearchFields(IEnumerable<string> searchFields)
+    protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
     {
-        var result = searchFields != null
-            ? new SearchFields(searchFields.ToDictionary(
-                searchField => _fieldNameConverter.ToProviderFieldName(searchField),
-                _ => new SearchFieldValue()
-            ))
-            : null;
+        var result = searchFields?.ToDictionary(
+            searchField => _fieldNameConverter.ToProviderFieldName(searchField),
+            _ => new SearchFieldValue()
+        );
 
         return result;
     }
