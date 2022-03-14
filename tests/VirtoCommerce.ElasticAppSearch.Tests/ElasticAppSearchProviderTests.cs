@@ -33,7 +33,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 documentConverter.Object,
                 searchQueryBuilder.Object,
                 searchResponseBuilder.Object
-                );
+            );
 
             var searchRequest = new SearchRequest
             {
@@ -41,7 +41,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             };
 
             // Act
-            var response = await appSearchProvider.SearchAsync("testDocumentType", searchRequest);
+            await appSearchProvider.SearchAsync("testDocumentType", searchRequest);
 
             // Assert
             appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>()), rawQueryTimesCall);
