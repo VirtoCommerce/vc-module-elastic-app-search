@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -50,15 +51,15 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     protected virtual Sort GetSorting(IEnumerable<SortingField> sortingFields)
     {
-        var result = sortingFields != null
-            ? new Sort(sortingFields
-                .Select(sortingField => new Field<SortOrder>
-                {
-                    FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
-                    Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
-                })
-                .ToArray())
-            : null;
+        var result = new Sort(
+            (sortingFields ?? Array.Empty<SortingField>())
+            .Select(sortingField => new Field<SortOrder>
+            {
+                FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
+                Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
+            })
+            .ToArray()
+        );
 
         return result;
     }

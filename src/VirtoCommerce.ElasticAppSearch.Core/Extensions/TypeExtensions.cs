@@ -7,10 +7,16 @@ public static class TypeExtensions
 {
     public static Type GetEnumerableElementType(this Type type)
     {
-        return type.HasElementType
-            ? type.GetElementType()
-            : type.IsGenericType
-                ? type.GenericTypeArguments.First()
-                : typeof(object);
+        if (type.HasElementType)
+        {
+            return type.GetElementType();
+        }
+
+        if (type.IsGenericType)
+        {
+            return type.GenericTypeArguments.First();
+        }
+
+        return typeof(object);
     }
 }
