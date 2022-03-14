@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
@@ -10,40 +11,52 @@ public class SortSerializationTests: SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {
-        new object[] { new SearchQuery
+        new object[]
         {
-            Query = "test",
-            Sort = new Sort()
-        }, @"..\Default.json" },
-        new object[] { new SearchQuery
-        {
-            Query = "test",
-            Sort = new Sort(new []
+            new SearchQuery
             {
-                new Field<SortOrder>
-                {
-                    FieldName = "test",
-                    Value = SortOrder.Asc
-                },
-            })
-        }, "Single.json" },
-        new object[] { new SearchQuery
+                Query = "test",
+                Sort = new Sort()
+            },
+            Path.Combine("..", "Default.json")
+        },
+        new object[]
         {
-            Query = "test",
-            Sort = new Sort(new []
+            new SearchQuery
             {
-                new Field<SortOrder>
+                Query = "test",
+                Sort = new Sort(new[]
                 {
-                    FieldName = "test1",
-                    Value = SortOrder.Asc
-                },
-                new Field<SortOrder>
+                    new Field<SortOrder>
+                    {
+                        FieldName = "test",
+                        Value = SortOrder.Asc
+                    },
+                })
+            },
+            "Single.json"
+        },
+        new object[]
+        {
+            new SearchQuery
+            {
+                Query = "test",
+                Sort = new Sort(new[]
                 {
-                    FieldName = "test2",
-                    Value = SortOrder.Desc
-                }
-            })
-        }, "Multiple.json" },
+                    new Field<SortOrder>
+                    {
+                        FieldName = "test1",
+                        Value = SortOrder.Asc
+                    },
+                    new Field<SortOrder>
+                    {
+                        FieldName = "test2",
+                        Value = SortOrder.Desc
+                    }
+                })
+            },
+            "Multiple.json"
+        },
     };
 
     [Theory]
@@ -55,6 +68,6 @@ public class SortSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Sort";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Sort");
     }
 }

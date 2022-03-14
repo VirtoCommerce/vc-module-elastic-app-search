@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using Xunit;
@@ -48,6 +49,6 @@ public class RangeFilterSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Filters\Single\Range";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Filters", "Single", "Range");
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.CombiningFilters;
@@ -31,7 +32,7 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
                 Query = "test",
                 Filters = new AllFilter { Value = Filters }
             },
-            @"Single\Combining\All.json"
+            Path.Combine("Single", "Combining", "All.json")
         },
         new object[]
         {
@@ -40,7 +41,7 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
                 Query = "test",
                 Filters = new AnyFilter { Value = Filters }
             },
-            @"Single\Combining\Any.json"
+            Path.Combine("Single", "Combining", "Any.json")
         },
         new object[]
         {
@@ -49,7 +50,7 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
                 Query = "test",
                 Filters = new NoneFilter { Value = Filters }
             },
-            @"Single\Combining\None.json"
+            Path.Combine("Single", "Combining", "None.json")
         },
         new object[]
         {
@@ -63,7 +64,7 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
                     None = Filters
                 }
             },
-            @"Multiple\Combining\Every.json"
+            Path.Combine("Multiple", "Combining", "Every.json")
         },
         new object[]
         {
@@ -83,7 +84,7 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
                     }
                 }
             },
-            @"Multiple\Combining\Nested.json"
+            Path.Combine("Multiple", "Combining", "Nested.json")
         }
     };
 
@@ -96,6 +97,6 @@ public class CombiningFiltersSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Filters";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Filters");
     }
 }

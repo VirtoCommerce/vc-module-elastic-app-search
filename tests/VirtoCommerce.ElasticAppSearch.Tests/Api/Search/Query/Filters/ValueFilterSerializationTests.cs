@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using Xunit;
@@ -48,6 +49,6 @@ public class ValueFilterSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Filters\Single\Value";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Filters", "Single", "Value");
     }
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Moq;
-using Newtonsoft.Json;
-using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;

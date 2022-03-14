@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
 using Xunit;
@@ -16,7 +17,7 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
                 Query = "test",
                 SearchFields = new Dictionary<string, SearchFieldValue>()
             },
-            @"..\Default.json"
+            Path.Combine("..", "Default.json")
         },
         new object[]
         {
@@ -73,6 +74,6 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\SearchFields";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "SearchFields");
     }
 }
