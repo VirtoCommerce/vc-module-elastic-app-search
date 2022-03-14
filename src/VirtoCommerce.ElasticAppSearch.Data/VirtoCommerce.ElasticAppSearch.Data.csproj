@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\..\.sonarlint\virtocommerce_vc-module-elastic-app-search\CSharp\SonarLint.xml" Link="SonarLint.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Core\VirtoCommerce.ElasticAppSearch.Core.csproj" />
   </ItemGroup>
 
