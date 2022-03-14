@@ -1,8 +1,11 @@
 using System;
 using Newtonsoft.Json;
 
+// _isReading, _isWriting fields are thread-static and type-specific,
+// so warnings is not
 // ReSharper disable StaticMemberInGenericType
 #pragma warning disable S2743 // Static fields should not be used in generic types
+#pragma warning disable S2696 // Instance members should not write to "static" fields
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
