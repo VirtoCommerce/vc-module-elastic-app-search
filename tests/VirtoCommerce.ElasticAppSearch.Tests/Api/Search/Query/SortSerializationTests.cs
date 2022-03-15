@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
@@ -15,7 +16,7 @@ public class SortSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                Sort = new Field<SortOrder>[] {}
+                Sort = Array.Empty<Field<SortOrder>>()
             },
             Path.Combine("..", "Default.json")
         },

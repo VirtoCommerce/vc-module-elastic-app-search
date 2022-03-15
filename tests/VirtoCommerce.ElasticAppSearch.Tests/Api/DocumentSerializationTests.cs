@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
@@ -9,7 +10,7 @@ public class DocumentSerializationTests: SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {
-        new object[] { new Document[] {}, "Empty.json" },
+        new object[] { Array.Empty<Document>(), "Empty.json" },
         new object[] { new Document[] { new() { Id = "test" } }, "Id.json" },
         new object[]
         {

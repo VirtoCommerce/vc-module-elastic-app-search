@@ -17,7 +17,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         public static IEnumerable<object[]> SortData => new[]
         {
             new object[] { null, null },
-            new object[] { Array.Empty<SortingField>(), new Field<SortOrder>[] {} },
+            new object[] { Array.Empty<SortingField>(), Array.Empty<Field<SortOrder>>() },
             new object[]
             {
                 new SortingField[] { new("test") },
