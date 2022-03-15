@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFilter;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using Xunit;
 
@@ -15,29 +16,40 @@ public class GeoFilterSerializationTests: SerializationTestsBase
         new object[] { new SearchQuery
         {
             Query = "test",
-            Filters = new NumberRangeFilter
+            Filters = new GeoFilter
             {
                 FieldName = "field",
-                Value = new RangeFilterValue<double>
+                Value = new GeoFilterValue
                 {
-                    From = 0.1d,
-                    To = 10.0d
+                    Center = new GeoPoint
+                    {
+                        Latitude = 11.3501959,
+                        Longitude = 142.1995228
+                    },
+                    Unit = MeasurementUnit.Km,
+                    Distance = 100
                 }
             }
-        }, "Double.json" },
+        }, "Distance.json" },
         new object[] { new SearchQuery
         {
             Query = "test",
-            Filters = new DateTimeRangeFilter
+            Filters = new GeoFilter
             {
                 FieldName = "field",
-                Value = new RangeFilterValue<DateTime>
+                Value = new GeoFilterValue
                 {
-                    From = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                    To = new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc)
+                    Center = new GeoPoint
+                    {
+                        Latitude = 11.3501959,
+                        Longitude = 142.1995228
+                    },
+                    Unit = MeasurementUnit.Km,
+                    From = 0,
+                    To = 100
                 }
             }
-        }, "Date.json" },
+        }, "FromTo.json" },
     };
 
     [Theory]
@@ -49,6 +61,6 @@ public class GeoFilterSerializationTests: SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Filters", "Single", "Range");
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Filters", "Single", "Geo");
     }
 }

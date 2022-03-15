@@ -2,7 +2,6 @@ using System.IO;
 using FluentAssertions;
 using Newtonsoft.Json;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Tests.Extensions;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api;
@@ -12,7 +11,7 @@ public class SerializationTestsBase
     public virtual void Serialize_Entity_CorrectlySerializes<T>(T actual, string expectedJsonFileName)
     {
         // Arrange
-        var expectedJson = JsonHelper.LoadFrom(GetJsonPath(expectedJsonFileName)).ReplaceLineEndings(string.Empty).ReplaceWhitespaces(string.Empty);
+        var expectedJson = JsonHelper.LoadFrom(GetJsonPath(expectedJsonFileName));
 
         // Act
         var actualJson = JsonConvert.SerializeObject(actual, ModuleConstants.Api.JsonSerializerSettings);

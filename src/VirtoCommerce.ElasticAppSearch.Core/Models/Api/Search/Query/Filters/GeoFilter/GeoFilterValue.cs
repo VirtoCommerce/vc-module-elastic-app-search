@@ -10,6 +10,7 @@ public record GeoFilterValue: RangeFilterValue<double>
 
     [JsonRequired]
     public MeasurementUnit Unit { get; init; }
-    
-    public double Distance { get; init; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public double? Distance { get; init; }
 };
