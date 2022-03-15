@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 public record SearchFieldValue
 {

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,8 +5,6 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -49,28 +46,20 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return searchQuery;
     }
 
-    protected virtual Sort GetSorting(IEnumerable<SortingField> sortingFields)
+    protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields)
     {
-        var result = sortingFields switch
+        var result = sortingFields?.Select(sortingField => new Field<SortOrder>
         {
-            null => null,
-            _ => new Sort(sortingFields.Select(sortingField => new Field<SortOrder>
-            {
-                FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
-                Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
-            }).ToArray())
-        };
+            FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
+            Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
+        }).ToArray();
 
         return result;
     }
 
     protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
     {
-        var result = searchFields switch
-        {
-            null => null,
-            _ => searchFields.ToDictionary(searchField => _fieldNameConverter.ToProviderFieldName(searchField), _ => new SearchFieldValue())
-        };
+        var result = searchFields?.ToDictionary(searchField => _fieldNameConverter.ToProviderFieldName(searchField), _ => new SearchFieldValue());
 
         return result;
     }

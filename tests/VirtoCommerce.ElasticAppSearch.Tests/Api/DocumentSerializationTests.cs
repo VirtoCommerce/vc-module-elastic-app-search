@@ -9,11 +9,11 @@ public class DocumentSerializationTests: SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {
-        new object[] { new Documents(), "Empty.json" },
-        new object[] { new Documents { new() { Id = "test" } }, "Id.json" },
+        new object[] { new Document[] {}, "Empty.json" },
+        new object[] { new Document[] { new() { Id = "test" } }, "Id.json" },
         new object[]
         {
-            new Documents
+            new Document []
             {
                 new()
                 {
@@ -39,7 +39,13 @@ public class DocumentSerializationTests: SerializationTestsBase
     [Fact]
     public void Serialize_WithoutRequiredFields_ThrowsException()
     {
-        Serialize_InvalidData_ThrowsException(new Documents { new() });
+        Serialize_InvalidData_ThrowsException(new Document[] { new() });
+    }
+
+    [Fact]
+    public void Serialize_NullElements_ThrowsException()
+    {
+        Serialize_InvalidData_ThrowsException(new Document[] { null });
     }
 
     [Theory]

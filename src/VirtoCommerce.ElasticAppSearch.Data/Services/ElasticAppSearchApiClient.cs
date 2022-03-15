@@ -11,6 +11,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
+using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
@@ -56,7 +57,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region Documents
 
-    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Documents documents)
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
 

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query;

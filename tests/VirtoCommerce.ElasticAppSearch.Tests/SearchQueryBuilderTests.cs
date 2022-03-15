@@ -4,8 +4,6 @@ using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.SearchFields;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sort;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
@@ -19,35 +17,35 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         public static IEnumerable<object[]> SortData => new[]
         {
             new object[] { null, null },
-            new object[] { Array.Empty<SortingField>(), new Sort() },
+            new object[] { Array.Empty<SortingField>(), new Field<SortOrder>[] {} },
             new object[]
             {
                 new SortingField[] { new("test") },
-                new Sort(new[]
+                new Field<SortOrder>[]
                 {
-                    new Field<SortOrder>
+                    new()
                     {
                         FieldName = "test",
                         Value = SortOrder.Asc
                     }
-                })
+                }
             },
             new object[]
             {
                 new SortingField[] { new("test1"), new("test2", true) },
-                new Sort(new[]
+                new Field<SortOrder>[]
                 {
-                    new Field<SortOrder>
+                    new()
                     {
                         FieldName = "test1",
                         Value = SortOrder.Asc
                     },
-                    new Field<SortOrder>
+                    new()
                     {
                         FieldName = "test2",
                         Value = SortOrder.Desc
                     }
-                })
+                }
             }
         };
 
