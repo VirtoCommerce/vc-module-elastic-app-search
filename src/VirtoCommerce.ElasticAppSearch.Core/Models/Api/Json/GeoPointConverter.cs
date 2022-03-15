@@ -8,13 +8,7 @@ public class GeoPointConverter: JsonConverter<GeoPoint>
     public override GeoPoint ReadJson(JsonReader reader, Type objectType, GeoPoint existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         var value = serializer.Deserialize<string>(reader);
-
-        GeoPoint result = null;
-        if (value != null)
-        {
-            result = new GeoPoint(SearchModule.Core.Model.GeoPoint.Parse(value));
-        }
-
+        var result = value != null ? new GeoPoint(SearchModule.Core.Model.GeoPoint.Parse(value)) : null;
         return result;
     }
 
