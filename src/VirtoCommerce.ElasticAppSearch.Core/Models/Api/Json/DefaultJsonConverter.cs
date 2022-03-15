@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 
 // _isReading, _isWriting fields are thread-static and type-specific,
-// so warnings is not
+// so warnings is false-positive because undesirable behavior is correct behavior in this case
 // ReSharper disable StaticMemberInGenericType
 #pragma warning disable S2743 // Static fields should not be used in generic types
 #pragma warning disable S2696 // Instance members should not write to "static" fields
