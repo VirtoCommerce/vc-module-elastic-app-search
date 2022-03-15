@@ -7,7 +7,6 @@
   <PropertyGroup>
       <!-- Project is not a test project -->
       <SonarQubeTestProject>false</SonarQubeTestProject>
-      <CodeAnalysisRuleSet>..\..\.sonarlint\virtocommerce_vc-module-elastic-app-searchcsharp.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,8 +15,6 @@
 
   <ItemGroup>
     <Folder Include="Events\" />
-    <Folder Include="Models\Api\Search\Query\Filters\GeoFilter\" />
-    <Folder Include="Models\Api\Search\Query\Filters\CombiningFilters\" />
     <Folder Include="Notifications\" />
   </ItemGroup>
 

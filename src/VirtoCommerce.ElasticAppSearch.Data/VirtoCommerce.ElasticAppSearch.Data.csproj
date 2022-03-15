@@ -7,7 +7,6 @@
   <PropertyGroup>
       <!-- Project is not a test project -->
       <SonarQubeTestProject>false</SonarQubeTestProject>
-      <CodeAnalysisRuleSet>..\..\.sonarlint\virtocommerce_vc-module-elastic-app-searchcsharp.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
