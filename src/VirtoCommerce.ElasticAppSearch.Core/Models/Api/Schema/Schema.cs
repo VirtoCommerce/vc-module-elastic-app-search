@@ -6,7 +6,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 
 [JsonConverter(typeof(DocumentConverter<Schema, FieldType>))]
-public record Schema: Document<FieldType>
+public record Schema: DocumentBase<FieldType>
 {
     [JsonIgnore]
     public override FieldType Id => FieldType.Text;

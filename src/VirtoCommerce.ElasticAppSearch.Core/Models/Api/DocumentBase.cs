@@ -6,7 +6,7 @@ using Newtonsoft.Json.Serialization;
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 
 [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-public record Document<TFieldValue>
+public abstract record DocumentBase<TFieldValue>
 {
     [JsonRequired]
     [JsonProperty(ModuleConstants.Api.FieldNames.Id)]

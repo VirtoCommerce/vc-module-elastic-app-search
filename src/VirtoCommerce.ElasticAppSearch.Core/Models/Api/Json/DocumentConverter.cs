@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
 public class DocumentConverter<TDocument, TFieldValue>: DefaultJsonConverter<TDocument>
-    where TDocument: Document<TFieldValue>
+    where TDocument: DocumentBase<TFieldValue>
 {
     public override TDocument ReadJson(JsonReader reader, Type objectType, TDocument existingValue, bool hasExistingValue, JsonSerializer serializer)
     {

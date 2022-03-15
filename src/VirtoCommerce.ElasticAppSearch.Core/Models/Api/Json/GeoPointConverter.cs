@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 

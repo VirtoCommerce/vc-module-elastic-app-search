@@ -77,7 +77,7 @@ public class DocumentConverter: IDocumentConverter
         return result;
     }
 
-    public SearchDocument ToSearchDocument(Core.Models.Api.Search.Result.Document searchResultDocument)
+    public SearchDocument ToSearchDocument(Core.Models.Api.Search.Result.SearchResultDocument searchResultDocument)
     {
         var searchDocument = new SearchDocument { Id = searchResultDocument.Id.Raw as string };
         foreach (var (providerFieldName, value) in searchResultDocument.Fields)

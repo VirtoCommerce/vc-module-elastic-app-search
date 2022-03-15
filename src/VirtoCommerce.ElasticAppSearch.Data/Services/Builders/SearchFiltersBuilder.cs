@@ -6,6 +6,7 @@ using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.CombiningFilters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFilter;
@@ -15,7 +16,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 using IApiFilter = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.IFilter;
-using ApiGeoPoint = VirtoCommerce.ElasticAppSearch.Core.Models.Api.GeoPoint;
+using ApiGeoPoint = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.GeoPoint;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 

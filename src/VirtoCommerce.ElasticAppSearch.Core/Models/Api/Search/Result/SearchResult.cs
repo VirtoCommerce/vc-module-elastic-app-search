@@ -4,5 +4,5 @@ public record SearchResult
 {
     public Metadata Meta { get; init; }
     
-    public Document[] Results { get; init; }
+    public SearchResultDocument[] Results { get; init; }
 }
