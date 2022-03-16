@@ -1,0 +1,13 @@
+{
+  "query": "test",
+  "filters": {
+    "none": [
+      {
+        "field1": [ "test1" ]
+      },
+      {
+        "field2": [ "test2" ]
+      }
+    ]
+  }
+}

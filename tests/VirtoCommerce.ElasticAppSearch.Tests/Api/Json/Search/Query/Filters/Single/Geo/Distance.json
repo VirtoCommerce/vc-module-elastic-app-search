@@ -1,0 +1,10 @@
+{
+  "query": "test",
+  "filters": {
+    "field": {
+      "center": "11.3501959, 142.1995228",
+      "unit": "km",
+      "distance": 100.0
+    }
+  }
+}
