@@ -56,20 +56,6 @@ public class SearchFieldsSerializationTests: SerializationTestsBase
     {
         base.Serialize_Entity_CorrectlySerializes(actual, expectedJsonFileName);
     }
-    
-
-    [Fact(Skip = "Need to find the way to prevent pass null into the SearchFields")]
-    public void Serialize_NullSearchFieldValue_ThrowsException()
-    {
-        Serialize_InvalidData_ThrowsException(new SearchQuery
-        {
-            Query = "test",
-            SearchFields = new Dictionary<string, SearchFieldValue>
-            {
-                { "test", null }
-            }
-        });
-    }
 
     protected override string GetJsonPath()
     {
