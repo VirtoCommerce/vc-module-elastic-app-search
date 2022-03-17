@@ -40,7 +40,8 @@ public class DocumentConverter: IDocumentConverter
 
             if (fieldName.Length > ModuleConstants.Api.FieldNames.MaximumLength)
             {
-                Debug.WriteLine("Elastic App Search supports up to 64 symbols in document field name.");
+                Debug.WriteLine($"Elastic App Search supports up to 64 symbols in document field name: {fieldName}");
+
             }
             else
             {
