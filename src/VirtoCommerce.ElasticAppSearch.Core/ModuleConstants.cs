@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ElasticAppSearch.Core;
@@ -11,6 +15,17 @@ public static class ModuleConstants
 
     public static class Api
     {
+        public static readonly JsonSerializerSettings JsonSerializerSettings = new()
+        {
+            // Elastic App Search API use camelCase in JSON
+            ContractResolver = new CustomContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() },
+            Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) },
+
+            // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'sszzz",
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+        };
+
         public static class Languages
         {
             public const string BrazilianPortuguese = "pt-br";
@@ -32,6 +47,8 @@ public static class ModuleConstants
 
         public static class FieldNames
         {
+            public const string Id = "id";
+
             public static readonly string[] Reserved = { "external_id", "engine_id", "highlight", "or", "and", "not", "any", "all", "none" };
 
             public const string ReservedFieldNamesPrefix = "field_";
@@ -44,6 +61,11 @@ public static class ModuleConstants
             });
 
             public const int MaximumLength = 64;
+        }
+
+        public static class Search
+        {
+            public const int MaxDepth = 5;
         }
     }
 

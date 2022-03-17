@@ -1,19 +1,17 @@
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
+using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
@@ -22,28 +20,20 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private const string EnginesEndpoint = "engines";
 
     private readonly HttpClient _httpClient;
-    private static readonly JsonSerializerSettings JsonSerializerSettings = new()
-    {
-        // Elastic App Search API use camelCase in JSON
-        ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() },
-        Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) },
-
-        // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 specification support)
-        DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
-        DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-    };
 
     public ElasticAppSearchApiClient(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
     }
 
+    #region Engine
+
     public async Task<bool> GetEngineExistsAsync(string name)
     {
         var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
         if (response.StatusCode != HttpStatusCode.NotFound)
         {
-            await response.EnsureSuccessStatusCodeAsync<Result>(JsonSerializerSettings);
+            await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
         }
 
         return response.StatusCode != HttpStatusCode.NotFound;
@@ -56,58 +46,88 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
             Name = name,
             Type = EngineType.Default,
             Language = language
-        }, JsonSerializerSettings);
+        }, ModuleConstants.Api.JsonSerializerSettings);
 
-        await response.EnsureSuccessStatusCodeAsync<Result>(JsonSerializerSettings);
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<Engine>(JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
-    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync<T>(string engineName, T[] documents)
+    #endregion
+
+    #region Documents
+
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, JsonSerializerSettings);
+        var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
     public async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids)
     {
-        var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, JsonSerializerSettings);
+        var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings);
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
+    }
+
+    #endregion
+
+    #region Schema
+
+    public async Task<Schema> GetSchemaAsync(string engineName)
+    {
+        var response = await _httpClient.GetAsync(GetSchemaEndpoint(engineName));
+
+        await response.EnsureSuccessStatusCodeAsync<Result>();
+
+        var result = await response.Content.ReadFromJsonAsync<Schema>();
+
+        return result;
     }
 
     public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, JsonSerializerSettings);
+        var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<Result>();
 
-        return await response.Content.ReadFromJsonAsync<Schema>(JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Schema>(ModuleConstants.Api.JsonSerializerSettings);
     }
+
+    #endregion
+
+    #region Search
 
     public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, JsonSerializerSettings);
+        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, ModuleConstants.Api.JsonSerializerSettings);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<SearchResult>(JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
     }
 
     public async Task<SearchResult> SearchAsync(string engineName, string rawQuery)
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+
         var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<SearchResult>(JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
     }
+
+    #endregion
 
     private static string GetEngineEndpoint(string engineName)
     {
