@@ -38,7 +38,12 @@ public class DocumentConverter: IDocumentConverter
             var fieldName = fieldByName.FieldName;
             var field = fieldByName.Field;
 
-            if (field.Name.Length <= ModuleConstants.Api.FieldNames.MaximumLength)
+            if (fieldName.Length > ModuleConstants.Api.FieldNames.MaximumLength)
+            {
+                Debug.WriteLine($"Elastic App Search supports up to 64 symbols in document field name. {fieldName} field name is too large.");
+
+            }
+            else
             {
                 document.Fields.Add(fieldName, field.IsCollection ? field.Values : field.Value);
                 schema.Fields.Add(fieldName, ToProviderFieldType(field));
