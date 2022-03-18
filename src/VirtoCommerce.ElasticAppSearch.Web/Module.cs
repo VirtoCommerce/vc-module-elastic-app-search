@@ -45,6 +45,8 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
             serviceCollection.AddSingleton<ISearchResponseBuilder, SearchResponseBuilder>();
             serviceCollection.AddSingleton<ISearchProvider, ElasticAppSearchProvider>();
+            serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
+            serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
             {

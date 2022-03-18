@@ -105,20 +105,29 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         var schema = await GetSchemaAsync(engineName);
 
-        SearchResult searchResult;
+        SearchResponse response;
 
         if (string.IsNullOrEmpty(request.RawQuery))
         {
-            var searchQuery = _searchQueryBuilder.ToSearchQuery(request, schema);
-            searchResult = await _elasticAppSearch.SearchAsync(engineName, searchQuery);
+            var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema);
+            var searchTasks = searchQueries.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery));
+            var searchResponses = await Task.WhenAll(searchTasks);
+
+            var searchResults = searchResponses.Select((searchResult, i) => new SearchResultWrapper
+            {
+                AggregationId = searchQueries[i].AggregationId,
+                SearchResult = searchResult,
+            }).ToList();
+
+            response = _searchResponseBuilder.ToSearchResponse(searchResults, request.Aggregations);
         }
         else
         {
-            searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
+            var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
+            response = _searchResponseBuilder.ToSearchResponse(searchResult);
         }
 
-        var searchResponse = _searchResponseBuilder.ToSearchResponse(searchResult);
-        return searchResponse;
+        return response;
     }
 
     #endregion

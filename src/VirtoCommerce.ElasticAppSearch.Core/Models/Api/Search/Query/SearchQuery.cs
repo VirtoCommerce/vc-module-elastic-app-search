@@ -7,6 +7,10 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 public record SearchQuery
 {
+    //temp, add to wrapper
+    [JsonIgnore]
+    public string AggregationId { get; set; }
+
     [JsonRequired]
     public string Query { get; init; }
 
@@ -17,11 +21,15 @@ public record SearchQuery
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public IFilters Filters { get; init; }
-    
+
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
     public Dictionary<string, SearchFieldValue> SearchFields { get; init; }
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public Page Page { get; init; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
+    public Facets.Facets Facets { get; set; } = new();
 }
