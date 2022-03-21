@@ -6,6 +6,6 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Services.Builders
 {
     public interface IAggregationsResponseBuilder
     {
-        IList<AggregationResponse> ToAggregationResult(IList<SearchResultWrapper> searchResults, IList<AggregationRequest> aggregations);
+        IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations);
     }
 }

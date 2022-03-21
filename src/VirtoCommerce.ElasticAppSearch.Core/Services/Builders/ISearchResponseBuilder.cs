@@ -8,5 +8,5 @@ public interface ISearchResponseBuilder
 {
     SearchResponse ToSearchResponse(SearchResult searchResult);
 
-    SearchResponse ToSearchResponse(IList<SearchResultWrapper> searchResults, IList<AggregationRequest> aggregations);
+    SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations);
 }

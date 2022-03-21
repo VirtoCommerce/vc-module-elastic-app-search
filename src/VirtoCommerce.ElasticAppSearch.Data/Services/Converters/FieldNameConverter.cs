@@ -6,11 +6,11 @@ using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
 
-public class FieldNameConverter: IFieldNameConverter
+public class FieldNameConverter : IFieldNameConverter
 {
     protected virtual string ReservedFieldNamesPrefix => ModuleConstants.Api.FieldNames.ReservedFieldNamesPrefix;
 
-    protected virtual string PrivateFieldPrefix =>  ModuleConstants.Api.FieldNames.PrivateFieldPrefix;
+    protected virtual string PrivateFieldPrefix => ModuleConstants.Api.FieldNames.PrivateFieldPrefix;
 
     protected virtual Dictionary<string, string> Replacements => new(ModuleConstants.Api.FieldNames.Replacements);
 
@@ -18,6 +18,9 @@ public class FieldNameConverter: IFieldNameConverter
     {
         // Only lowercase letters allowed
         var providerFieldName = indexFieldName.ToLowerInvariant();
+
+        // Replase whitespaces with underscores
+        providerFieldName = Regex.Replace(providerFieldName, @"\W", "_");
 
         // Replace private field prefix (double underscore) because field name cannot have leading underscore
         providerFieldName = Regex.Replace(providerFieldName, @"^__", PrivateFieldPrefix);

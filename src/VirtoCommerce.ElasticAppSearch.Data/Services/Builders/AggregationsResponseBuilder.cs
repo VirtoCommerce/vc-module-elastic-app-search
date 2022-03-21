@@ -18,7 +18,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             _fieldNameConverter = fieldNameConverter;
         }
 
-        public IList<AggregationResponse> ToAggregationResult(IList<SearchResultWrapper> searchResults, IList<AggregationRequest> aggregations)
+        public IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
         {
             var result = new List<AggregationResponse>();
 

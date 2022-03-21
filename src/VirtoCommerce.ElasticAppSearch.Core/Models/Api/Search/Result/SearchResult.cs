@@ -11,13 +11,6 @@ public record SearchResult
     public Dictionary<string, FacetResult[]> Facets { get; init; }
 }
 
-public class SearchResultWrapper
-{
-    public string AggregationId { get; set; }
-
-    public SearchResult SearchResult { get; set; }
-}
-
 public record FacetResult
 {
     public string Type { get; init; }

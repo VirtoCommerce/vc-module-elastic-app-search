@@ -32,7 +32,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
         return searchResponse;
     }
 
-    public SearchResponse ToSearchResponse(IList<SearchResultWrapper> searchResults, IList<AggregationRequest> aggregations)
+    public SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
         // create request based on main request
         var searchResult = searchResults.FirstOrDefault().SearchResult;
@@ -46,7 +46,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
         return searchResponse;
     }
 
-    protected virtual IList<AggregationResponse> ToAggregationResult(IList<SearchResultWrapper> searchResults, IList<AggregationRequest> aggregations)
+    protected virtual IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
         return _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations);
     }

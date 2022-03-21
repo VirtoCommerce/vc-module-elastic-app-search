@@ -9,5 +9,5 @@ public interface ISearchQueryBuilder
 {
     SearchQuery ToSearchQuery(SearchRequest request, Schema schema);
 
-    IList<SearchQuery> ToSearchQueries(SearchRequest request, Schema schema);
+    IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema);
 }
