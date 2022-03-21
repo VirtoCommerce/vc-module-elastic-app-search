@@ -7,10 +7,6 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 public record SearchQuery
 {
-    ////temp, add to wrapper
-    //[JsonIgnore]
-    //public string AggregationId { get; set; }
-
     [JsonRequired]
     public string Query { get; init; }
 
