@@ -110,7 +110,8 @@ public class ElasticAppSearchProvider : ISearchProvider
         if (string.IsNullOrEmpty(request.RawQuery))
         {
             var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema);
-            var searchTasks = searchQueries.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery));
+            var searchTasks = searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
+                ?? new List<Task<SearchResult>>();
             var searchResponses = await Task.WhenAll(searchTasks);
 
             var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
