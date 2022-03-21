@@ -42,7 +42,7 @@ public class DocumentConverter: IDocumentConverter
 
             if (fieldName.Length > ModuleConstants.Api.FieldNames.MaximumLength)
             {
-                _logger.LogCritical("Elastic App Search supports up to 64 symbols in document field name. {0} field name has {1}.", fieldName, fieldName.Length);
+                _logger.LogCritical("Elastic App Search supports up to 64 symbols in document field name. {fieldName} field name has {fieldNameLength}.", fieldName, fieldName.Length);
             }
             else
             {
@@ -78,7 +78,7 @@ public class DocumentConverter: IDocumentConverter
             _ => FieldType.Text
         };
 
-        _logger.LogInformation("The {0} field has undefined value type. {1} type was detected automatically based on field value object type.", fieldName, fieldType);
+        _logger.LogInformation("The {fieldName} field has undefined value type. {fieldType} type was detected automatically based on field value object type.", fieldName, fieldType);
 
         return fieldType;
     }

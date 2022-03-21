@@ -48,7 +48,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 result = ToValueFilter(termFilter, schema);
                 break;
             case WildCardTermFilter wildCardTermFilter:
-                _logger.LogError("Elastic App Search doesn't support wildcard queries: {0}", wildCardTermFilter);
+                _logger.LogError("Elastic App Search doesn't support wildcard queries: {filter}", wildCardTermFilter);
                 result = GetNothingFilter();
                 break;
             case RangeFilter rangeFilter:
@@ -70,7 +70,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 result = null;
                 break;
             default:
-                _logger.LogError("Unknown filter: {0}", searchFilter);
+                _logger.LogError("Unknown filter: {filter}", searchFilter);
                 result = GetNothingFilter();
                 break;
         }
@@ -123,7 +123,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 break;
             default:
                 _logger.LogError("Elastic App Search supports value filter for fields with text, number and date field types only." +
-                                 "Value filter is not supported for {0} field with {1} type.", fieldName, fieldType);
+                                 "Value filter is not supported for {fieldName} field with {fieldType} type.", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }
@@ -167,7 +167,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 result = isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
                 break;
             default:
-                _logger.LogError("Elastic App Search supports number and date ranges only. Range filter is not supported for {0} field with {1} type", fieldName, fieldType);
+                _logger.LogError("Elastic App Search supports number and date ranges only. Range filter is not supported for {fieldName} field with {fieldType} type", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }
@@ -199,7 +199,8 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 };
                 break;
             default:
-                _logger.LogError("Elastic App Search supports geo filter for fields with geolocation field type only. Geo filter is not supported for {0} field with {1} type", fieldName, fieldType);
+                _logger.LogError("Elastic App Search supports geo filter for fields with geolocation field type only." +
+                                 "Geo filter is not supported for {fieldName} field with {fieldType} type", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }

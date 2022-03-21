@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Castle.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
