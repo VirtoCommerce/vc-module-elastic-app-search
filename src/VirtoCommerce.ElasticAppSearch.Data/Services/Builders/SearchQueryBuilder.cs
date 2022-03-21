@@ -52,15 +52,29 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return searchQuery;
     }
 
+    private IEnumerable<SearchQueryAggregationWrapper> ToSearchQueryAggregationWrappers(IEnumerable<FacetRequest> facets, SearchRequest request)
+    {
+        var result = facets.Select(x => new SearchQueryAggregationWrapper
+        {
+            AggregationId = x.Id,
+            SearchQuery = new SearchQuery
+            {
+                Filters = x.Filter,
+                Query = request.SearchKeywords ?? string.Empty,
+                SearchFields = GetSearchFields(request.SearchFields),
+                Page = new Page { Current = 1 }
+            }
+        });
+        return result;
+    }
+
     public IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema)
     {
         var mainSearchQuery = ToSearchQuery(request, schema);
-        var mainSearchQueryWrapper = new SearchQueryAggregationWrapper
-        {
-            SearchQuery = mainSearchQuery
-        };
-        var queries = new List<SearchQueryAggregationWrapper> { mainSearchQueryWrapper };
+        var mainSearchQueryWrapper = new SearchQueryAggregationWrapper { SearchQuery = mainSearchQuery };
+        var result = new List<SearchQueryAggregationWrapper> { mainSearchQueryWrapper };
 
+        // process aggregates
         var facetRequests = GetFacets(request.Aggregations, schema);
 
         foreach (var filterGroup in facetRequests.GroupBy(x => x.FilterName))
@@ -72,46 +86,42 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                     .Where(x => x.Facet != null)
                     .ToDictionary(x => x.FacetFieldName, x => x.Facet));
 
+                // add requests for inverted filters
                 foreach (var facetRequest in filterGroup.Where(x => x.FieldName == null))
                 {
-                    // add filter request
                     var wrapper = new SearchQueryAggregationWrapper
                     {
                         AggregationId = facetRequest.Id,
                         SearchQuery = new SearchQuery
                         {
-                            Query = request.SearchKeywords ?? string.Empty,
                             Filters = facetRequest.Filter,
+                            Query = request.SearchKeywords ?? string.Empty,
                             SearchFields = GetSearchFields(request.SearchFields),
                             Page = new Page { Current = 1 }
                         }
                     };
-                    queries.Add(wrapper);
+                    result.Add(wrapper);
                 }
             }
             else
             {
                 foreach (var fieldGroup in filterGroup.GroupBy(x => x.FieldName))
                 {
+                    // base 
                     if (string.IsNullOrEmpty(fieldGroup.Key))
                     {
-                        foreach (var facetRequest in fieldGroup)
+                        var aggregationFilterQueries = fieldGroup.Select(x => new SearchQueryAggregationWrapper
                         {
-                            // add filter request
-                            var wrapper = new SearchQueryAggregationWrapper
+                            AggregationId = x.Id,
+                            SearchQuery = new SearchQuery
                             {
-                                AggregationId = facetRequest.Id,
-                                SearchQuery = new SearchQuery
-                                {
-                                    Query = request.SearchKeywords ?? string.Empty,
-                                    Filters = facetRequest.Filter,
-                                    SearchFields = GetSearchFields(request.SearchFields),
-                                    Page = new Page { Current = 1 }
-                                }
-                            };
-
-                            queries.Add(wrapper);
-                        }
+                                Filters = x.Filter,
+                                Query = request.SearchKeywords ?? string.Empty,
+                                SearchFields = GetSearchFields(request.SearchFields),
+                                Page = new Page { Current = 1 }
+                            }
+                        });
+                        result.AddRange(aggregationFilterQueries);
                     }
                     else
                     {
@@ -126,21 +136,21 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                         {
                             SearchQuery = new SearchQuery
                             {
-                                Query = request.SearchKeywords ?? string.Empty,
                                 Filters = filter,
                                 Facets = invertedFacets,
+                                Query = request.SearchKeywords ?? string.Empty,
                                 SearchFields = GetSearchFields(request.SearchFields),
                                 Page = new Page { Current = 1 }
                             }
                         };
 
-                        queries.Add(wrapper);
+                        result.Add(wrapper);
                     }
                 }
             }
         }
 
-        return queries;
+        return result;
     }
 
     protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
