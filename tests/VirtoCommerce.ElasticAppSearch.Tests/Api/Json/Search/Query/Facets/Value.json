@@ -1,0 +1,14 @@
+{
+  "query": "park",
+  "facets": {
+    "states": {
+      "type": "value",
+      "size": 5,
+      "sort": { "count": "desc" },
+      "name": "top-five-states"
+    },
+    "world_heritage_site": {
+      "type": "value"
+    }
+  }
+}
