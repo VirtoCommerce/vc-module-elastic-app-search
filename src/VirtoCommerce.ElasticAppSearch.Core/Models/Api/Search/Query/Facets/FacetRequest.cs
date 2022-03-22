@@ -13,7 +13,7 @@ public class FacetRequest
 
     public Facet Facet { get; set; }
 
-    public IFilters Filter { get; set; }
-
     public string FilterName { get; set; }
+
+    public IFilters Filter { get; set; }
 }

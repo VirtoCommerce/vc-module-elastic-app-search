@@ -7,6 +7,6 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Services.Builders
 {
     public interface ISearchFacetsQueryBuilder
     {
-        IList<FacetRequest> GetFacets(IList<AggregationRequest> aggregations, Schema schema);
+        IList<FacetRequest> GetFacetRequests(IList<AggregationRequest> aggregations, Schema schema);
     }
 }

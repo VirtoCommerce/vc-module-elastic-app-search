@@ -22,101 +22,96 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         {
             var result = new List<AggregationResponse>();
 
-            // convert facets results
-            var facets = new Dictionary<string, IList<FacetResult>>();
-            var facetResults = searchResults.Where(x => !x.SearchResult.Facets.IsNullOrEmpty()).Select(x => x.SearchResult.Facets).ToList();
-            foreach (var facetResul in facetResults)
-            {
-                foreach (var facet in facetResul)
-                {
-                    facets.Add(facet.Key, facet.Value);
-                }
-            }
+            var responses = ToFacetsAggregationResponses(searchResults, aggregations);
+            result.AddRange(responses);
 
-            if (facets.Any())
-            {
-                var responses = aggregations
-                    .Select(a => GetAggregation(a, facets))
-                    .Where(a => a != null && a.Values.Any());
-
-                result.AddRange(responses);
-            }
-
-            // aggregations with empty field name
-            foreach (var searchResultWrapper in searchResults.Where(x => !string.IsNullOrEmpty(x.AggregationId) && x.SearchResult.Meta.Page.TotalResults > 0))
-            {
-                result.Add(new AggregationResponse
-                {
-                    Id = searchResultWrapper.AggregationId,
-                    Values = new List<AggregationResponseValue>
-                        {
-                            new AggregationResponseValue
-                            {
-                                Id= searchResultWrapper.AggregationId,
-                                Count = searchResultWrapper.SearchResult.Meta.Page.TotalResults,
-                            }
-                        }
-                });
-            }
+            responses = ToSimpleAggregationResponses(searchResults);
+            result.AddRange(responses);
 
             return result;
         }
 
-        private AggregationResponse GetAggregation(AggregationRequest aggregationRequest, Dictionary<string, IList<FacetResult>> facets)
+        /// <summary>
+        /// Convert facets results
+        /// </summary>
+        private IEnumerable<AggregationResponse> ToFacetsAggregationResponses(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
+        {
+            var facetResults = searchResults.Where(x => !x.SearchResult.Facets.IsNullOrEmpty()).Select(x => x.SearchResult.Facets).ToList();
+
+            // combine all result facets in one dictionary
+            var facets = facetResults.SelectMany(x => x).ToDictionary(x => x.Key, x => x.Value.FirstOrDefault());
+
+            return aggregations
+                .Select(x => GetAggregationResponseFromRequest(x, facets))
+                .Where(x => x?.Values.Any() == true);
+        }
+
+        /// <summary>
+        /// Convert aggregations without field name (special case)
+        /// </summary>
+        private IEnumerable<AggregationResponse> ToSimpleAggregationResponses(IList<SearchResultAggregationWrapper> searchResults)
+        {
+            return searchResults
+                .Where(x => !string.IsNullOrEmpty(x.AggregationId) && x.SearchResult.Meta.Page.TotalResults > 0)
+                .Select(x => new AggregationResponse
+                {
+                    Id = x.AggregationId,
+                    Values = new List<AggregationResponseValue>
+                            {
+                                new AggregationResponseValue
+                                {
+                                    Id = x.AggregationId,
+                                    Count = x.SearchResult.Meta.Page.TotalResults,
+                                }
+                            }
+                });
+        }
+
+        private AggregationResponse GetAggregationResponseFromRequest(AggregationRequest aggregationRequest, Dictionary<string, FacetResult> facets)
         {
             AggregationResponse result = null;
 
-            if (!(aggregationRequest is TermAggregationRequest termAggregationRequest) || string.IsNullOrEmpty(termAggregationRequest.FieldName))
+            if (aggregationRequest is not TermAggregationRequest termAggregationRequest || string.IsNullOrEmpty(termAggregationRequest.FieldName))
             {
                 return result;
             }
 
             var fieldName = _fieldNameConverter.ToProviderFieldName(termAggregationRequest.FieldName);
 
-            if (!string.IsNullOrEmpty(fieldName))
+            var facet = facets.ContainsKey(fieldName)
+                ? facets[fieldName]
+                : null;
+
+            if (facet == null || facet.Data.IsNullOrEmpty())
             {
-                var facetResults = facets.ContainsKey(fieldName) ? facets[fieldName] : null;
+                return result;
+            }
 
-                var facet = facetResults?.FirstOrDefault();
-                if (facet != null && !facet.Data.IsNullOrEmpty())
+            result = new AggregationResponse
+            {
+                Id = (termAggregationRequest.Id ?? termAggregationRequest.FieldName).ToLowerInvariant(),
+                Values = new List<AggregationResponseValue>(),
+            };
+
+            if (termAggregationRequest.Values == null)
+            {
+                // Return all found facet results is no values is defined
+                foreach (var facetResult in facet.Data)
                 {
-                    result = new AggregationResponse
-                    {
-                        Id = (termAggregationRequest.Id ?? termAggregationRequest.FieldName).ToLowerInvariant(),
-                        Values = new List<AggregationResponseValue>(),
-                    };
+                    var aggregationValue = GetAggregationResponseValue(ToStringInvariant(facetResult.Value), facetResult.Count);
+                    result.Values.Add(aggregationValue);
+                }
+            }
+            else
+            {
+                foreach (var value in termAggregationRequest.Values)
+                {
+                    var facetResult = facet.Data.FirstOrDefault(r => ToStringInvariant(r.Value).EqualsInvariant(value));
 
-                    var values = termAggregationRequest.Values;
-
-                    if (values != null)
+                    if (facetResult?.Count > 0)
                     {
-                        foreach (var value in values)
-                        {
-                            var facetResult = facet.Data.FirstOrDefault(r => ToStringInvariant(r.Value).EqualsInvariant(value));
-
-                            if (facetResult != null && facetResult.Count > 0)
-                            {
-                                var aggregationValue = new AggregationResponseValue
-                                {
-                                    Id = value,
-                                    Count = facetResult.Count ?? 0,
-                                };
-                                result.Values.Add(aggregationValue);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Return all facet results if values are not defined
-                        foreach (var facetResult in facet.Data)
-                        {
-                            var aggregationValue = new AggregationResponseValue
-                            {
-                                Id = ToStringInvariant(facetResult.Value),
-                                Count = facetResult.Count ?? 0,
-                            };
-                            result.Values.Add(aggregationValue);
-                        }
+                        var aggregationValue = GetAggregationResponseValue(value, facetResult.Count);
+                        result.Values.Add(aggregationValue);
                     }
                 }
             }
@@ -124,7 +119,16 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             return result;
         }
 
-        public string ToStringInvariant(object value)
+        private AggregationResponseValue GetAggregationResponseValue(string value, int? count)
+        {
+            return new AggregationResponseValue
+            {
+                Id = value,
+                Count = count ?? 0,
+            };
+        }
+
+        private string ToStringInvariant(object value)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}", value);
         }
