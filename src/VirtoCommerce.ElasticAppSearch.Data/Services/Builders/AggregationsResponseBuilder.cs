@@ -18,6 +18,31 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             _fieldNameConverter = fieldNameConverter;
         }
 
+        public IList<AggregationResponse> ToAggregationResult(SearchResult searchResult)
+        {
+            var result = searchResult.Facets?.Select(x =>
+            {
+                var aggregation = new AggregationResponse
+                {
+                    Id = x.Key,
+                };
+
+                var dataValue = x.Value.FirstOrDefault();
+                if (dataValue?.Data.Any() == true)
+                {
+                    aggregation.Values = dataValue.Data.Select(x => new AggregationResponseValue
+                    {
+                        Id = ToStringInvariant(x.Value),
+                        Count = x.Count ?? 0
+                    }).ToList();
+                }
+
+                return aggregation;
+            });
+
+            return result.ToList();
+        }
+
         public IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
         {
             var result = new List<AggregationResponse>();

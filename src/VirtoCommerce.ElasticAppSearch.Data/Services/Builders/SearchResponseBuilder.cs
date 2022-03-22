@@ -27,7 +27,8 @@ public class SearchResponseBuilder : ISearchResponseBuilder
         var searchResponse = new SearchResponse
         {
             Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList(),
-            TotalCount = searchResult.Meta.Page.TotalResults
+            TotalCount = searchResult.Meta.Page.TotalResults,
+            Aggregations = ToAggregationResult(searchResult),
         };
         return searchResponse;
     }
@@ -44,6 +45,11 @@ public class SearchResponseBuilder : ISearchResponseBuilder
             Aggregations = ToAggregationResult(searchResults, aggregations),
         };
         return searchResponse;
+    }
+
+    protected virtual IList<AggregationResponse> ToAggregationResult(SearchResult searchResult)
+    {
+        return _aggregationsResponseBuilder.ToAggregationResult(searchResult);
     }
 
     protected virtual IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
