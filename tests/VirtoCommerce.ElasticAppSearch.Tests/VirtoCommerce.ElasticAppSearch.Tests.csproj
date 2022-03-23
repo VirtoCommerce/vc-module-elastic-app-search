@@ -32,9 +32,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Api\Json\Search\Query\Facets\" />
-    <Folder Include="Api\Search\Query\Facets\" />
-  </ItemGroup>
-
 </Project>

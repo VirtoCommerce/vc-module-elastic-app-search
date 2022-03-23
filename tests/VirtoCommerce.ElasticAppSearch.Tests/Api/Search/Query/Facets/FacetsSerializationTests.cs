@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using Xunit;
@@ -138,6 +139,6 @@ public class FacetsSerializationTests : SerializationTestsBase
 
     protected override string GetJsonPath()
     {
-        return $@"{base.GetJsonPath()}\Search\Query\Facets";
+        return Path.Combine(base.GetJsonPath(), "Search", "Query", "Facets");
     }
 }
