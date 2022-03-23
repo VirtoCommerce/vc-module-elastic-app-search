@@ -152,7 +152,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             return result;
         }
 
-        private AggregationResponseValue GetAggregationResponseValue(string value, int? count)
+        private static AggregationResponseValue GetAggregationResponseValue(string value, int? count)
         {
             return new AggregationResponseValue
             {
