@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
@@ -10,7 +11,7 @@ using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
 
-public class DocumentConverter: IDocumentConverter
+public class DocumentConverter : IDocumentConverter
 {
     private readonly ILogger<DocumentConverter> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
@@ -53,7 +54,7 @@ public class DocumentConverter: IDocumentConverter
 
         return (document, schema);
     }
-    
+
     protected virtual FieldType ToProviderFieldType(IndexDocumentField indexDocumentField)
     {
         var indexDocumentFieldValueType = indexDocumentField.ValueType;
@@ -89,7 +90,13 @@ public class DocumentConverter: IDocumentConverter
         foreach (var (providerFieldName, value) in searchResultDocument.Fields)
         {
             var indexFieldName = _fieldNameConverter.ToIndexFieldName(providerFieldName);
+
             var indexFieldValue = value.Raw;
+            if (indexFieldValue is JArray jArray)
+            {
+                indexFieldValue = jArray.ToObject<object[]>();
+            }
+
             searchDocument.Add(indexFieldName, indexFieldValue);
         }
 
