@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
@@ -89,10 +90,11 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         private static void Test(Func<SearchRequest> searchRequest, Func<SearchQuery, object> actualResultSelector, object expectedResult)
         {
             // Arrange
+            var logger = GetLogger<SearchQueryBuilder>();
             var fieldNameConverter = GetFieldNameConverter();
             var searchFiltersBuilder = GetSearchFiltersBuilder();
             var searchFacetsQueryBuilder = GetSearchFacetsQueryBuilder();
-            var searchQueryBuilder = new SearchQueryBuilder(fieldNameConverter, searchFiltersBuilder, searchFacetsQueryBuilder);
+            var searchQueryBuilder = new SearchQueryBuilder(logger, fieldNameConverter, searchFiltersBuilder, searchFacetsQueryBuilder);
             var request = searchRequest();
             var schema = GetSchema();
 
@@ -117,6 +119,12 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                     { "test4", FieldType.Geolocation },
                 }
             };
+        }
+
+        private static ILogger<T> GetLogger<T>()
+        {
+            var mock = new Mock<ILogger<T>>();
+            return mock.Object;
         }
 
         private static IFieldNameConverter GetFieldNameConverter()

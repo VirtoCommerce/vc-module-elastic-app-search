@@ -1,10 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
@@ -22,10 +21,12 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
 public class SearchFiltersBuilder: ISearchFiltersBuilder
 {
+    private readonly ILogger<SearchFiltersBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
 
-    public SearchFiltersBuilder(IFieldNameConverter fieldNameConverter)
+    public SearchFiltersBuilder(ILogger<SearchFiltersBuilder> logger, IFieldNameConverter fieldNameConverter)
     {
+        _logger = logger;
         _fieldNameConverter = fieldNameConverter;
     }
 
@@ -46,8 +47,8 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
             case TermFilter termFilter:
                 result = ToValueFilter(termFilter, schema);
                 break;
-            case WildCardTermFilter:
-                Debug.WriteLine("Elastic App Search doesn't support wildcard queries.");
+            case WildCardTermFilter wildCardTermFilter:
+                _logger.LogError("Elastic App Search doesn't support wildcard queries: {filter}", wildCardTermFilter);
                 result = GetNothingFilter();
                 break;
             case RangeFilter rangeFilter:
@@ -69,7 +70,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 result = null;
                 break;
             default:
-                Debug.WriteLine("Unknown filter");
+                _logger.LogError("Unknown filter: {filter}", searchFilter);
                 result = GetNothingFilter();
                 break;
         }
@@ -121,7 +122,8 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 };
                 break;
             default:
-                Debug.WriteLine("Elastic App Search supports value filter for fields with text, number and date field types only.");
+                _logger.LogError("Elastic App Search supports value filter for fields with text, number and date field types only." +
+                                 "Value filter is not supported for {fieldName} field with {fieldType} type.", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }
@@ -165,7 +167,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 result = isDateTimeRangeFilter ? dateTimeRangeFilter : GetNothingFilter();
                 break;
             default:
-                Debug.WriteLine("Elastic App Search supports number and date ranges only.");
+                _logger.LogError("Elastic App Search supports number and date ranges only. Range filter is not supported for {fieldName} field with {fieldType} type", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }
@@ -197,7 +199,8 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
                 };
                 break;
             default:
-                Debug.WriteLine("Elastic App Search supports geo filter for fields with geolocation field type only.");
+                _logger.LogError("Elastic App Search supports geo filter for fields with geolocation field type only." +
+                                 "Geo filter is not supported for {fieldName} field with {fieldType} type", fieldName, fieldType);
                 result = GetNothingFilter();
                 break;
         }

@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
@@ -12,10 +12,12 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
 
 public class DocumentConverter: IDocumentConverter
 {
+    private readonly ILogger<DocumentConverter> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
 
-    public DocumentConverter(IFieldNameConverter fieldNameConverter)
+    public DocumentConverter(ILogger<DocumentConverter> logger, IFieldNameConverter fieldNameConverter)
     {
+        _logger = logger;
         _fieldNameConverter = fieldNameConverter;
     }
 
@@ -40,8 +42,7 @@ public class DocumentConverter: IDocumentConverter
 
             if (fieldName.Length > ModuleConstants.Api.FieldNames.MaximumLength)
             {
-                Debug.WriteLine($"Elastic App Search supports up to 64 symbols in document field name. {fieldName} field name is too large.");
-
+                _logger.LogCritical("Elastic App Search supports up to 64 symbols in document field name. {fieldName} field name has {fieldNameLength}.", fieldName, fieldName.Length);
             }
             else
             {
@@ -69,9 +70,7 @@ public class DocumentConverter: IDocumentConverter
     [Obsolete("Left for backward compatibility")]
     protected virtual FieldType ToProviderFieldType(string fieldName, object fieldValue)
     {
-        Debug.WriteLine($"The {fieldName} field has undefined value type. It will be detected automatically based on field value object type.");
-
-        var result = fieldValue switch
+        var fieldType = fieldValue switch
         {
             sbyte or byte or ushort or short or uint or int or ulong or long or float or double or decimal or TimeSpan => FieldType.Number,
             DateTime or DateTimeOffset => FieldType.Date,
@@ -79,7 +78,9 @@ public class DocumentConverter: IDocumentConverter
             _ => FieldType.Text
         };
 
-        return result;
+        _logger.LogInformation("The {fieldName} field has undefined value type. {fieldType} type was detected automatically based on field value object type.", fieldName, fieldType);
+
+        return fieldType;
     }
 
     public SearchDocument ToSearchDocument(Core.Models.Api.Search.Result.SearchResultDocument searchResultDocument)

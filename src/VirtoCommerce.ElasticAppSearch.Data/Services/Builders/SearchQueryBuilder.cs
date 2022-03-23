@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -11,19 +11,21 @@ using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 
-
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
 public class SearchQueryBuilder : ISearchQueryBuilder
 {
+    private readonly ILogger<SearchQueryBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
     private readonly ISearchFiltersBuilder _searchFiltersBuilder;
     private readonly ISearchFacetsQueryBuilder _facetsBuilder;
 
-    public SearchQueryBuilder(IFieldNameConverter fieldNameConverter,
+    public SearchQueryBuilder(ILogger<SearchQueryBuilder> logger,
+        IFieldNameConverter fieldNameConverter,
         ISearchFiltersBuilder searchFiltersBuilder,
         ISearchFacetsQueryBuilder facetsBuilder)
     {
+        _logger = logger;
         _fieldNameConverter = fieldNameConverter;
         _searchFiltersBuilder = searchFiltersBuilder;
         _facetsBuilder = facetsBuilder;
@@ -33,7 +35,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     {
         if (request.IsFuzzySearch)
         {
-            Debug.WriteLine("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
+            _logger.LogWarning("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
         }
 
         var searchQuery = new SearchQuery
