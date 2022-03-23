@@ -10,15 +10,12 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 public class SearchResponseBuilder : ISearchResponseBuilder
 {
     private readonly IDocumentConverter _documentConverter;
-    private readonly IFieldNameConverter _fieldNameConverter;
     private readonly IAggregationsResponseBuilder _aggregationsResponseBuilder;
 
     public SearchResponseBuilder(IDocumentConverter documentConverter,
-        IFieldNameConverter fieldNameConverter,
         IAggregationsResponseBuilder aggregationsResponseBuilder)
     {
         _documentConverter = documentConverter;
-        _fieldNameConverter = fieldNameConverter;
         _aggregationsResponseBuilder = aggregationsResponseBuilder;
     }
 
@@ -47,12 +44,12 @@ public class SearchResponseBuilder : ISearchResponseBuilder
         return searchResponse;
     }
 
-    protected virtual IList<AggregationResponse> ToAggregationResult(SearchResult searchResult)
+    private IList<AggregationResponse> ToAggregationResult(SearchResult searchResult)
     {
         return _aggregationsResponseBuilder.ToAggregationResult(searchResult);
     }
 
-    protected virtual IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
+    private IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
         return _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations);
     }

@@ -18,7 +18,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             new SearchQuery
             {
                 Query = "park",
-                Facets = new Facets
+                Facets = new Dictionary<string, Facet>
                 {
                     { "states", new ValueFacet
                                 {
@@ -41,7 +41,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             new SearchQuery
             {
                 Query = "park",
-                Facets = new Facets
+                Facets = new Dictionary<string, Facet>
                 {
                     { "acres", new NumberRangeFacet
                                 {
@@ -66,7 +66,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             new SearchQuery
             {
                 Query = "park",
-                Facets = new Facets
+                Facets = new Dictionary<string, Facet>
                 {
                     { "date_established", new DateTimeRangeFacet
                                 {
@@ -94,7 +94,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             new SearchQuery
             {
                 Query = "park",
-                Facets = new Facets
+                Facets = new Dictionary<string, Facet>
                 {
                     { "location", new GeoLocationRangeFacet
                                 {

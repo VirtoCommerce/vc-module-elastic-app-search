@@ -143,11 +143,11 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return _facetsBuilder.GetFacetRequests(aggregations, schema);
     }
 
-    private Facets GetFacets(IEnumerable<FacetRequest> facetRequests)
+    private Dictionary<string, Facet> GetFacets(IEnumerable<FacetRequest> facetRequests)
     {
-        return new Facets(facetRequests
+        return facetRequests
             .Where(x => x.Facet != null)
-            .ToDictionary(x => x.FacetFieldName, x => x.Facet));
+            .ToDictionary(x => x.FacetFieldName, x => x.Facet);
     }
 
     private IEnumerable<SearchQueryAggregationWrapper> ToSearchQueryAggregationWrappers(IEnumerable<FacetRequest> facets, SearchRequest request)
