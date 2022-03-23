@@ -97,23 +97,30 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         {
             AggregationResponse result = null;
 
-            if (aggregationRequest is not TermAggregationRequest termAggregationRequest || string.IsNullOrEmpty(termAggregationRequest.FieldName))
+            if (aggregationRequest is TermAggregationRequest termAggregationRequest)
             {
-                return result;
+                result = GetAggregationResponseByTerm(termAggregationRequest, facets);
+            }
+
+            return result;
+        }
+
+        private AggregationResponse GetAggregationResponseByTerm(TermAggregationRequest termAggregationRequest, Dictionary<string, FacetResult> facets)
+        {
+            if (string.IsNullOrEmpty(termAggregationRequest.FieldName))
+            {
+                return null;
             }
 
             var fieldName = _fieldNameConverter.ToProviderFieldName(termAggregationRequest.FieldName);
+            var facet = facets.GetValueOrDefault(fieldName);
 
-            var facet = facets.ContainsKey(fieldName)
-                ? facets[fieldName]
-                : null;
-
-            if (facet == null || facet.Data.IsNullOrEmpty())
+            if (facet == null)
             {
-                return result;
+                return null;
             }
 
-            result = new AggregationResponse
+            var result = new AggregationResponse
             {
                 Id = (termAggregationRequest.Id ?? termAggregationRequest.FieldName).ToLowerInvariant(),
                 Values = new List<AggregationResponseValue>(),
@@ -154,7 +161,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             };
         }
 
-        private string ToStringInvariant(object value)
+        private static string ToStringInvariant(object value)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}", value);
         }
