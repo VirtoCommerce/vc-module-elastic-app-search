@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets
 {
-    public record GeoLocationRangeFacet : RangeFacet<double>
+    public class GeoLocationRangeFacet : RangeFacet<double>
     {
         [JsonRequired]
         public GeoPoint Center { get; init; }

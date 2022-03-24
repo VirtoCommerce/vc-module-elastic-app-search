@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets
 {
@@ -6,7 +6,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets
     /// Available on text, number, date fields.
     /// Not available for geolocation.
     /// </summary>
-    public record ValueFacet : Facet
+    public class ValueFacet : Facet
     {
         public override string Type => "value";
 

@@ -30,11 +30,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                 var dataValue = x.Value.FirstOrDefault();
                 if (dataValue?.Data.Any() == true)
                 {
-                    aggregation.Values = dataValue.Data.Select(x => new AggregationResponseValue
-                    {
-                        Id = ToStringInvariant(x.Value),
-                        Count = x.Count ?? 0
-                    }).ToList();
+                    aggregation.Values = dataValue.Data.Select(x => GetAggregationResponseValue(x.Value, x.Count)).ToList();
                 }
 
                 return aggregation;
@@ -123,40 +119,30 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             var result = new AggregationResponse
             {
                 Id = termAggregationRequest.Id ?? termAggregationRequest.FieldName,
-                Values = new List<AggregationResponseValue>(),
             };
 
             if (termAggregationRequest.Values == null)
             {
-                // Return all found facet results is no values is defined
-                foreach (var facetResult in facet.Data)
-                {
-                    var aggregationValue = GetAggregationResponseValue(ToStringInvariant(facetResult.Value), facetResult.Count);
-                    result.Values.Add(aggregationValue);
-                }
+                // Return all found facet results is no values are defined
+                result.Values = facet.Data
+                    .Where(x => x.Count > 0)
+                    .Select(x => GetAggregationResponseValue(x.Value, x.Count)).ToList();
             }
             else
             {
-                foreach (var value in termAggregationRequest.Values)
-                {
-                    var facetResult = facet.Data.FirstOrDefault(r => ToStringInvariant(r.Value).EqualsInvariant(value));
-
-                    if (facetResult?.Count > 0)
-                    {
-                        var aggregationValue = GetAggregationResponseValue(value, facetResult.Count);
-                        result.Values.Add(aggregationValue);
-                    }
-                }
+                result.Values = facet.Data
+                    .Where(x => termAggregationRequest.Values.Any(v => ToStringInvariant(x.Value).EqualsInvariant(v)) && x.Count > 0)
+                    .Select(x => GetAggregationResponseValue(x.Value, x.Count)).ToList();
             }
 
             return result;
         }
 
-        private static AggregationResponseValue GetAggregationResponseValue(string value, int? count)
+        private static AggregationResponseValue GetAggregationResponseValue(object facetDataValue, int? count)
         {
             return new AggregationResponseValue
             {
-                Id = value,
+                Id = ToStringInvariant(facetDataValue),
                 Count = count ?? 0,
             };
         }

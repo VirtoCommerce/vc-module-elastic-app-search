@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets
 {
-    public record class Facet
+    public class Facet
     {
         [JsonRequired]
         public virtual string Type { get; }

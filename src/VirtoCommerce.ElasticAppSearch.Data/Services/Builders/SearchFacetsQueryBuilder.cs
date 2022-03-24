@@ -22,7 +22,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         _searchFiltersBuilder = searchFiltersBuilder;
     }
 
-    public IList<FacetRequest> GetFacetRequests(IList<AggregationRequest> aggregations, Schema schema)
+    public IList<FacetRequest> GetFacetRequests(IEnumerable<AggregationRequest> aggregations, Schema schema)
     {
         var results = new List<FacetRequest>();
 
