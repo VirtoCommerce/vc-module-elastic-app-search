@@ -64,6 +64,8 @@ public static class ModuleConstants
                 { "-", "_hyphen_" }
             });
 
+            public static readonly string[] IgnoredForSearch = { "__content" };
+
             public const int MaximumLength = 64;
         }
 
