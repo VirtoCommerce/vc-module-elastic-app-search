@@ -128,7 +128,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
     {
-        searchFields = searchFields.Where(x => !ModuleConstants.Api.FieldNames.IgnoredForSearch.Contains(x));
+        searchFields = searchFields?.Where(x => !ModuleConstants.Api.FieldNames.IgnoredForSearch.Contains(x));
 
         var result = searchFields?.ToDictionary(searchField => _fieldNameConverter.ToProviderFieldName(searchField), _ => new SearchFieldValue());
 
