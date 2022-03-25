@@ -93,9 +93,14 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         {
             AggregationResponse result = null;
 
-            if (aggregationRequest is TermAggregationRequest termAggregationRequest)
+            switch (aggregationRequest)
             {
-                result = GetAggregationResponseByTerm(termAggregationRequest, facets);
+                case TermAggregationRequest termAggregationRequest:
+                    result = GetAggregationResponseByTerm(termAggregationRequest, facets);
+                    break;
+                case RangeAggregationRequest rangeAggregationRequest:
+                    result = GetAggregationResponseByRange(rangeAggregationRequest, facets);
+                    break;
             }
 
             return result;
@@ -136,6 +141,45 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             }
 
             return result;
+        }
+
+        private AggregationResponse GetAggregationResponseByRange(RangeAggregationRequest rangeAggregationRequest, Dictionary<string, FacetResult> facets)
+        {
+            if (string.IsNullOrEmpty(rangeAggregationRequest.FieldName))
+            {
+                return null;
+            }
+
+            var fieldName = _fieldNameConverter.ToProviderFieldName(rangeAggregationRequest.FieldName);
+            var facet = facets.GetValueOrDefault(fieldName);
+
+            if (facet == null)
+            {
+                return null;
+            }
+
+            var result = new AggregationResponse
+            {
+                Id = rangeAggregationRequest.Id ?? rangeAggregationRequest.FieldName,
+            };
+
+            if (rangeAggregationRequest.Values != null)
+            {
+                result.Values = facet.Data
+                    .Where(x => rangeAggregationRequest.Values.Any(r => r.Id == x.Name) && x.Count > 0)
+                    .Select(x => GetAggregationResponseValue(x.Name, x.Count)).ToList();
+            }
+
+            return result;
+        }
+
+        private static AggregationResponseValue GetAggregationResponseValue(string facetDataName, int? count)
+        {
+            return new AggregationResponseValue
+            {
+                Id = facetDataName,
+                Count = count ?? 0,
+            };
         }
 
         private static AggregationResponseValue GetAggregationResponseValue(object facetDataValue, int? count)
