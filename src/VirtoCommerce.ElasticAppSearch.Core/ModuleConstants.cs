@@ -19,7 +19,11 @@ public static class ModuleConstants
         {
             // Elastic App Search API use camelCase in JSON
             ContractResolver = new CustomContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() },
-            Converters = new List<JsonConverter> { new StringEnumConverter(new CamelCaseNamingStrategy()) },
+            Converters = new List<JsonConverter>
+            {
+                new StringEnumConverter(new CamelCaseNamingStrategy()),
+                new SearchModuleCoreGeoPointConverter()
+            },
 
             // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
             DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'sszzz",
