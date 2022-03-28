@@ -34,6 +34,8 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
             return results;
         }
 
+        aggregations = PreProcessAggregations(aggregations);
+
         foreach (var aggregation in aggregations)
         {
             Facet facet = null;
@@ -65,6 +67,11 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         }
 
         return results;
+    }
+
+    protected virtual IEnumerable<AggregationRequest> PreProcessAggregations(IEnumerable<AggregationRequest> aggregations)
+    {
+        return PrepareFacets(aggregations);
     }
 
     protected virtual Facet AddTermAggregationRequest(TermAggregationRequest termAggregationRequest, Schema schema)
@@ -135,8 +142,8 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                 {
                     Ranges = rangeAggregationRequest.Values.Select(x => new FacetRangeValue<DateTime>
                     {
-                        //From = ConvertToDouble(x.Lower),
-                        //To = ConvertToDouble(x.Upper),
+                        From = ConvertToDateTime(x.Lower),
+                        To = ConvertToDateTime(x.Upper),
                         Name = x.Id,
                     }).ToList()
                 };
@@ -165,6 +172,18 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         return result;
     }
 
+    private static DateTime? ConvertToDateTime(string input)
+    {
+        var result = (DateTime?)null;
+
+        if (DateTime.TryParse(input, out var value))
+        {
+            result = value;
+        }
+
+        return result;
+    }
+
     private static double? ConvertToDouble(string input)
     {
         var result = (double?)null;
@@ -172,6 +191,49 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
         {
             result = value;
+        }
+
+        return result;
+    }
+
+    /// Try to fix faulty xapi logic
+    private IEnumerable<AggregationRequest> PrepareFacets(IEnumerable<AggregationRequest> aggregations)
+    {
+        var result = new List<AggregationRequest>();
+
+        foreach (var aggregation in aggregations ?? Array.Empty<AggregationRequest>())
+        {
+            var aggregationFilterFieldName = aggregation.FieldName ?? (aggregation.Filter as INamedFilter)?.FieldName;
+
+            if (aggregation.Filter is AndFilter andFilter)
+            {
+                var clonedFilter = aggregation.Filter.Clone() as AndFilter;
+
+                clonedFilter.ChildFilters = clonedFilter.ChildFilters
+                    .Where(x =>
+                    {
+                        var result = true;
+
+                        if (x is INamedFilter namedFilter)
+                        {
+                            result = !(aggregationFilterFieldName?.StartsWith(namedFilter.FieldName, true, CultureInfo.InvariantCulture) ?? false);
+                        }
+
+                        return result;
+                    })
+                    .ToList();
+
+                if (clonedFilter.ChildFilters.Count == 1 && clonedFilter.ChildFilters[0] is AndFilter)
+                {
+                    aggregation.Filter = clonedFilter.ChildFilters[0];
+                }
+                else
+                {
+                    aggregation.Filter = clonedFilter;
+                }
+            }
+
+            result.Add(aggregation);
         }
 
         return result;
