@@ -12,14 +12,15 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFil
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
-using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
-using IApiFilter = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.IFilter;
 using ApiGeoPoint = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.GeoPoint;
+using IApiFilter = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.IFilter;
+using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
-public class SearchFiltersBuilder: ISearchFiltersBuilder
+public class SearchFiltersBuilder : ISearchFiltersBuilder
 {
     private readonly ILogger<SearchFiltersBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
@@ -93,33 +94,44 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
         var fieldName = _fieldNameConverter.ToProviderFieldName(termFilter.FieldName);
         var fieldType = schema.Fields.ContainsKey(fieldName) ? (FieldType?)schema.Fields[fieldName] : null;
 
-        IApiFilter result;
+        IApiFilter result = null;
         switch (fieldType)
         {
-
             case null:
                 result = GetNothingFilter();
                 break;
             case FieldType.Text:
-                result = new ValueFilter<string>
+                var values = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+                if (!values.IsNullOrEmpty())
                 {
-                    FieldName = fieldName,
-                    Value = termFilter.Values.ToArray()
-                };
+                    result = new ValueFilter<string>
+                    {
+                        FieldName = fieldName,
+                        Value = values
+                    };
+                }
                 break;
             case FieldType.Number:
-                result = new ValueFilter<double>
+                var numberValues = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).Select(value => double.Parse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)).ToArray();
+                if (!numberValues.IsNullOrEmpty())
                 {
-                    FieldName = fieldName,
-                    Value = termFilter.Values.Select(value => double.Parse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)).ToArray()
-                };
+                    result = new ValueFilter<double>
+                    {
+                        FieldName = fieldName,
+                        Value = numberValues,
+                    };
+                }
                 break;
             case FieldType.Date:
-                result = new ValueFilter<DateTime>
+                var dateValues = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).Select(value => DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal)).ToArray();
+                if (!dateValues.IsNullOrEmpty())
                 {
-                    FieldName = fieldName,
-                    Value = termFilter.Values.Select(value => DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal)).ToArray()
-                };
+                    result = new ValueFilter<DateTime>
+                    {
+                        FieldName = fieldName,
+                        Value = dateValues,
+                    };
+                }
                 break;
             default:
                 _logger.LogError("Elastic App Search supports value filter for fields with text, number and date field types only." +
@@ -230,7 +242,7 @@ public class SearchFiltersBuilder: ISearchFiltersBuilder
     {
         var result = new NoneFilter
         {
-            Value = new []{ ToFilter(notFilter.ChildFilter, schema) }
+            Value = new[] { ToFilter(notFilter.ChildFilter, schema) }
         };
         return result;
     }
