@@ -165,14 +165,14 @@ public class SearchFiltersBuilder : ISearchFiltersBuilder
                 result = GetNothingFilter();
                 break;
             case FieldType.Number:
-                var isNumberRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                var isNumberRangeFilter = RangeExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
                     out NumberRangeFilter doubleRangeFilter);
                 result = isNumberRangeFilter ? doubleRangeFilter : GetNothingFilter();
                 break;
             case FieldType.Date:
-                var isDateTimeRangeFilter = RangeFilterExtensions.TryParse(fieldName,
+                var isDateTimeRangeFilter = RangeExtensions.TryParse(fieldName,
                     rangeFilterValue.IncludeLower, rangeFilterValue.Lower,
                     rangeFilterValue.IncludeUpper, rangeFilterValue.Upper,
                     out DateTimeRangeFilter dateTimeRangeFilter);

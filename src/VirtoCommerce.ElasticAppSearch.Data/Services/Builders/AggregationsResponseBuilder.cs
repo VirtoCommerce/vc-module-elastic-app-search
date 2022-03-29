@@ -60,7 +60,14 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             var facetResults = searchResults.Where(x => !x.SearchResult.Facets.IsNullOrEmpty()).Select(x => x.SearchResult.Facets).ToList();
 
             // combine all result facets in one dictionary
-            var facets = facetResults.SelectMany(x => x).ToDictionary(x => x.Key, x => x.Value.FirstOrDefault());
+            var facets = new Dictionary<string, FacetResult>();
+            foreach (var item in facetResults.SelectMany(x => x).ToList())
+            {
+                if (!facets.ContainsKey(item.Key))
+                {
+                    facets.Add(item.Key, item.Value.FirstOrDefault());
+                }
+            }
 
             return aggregations?
                 .Select(x => GetAggregationResponseFromRequest(x, facets))

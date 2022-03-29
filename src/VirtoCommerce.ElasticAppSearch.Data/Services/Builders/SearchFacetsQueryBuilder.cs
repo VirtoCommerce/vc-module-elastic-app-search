@@ -127,53 +127,23 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
             case null:
                 break;
             case FieldType.Number:
-                var ranges = rangeAggregationRequest.Values
-                    .Select(range =>
-                    {
-                        var isFacetRangeValue = RangeFilterExtensions.TryParse(
-                           range.IncludeLower, range.Lower,
-                           range.IncludeUpper, range.Upper,
-                           out FacetRangeValue<double> facetRangeValue);
-
-                        var result = isFacetRangeValue ? facetRangeValue : null;
-
-                        if (result != null)
-                        {
-                            result.Name = range.Id;
-                        }
-
-                        return result;
-                    })
-                    .Where(x => x != null)
-                    .ToList();
-
                 result = new NumberRangeFacet
                 {
-                    Ranges = ranges,
+                    Ranges = GetNumberRanges(rangeAggregationRequest),
                 };
 
                 break;
             case FieldType.Date:
                 result = new DateTimeRangeFacet
                 {
-                    Ranges = rangeAggregationRequest.Values.Select(x => new FacetRangeValue<DateTime>
-                    {
-                        From = ConvertToDateTime(x.Lower),
-                        To = ConvertToDateTime(x.Upper),
-                        Name = x.Id,
-                    }).ToList()
+                    Ranges = GetDateTimeRanges(rangeAggregationRequest),
                 };
 
                 break;
             case FieldType.Geolocation:
                 result = new GeoLocationRangeFacet
                 {
-                    Ranges = rangeAggregationRequest.Values.Select(x => new FacetRangeValue<double>
-                    {
-                        From = ConvertToDouble(x.Lower),
-                        To = ConvertToDouble(x.Upper),
-                        Name = x.Id,
-                    }).ToList()
+                    Ranges = GetNumberRanges(rangeAggregationRequest),
                 };
 
                 break;
@@ -190,29 +160,44 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         return result;
     }
 
-    private static DateTime? ConvertToDateTime(string input)
+    private static List<FacetRangeValue<double>> GetNumberRanges(RangeAggregationRequest rangeAggregationRequest)
     {
-        var result = (DateTime?)null;
+        return rangeAggregationRequest.Values
+                            .Select(range =>
+                            {
+                                var isFacetRangeValue = RangeExtensions.TryParse(
+                                   range.Id,
+                                   range.IncludeLower, range.Lower,
+                                   range.IncludeUpper, range.Upper,
+                                   out FacetRangeValue<double> facetRangeValue);
 
-        if (DateTime.TryParse(input, out var value))
-        {
-            result = value;
-        }
+                                var result = isFacetRangeValue ? facetRangeValue : null;
 
-        return result;
+                                return result;
+                            })
+                            .Where(x => x != null)
+                            .ToList();
     }
 
-    private static double? ConvertToDouble(string input)
+    private static List<FacetRangeValue<DateTime>> GetDateTimeRanges(RangeAggregationRequest rangeAggregationRequest)
     {
-        var result = (double?)null;
+        return rangeAggregationRequest.Values
+                     .Select(range =>
+                     {
+                         var isFacetRangeValue = RangeExtensions.TryParse(
+                            range.Id,
+                            range.IncludeLower, range.Lower,
+                            range.IncludeUpper, range.Upper,
+                            out FacetRangeValue<DateTime> facetRangeValue);
 
-        if (double.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
-        {
-            result = value;
-        }
+                         var result = isFacetRangeValue ? facetRangeValue : null;
 
-        return result;
+                         return result;
+                     })
+                     .Where(x => x != null)
+                     .ToList();
     }
+
 
     /// Try to fix faulty xapi logic
     private IEnumerable<AggregationRequest> PrepareFacets(IEnumerable<AggregationRequest> aggregations)
