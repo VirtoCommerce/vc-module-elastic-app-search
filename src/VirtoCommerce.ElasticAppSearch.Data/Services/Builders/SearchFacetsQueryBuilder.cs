@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -126,14 +127,29 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
             case null:
                 break;
             case FieldType.Number:
+                var ranges = rangeAggregationRequest.Values
+                    .Select(range =>
+                    {
+                        var isFacetRangeValue = RangeFilterExtensions.TryParse(
+                           range.IncludeLower, range.Lower,
+                           range.IncludeUpper, range.Upper,
+                           out FacetRangeValue<double> facetRangeValue);
+
+                        var result = isFacetRangeValue ? facetRangeValue : null;
+
+                        if (result != null)
+                        {
+                            result.Name = range.Id;
+                        }
+
+                        return result;
+                    })
+                    .Where(x => x != null)
+                    .ToList();
+
                 result = new NumberRangeFacet
                 {
-                    Ranges = rangeAggregationRequest.Values.Select(x => new FacetRangeValue<double>
-                    {
-                        From = ConvertToDouble(x.Lower),
-                        To = ConvertToDouble(x.Upper),
-                        Name = x.Id,
-                    }).ToList()
+                    Ranges = ranges,
                 };
 
                 break;
@@ -147,6 +163,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                         Name = x.Id,
                     }).ToList()
                 };
+
                 break;
             case FieldType.Geolocation:
                 result = new GeoLocationRangeFacet
@@ -158,6 +175,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                         Name = x.Id,
                     }).ToList()
                 };
+
                 break;
             default:
                 Debug.WriteLine("Elastic App Search supports range facet only for date, number and geo location fields.");
