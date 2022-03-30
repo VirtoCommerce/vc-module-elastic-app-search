@@ -101,7 +101,7 @@ public class SearchFiltersBuilder : ISearchFiltersBuilder
                 result = GetNothingFilter();
                 break;
             case FieldType.Text:
-                var values = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+                var values = termFilter.Values.WhereNonEmpty().ToArray();
                 if (!values.IsNullOrEmpty())
                 {
                     result = new ValueFilter<string>
@@ -112,7 +112,7 @@ public class SearchFiltersBuilder : ISearchFiltersBuilder
                 }
                 break;
             case FieldType.Number:
-                var numberValues = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).Select(value => double.Parse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)).ToArray();
+                var numberValues = termFilter.Values.WhereNonEmpty().Select(value => double.Parse(value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture)).ToArray();
                 if (!numberValues.IsNullOrEmpty())
                 {
                     result = new ValueFilter<double>
@@ -123,7 +123,7 @@ public class SearchFiltersBuilder : ISearchFiltersBuilder
                 }
                 break;
             case FieldType.Date:
-                var dateValues = termFilter.Values.Where(x => !string.IsNullOrEmpty(x)).Select(value => DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal)).ToArray();
+                var dateValues = termFilter.Values.WhereNonEmpty().Select(value => DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal)).ToArray();
                 if (!dateValues.IsNullOrEmpty())
                 {
                     result = new ValueFilter<DateTime>

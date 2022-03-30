@@ -1,10 +1,9 @@
 using System;
-using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
@@ -54,12 +53,9 @@ public class DocumentConverter : IDocumentConverter
                 schema.Fields.Add(fieldName, ToProviderFieldType(field));
             }
 
-            if (field.Name == ModuleConstants.Api.FieldNames.ObjectFieldName
-                && document.Fields.ContainsKey(fieldName))
+            if (field.Name == ModuleConstants.Api.FieldNames.ObjectFieldName && document.Fields.ContainsKey(fieldName))
             {
-                var textValue = SerializeObject(field.Value);
-
-                document.Fields[fieldName] = textValue;
+                document.Fields[fieldName] = field.Value.SerializeJson();
             }
         }
 
@@ -112,29 +108,5 @@ public class DocumentConverter : IDocumentConverter
         }
 
         return searchDocument;
-    }
-
-    private JsonSerializer GetSerializer()
-    {
-        return new JsonSerializer
-        {
-            DefaultValueHandling = DefaultValueHandling.Include,
-            NullValueHandling = NullValueHandling.Ignore,
-            Formatting = Formatting.None,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            TypeNameHandling = TypeNameHandling.None,
-        };
-    }
-
-    private string SerializeObject(object obj)
-    {
-        using (var memStream = new MemoryStream())
-        {
-            obj.SerializeJson(memStream, GetSerializer());
-            memStream.Seek(0, SeekOrigin.Begin);
-
-            var result = memStream.ReadToString();
-            return result;
-        }
     }
 }
