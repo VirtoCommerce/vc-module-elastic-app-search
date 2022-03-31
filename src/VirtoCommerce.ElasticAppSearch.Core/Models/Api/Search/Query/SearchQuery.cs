@@ -24,6 +24,10 @@ public record SearchQuery
     public Dictionary<string, SearchFieldValue> SearchFields { get; init; }
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
+    public Dictionary<string, ResultFieldValue> ResultFields { get; init; }
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public Page Page { get; init; }
 
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

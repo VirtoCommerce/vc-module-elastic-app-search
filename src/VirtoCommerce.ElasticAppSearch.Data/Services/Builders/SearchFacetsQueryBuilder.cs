@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
@@ -17,11 +17,15 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 {
     private const int MaxFacetValues = 250;
 
+    private readonly ILogger<SearchFacetsQueryBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
     private readonly ISearchFiltersBuilder _searchFiltersBuilder;
 
-    public SearchFacetsQueryBuilder(IFieldNameConverter fieldNameConverter, ISearchFiltersBuilder searchFiltersBuilder)
+    public SearchFacetsQueryBuilder(ILogger<SearchFacetsQueryBuilder> logger,
+        IFieldNameConverter fieldNameConverter,
+        ISearchFiltersBuilder searchFiltersBuilder)
     {
+        _logger = logger;
         _fieldNameConverter = fieldNameConverter;
         _searchFiltersBuilder = searchFiltersBuilder;
     }
@@ -103,7 +107,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                 };
                 break;
             default:
-                Debug.WriteLine("Elastic App Search supports value facet only for text, number and date fields.");
+                _logger.LogError("Elastic App Search supports value facet only for text, number and date fields.");
                 break;
         }
 
@@ -148,7 +152,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 
                 break;
             default:
-                Debug.WriteLine("Elastic App Search supports range facet only for date, number and geo location fields.");
+                _logger.LogError("Elastic App Search supports range facet only for date, number and geo location fields.");
                 break;
         }
 
@@ -200,7 +204,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 
 
     /// Try to fix faulty xapi logic
-    private IEnumerable<AggregationRequest> PrepareFacets(IEnumerable<AggregationRequest> aggregations)
+    private static IEnumerable<AggregationRequest> PrepareFacets(IEnumerable<AggregationRequest> aggregations)
     {
         var result = new List<AggregationRequest>();
 

@@ -78,7 +78,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         /// <summary>
         /// Convert aggregations without field name (special case)
         /// </summary>
-        private IEnumerable<AggregationResponse> ToSimpleAggregationResponses(IList<SearchResultAggregationWrapper> searchResults)
+        private static IEnumerable<AggregationResponse> ToSimpleAggregationResponses(IList<SearchResultAggregationWrapper> searchResults)
         {
             return searchResults
                 .Where(x => !string.IsNullOrEmpty(x.AggregationId) && x.SearchResult.Meta.Page.TotalResults > 0)

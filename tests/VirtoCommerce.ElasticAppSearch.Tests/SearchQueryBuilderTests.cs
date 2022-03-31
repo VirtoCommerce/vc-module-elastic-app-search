@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
@@ -73,6 +74,29 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             }
         };
 
+        public static IEnumerable<object[]> ResultFieldsData => new[]
+{
+            new object[] { null, null },
+            new object[] { Array.Empty<string>(), new Dictionary<string, ResultFieldValue>() },
+            new object[]
+            {
+                new[] { "test" },
+                new Dictionary<string, ResultFieldValue>
+                {
+                    { "test", new ResultFieldValue() }
+                }
+            },
+            new object[]
+            {
+                new[] { "test1", "test2" },
+                new Dictionary<string, ResultFieldValue>
+                {
+                    { "test1", new ResultFieldValue() },
+                    { "test2", new ResultFieldValue() }
+                }
+            }
+        };
+
         [Theory]
         [MemberData(nameof(SortData))]
         public void ToSearchQuery_ConvertValidSorting_Successfully(SortingField[] sorting, object expectedResult)
@@ -87,6 +111,13 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             Test(() => new SearchRequest { SearchFields = searchFields }, searchQuery => searchQuery.SearchFields, expectedResult);
         }
 
+        [Theory]
+        [MemberData(nameof(ResultFieldsData))]
+        public void ToSearchQuery_ConvertValidResultFields_Successfully(string[] resultFields, object expectedResult)
+        {
+            Test(() => new SearchRequest { IncludeFields = resultFields }, searchQuery => searchQuery.ResultFields, expectedResult);
+        }
+
         private static void Test(Func<SearchRequest> searchRequest, Func<SearchQuery, object> actualResultSelector, object expectedResult)
         {
             // Arrange
@@ -99,9 +130,10 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var schema = GetSchema();
 
             // Act
-            var searchQuery = searchQueryBuilder.ToSearchQuery(request, schema);
+            var searchQueries = searchQueryBuilder.ToSearchQueries(request, schema);
 
             // Assert
+            var searchQuery = searchQueries.FirstOrDefault(x => x.AggregationId == null).SearchQuery;
             var actualResult = actualResultSelector(searchQuery);
             Assert.Equal(expectedResult, actualResult);
         }

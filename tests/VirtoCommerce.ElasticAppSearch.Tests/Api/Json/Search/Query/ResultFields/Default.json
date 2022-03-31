@@ -1,0 +1,11 @@
+{
+  "query": "test",
+  "result_fields": {
+    "test1": {
+      "raw": {}
+    },
+    "test2": {
+      "raw": {}
+    }
+  }
+}

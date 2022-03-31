@@ -53,6 +53,7 @@ public class DocumentConverter : IDocumentConverter
                 schema.Fields.Add(fieldName, ToProviderFieldType(field));
             }
 
+            // move inside json converters
             if (field.Name == ModuleConstants.Api.FieldNames.ObjectFieldName && document.Fields.ContainsKey(fieldName))
             {
                 document.Fields[fieldName] = field.Value.SerializeJson();
@@ -99,6 +100,8 @@ public class DocumentConverter : IDocumentConverter
             var indexFieldName = _fieldNameConverter.ToIndexFieldName(providerFieldName);
 
             var indexFieldValue = value.Raw;
+
+            // move inside json converters
             if (indexFieldValue is JArray jArray)
             {
                 indexFieldValue = jArray.ToObject<object[]>();

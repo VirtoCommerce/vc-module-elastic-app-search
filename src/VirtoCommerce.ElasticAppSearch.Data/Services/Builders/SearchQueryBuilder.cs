@@ -32,29 +32,6 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         _facetsBuilder = facetsBuilder;
     }
 
-    public virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema)
-    {
-        if (request.IsFuzzySearch)
-        {
-            _logger.LogWarning("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
-        }
-
-        var searchQuery = new SearchQuery
-        {
-            Query = request.SearchKeywords ?? string.Empty,
-            Sort = GetSorting(request.Sorting, schema),
-            Filters = GetFilters(request.Filter, schema),
-            SearchFields = GetSearchFields(request.SearchFields),
-            Page = new Page
-            {
-                Current = request.Skip / request.Take + 1,
-                Size = request.Take
-            },
-        };
-
-        return searchQuery;
-    }
-
     public IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema)
     {
         var mainSearchQuery = ToSearchQuery(request, schema);
@@ -64,7 +41,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         // process aggregates
         var facetRequests = GetFacetRequests(request.Aggregations, schema);
 
-        foreach (var filterGroup in facetRequests.GroupBy(x => x.FilterName))
+        foreach (var filterGroup in facetRequests?.GroupBy(x => x.FilterName) ?? new List<IGrouping<string, FacetRequest>>())
         {
             if (filterGroup.Key == request.Filter?.ToString())
             {
@@ -112,6 +89,30 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
+    protected virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema)
+    {
+        if (request.IsFuzzySearch)
+        {
+            _logger.LogWarning("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
+        }
+
+        var searchQuery = new SearchQuery
+        {
+            Query = request.SearchKeywords ?? string.Empty,
+            Sort = GetSorting(request.Sorting, schema),
+            Filters = GetFilters(request.Filter, schema),
+            SearchFields = GetSearchFields(request.SearchFields),
+            ResultFields = GetResultFields(request.IncludeFields, schema),
+            Page = new Page
+            {
+                Current = request.Skip / request.Take + 1,
+                Size = request.Take
+            },
+        };
+
+        return searchQuery;
+    }
+
     protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
     {
         var result = sortingFields?
@@ -135,6 +136,16 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
+    protected virtual Dictionary<string, ResultFieldValue> GetResultFields(IEnumerable<string> includeFields, Schema schema)
+    {
+        var result = includeFields?
+            .Select(x => _fieldNameConverter.ToProviderFieldName(x))
+            .Where(x => schema.Fields.ContainsKey(x))
+            .ToDictionary(x => x, _ => new ResultFieldValue());
+
+        return result;
+    }
+
     protected virtual IFilters GetFilters(ISearchFilter filter, Schema schema)
     {
         return _searchFiltersBuilder.ToFilters(filter, schema);
@@ -146,7 +157,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return _facetsBuilder.GetFacetRequests(aggregations, schema);
     }
 
-    private Dictionary<string, Facet> GetFacets(IEnumerable<FacetRequest> facetRequests)
+    private static Dictionary<string, Facet> GetFacets(IEnumerable<FacetRequest> facetRequests)
     {
         return facetRequests
             .Where(x => x.Facet != null)

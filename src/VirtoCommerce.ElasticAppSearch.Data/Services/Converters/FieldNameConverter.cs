@@ -19,7 +19,7 @@ public class FieldNameConverter : IFieldNameConverter
         // Only lowercase letters allowed
         var providerFieldName = indexFieldName.ToLowerInvariant();
 
-        // Replase whitespaces with underscores
+        // Replace whitespaces with underscores
         providerFieldName = Regex.Replace(providerFieldName, @"\W", "_");
 
         // Replace private field prefix (double underscore) because field name cannot have leading underscore
