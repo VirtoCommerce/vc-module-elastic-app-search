@@ -9,7 +9,7 @@ public record DateTimeRangeFilter : RangeFilter<DateTime>
     {
     }
 
-    public DateTimeRangeFilter(string fieldName, RangeFilterBound<DateTime> from, RangeFilterBound<DateTime> to):
+    public DateTimeRangeFilter(string fieldName, RangeBound<DateTime> from, RangeBound<DateTime> to):
         base(fieldName, from, fromValue => fromValue?.GetPreviousSecond(), to, toValue => toValue?.GetNextSecond())
     {
     }

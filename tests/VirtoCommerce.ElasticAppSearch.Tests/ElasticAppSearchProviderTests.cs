@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Moq;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -26,6 +27,10 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var documentConverter = new Mock<IDocumentConverter>();
             var searchQueryBuilder = new Mock<ISearchQueryBuilder>();
             var searchResponseBuilder = new Mock<ISearchResponseBuilder>();
+
+            searchQueryBuilder
+                .Setup(x => x.ToSearchQueries(It.IsAny<SearchRequest>(), It.IsAny<Schema>()))
+                .Returns(new List<SearchQueryAggregationWrapper> { new SearchQueryAggregationWrapper() });
 
             var appSearchProvider = new ElasticAppSearchProvider(
                 searchOptions,

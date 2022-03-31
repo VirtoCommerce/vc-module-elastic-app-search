@@ -18,7 +18,7 @@ public class RangeFilterSerializationTests: SerializationTestsBase
             Filters = new NumberRangeFilter
             {
                 FieldName = "field",
-                Value = new RangeFilterValue<double>
+                Value = new RangeValue<double>
                 {
                     From = 0.1d,
                     To = 10.0d
@@ -31,7 +31,7 @@ public class RangeFilterSerializationTests: SerializationTestsBase
             Filters = new DateTimeRangeFilter
             {
                 FieldName = "field",
-                Value = new RangeFilterValue<DateTime>
+                Value = new RangeValue<DateTime>
                 {
                     From = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     To = new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc)

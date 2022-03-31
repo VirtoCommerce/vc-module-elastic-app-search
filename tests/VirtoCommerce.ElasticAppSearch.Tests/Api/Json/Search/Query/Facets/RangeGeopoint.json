@@ -1,0 +1,27 @@
+{
+  "query": "park",
+  "facets": {
+    "location": {
+      "center": "37.386483, -122.083842",
+      "unit": "m",
+      "type": "range",
+      "ranges": [
+        {
+          "name": "Nearby",
+          "from": 0.0,
+          "to": 100000.0
+        },
+        {
+          "name": "Drive",
+          "from": 100000.0,
+          "to": 300000.0
+        },
+        {
+          "name": "Fly",
+          "from": 300000.0
+        }
+      ],
+      "name": "geo-range-from-san-francisco"
+    }
+  }
+}
