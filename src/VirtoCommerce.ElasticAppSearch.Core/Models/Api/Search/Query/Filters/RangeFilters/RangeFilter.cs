@@ -22,7 +22,7 @@ public abstract record RangeFilter<TValue> : Filter<RangeValue<TValue>>
         Value = new RangeValue<TValue>
         {
             From = from.Include ? from.Value : fromExcludeConverter(from.Value),
-            To = to.Include ? toIncludeConverter(to.Value) : to.Value
+            To = to.Include ? to.Value : toIncludeConverter(to.Value)
         };
     }
 }

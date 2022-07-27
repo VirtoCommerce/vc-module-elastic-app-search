@@ -34,7 +34,7 @@ public static class RangeExtensions
             {
                 Name = ragneName,
                 From = from.Include ? from.Value : from.Value?.GetNearestLower(),
-                To = to.Include ? to.Value?.GetNearestHigher() : to.Value,
+                To = to.Include ? to.Value : to.Value?.GetNearestHigher(),
             },
             out result);
     }

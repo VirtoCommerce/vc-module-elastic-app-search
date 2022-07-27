@@ -146,7 +146,7 @@ public class SearchFiltersBuilder : ISearchFiltersBuilder
     protected virtual IApiFilter ToRangeFilter(RangeFilter rangeFilter, Schema schema)
     {
         var fieldName = _fieldNameConverter.ToProviderFieldName(rangeFilter.FieldName);
-        var result = new AllFilter
+        var result = new AnyFilter
         {
             Value = rangeFilter.Values.Select(rangeFilterValue => ToRangeFilter(fieldName, rangeFilterValue, schema)).ToArray()
         };
