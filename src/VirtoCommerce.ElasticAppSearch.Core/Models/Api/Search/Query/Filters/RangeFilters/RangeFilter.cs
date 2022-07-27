@@ -21,8 +21,8 @@ public abstract record RangeFilter<TValue> : Filter<RangeValue<TValue>>
         FieldName = fieldName;
         Value = new RangeValue<TValue>
         {
-            From = from.Include ? from.Value : fromExcludeConverter(from.Value),
-            To = to.Include ? to.Value : toIncludeConverter(to.Value)
+            From = from.Include ? from.Value : fromExcludeConverter(from.Value), // by default Inclusive lower bound of the range
+            To = to.Include ? toIncludeConverter(to.Value) : to.Value // by default Exclusive upper bound of the range.
         };
     }
 }

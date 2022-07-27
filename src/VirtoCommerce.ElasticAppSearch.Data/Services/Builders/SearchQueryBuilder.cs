@@ -105,9 +105,9 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             ResultFields = GetResultFields(request.IncludeFields, schema),
             Page = new Page
             {
-                Current = request.Skip / request.Take + 1,
+                Current = request.Take == 0 ? 1 : request.Skip / request.Take + 1,
                 Size = request.Take
-            },
+            }
         };
 
         return searchQuery;

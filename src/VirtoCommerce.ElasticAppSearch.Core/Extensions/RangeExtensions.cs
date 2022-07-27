@@ -47,8 +47,8 @@ public static class RangeExtensions
             (from, to) => new FacetRangeValue<DateTime>()
             {
                 Name = ragneName,
-                From = from.Include ? from.Value : from.Value?.GetPreviousSecond(),
-                To = to.Include ? to.Value?.GetNextSecond() : to.Value,
+                From = from.Include ? from.Value : from.Value?.GetPreviousMillisecond(),
+                To = to.Include ? to.Value?.GetNextMillisecond() : to.Value,
             },
             out result);
     }
