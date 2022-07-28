@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -9,6 +11,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 using Xunit;
 
@@ -27,6 +30,16 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var documentConverter = new Mock<IDocumentConverter>();
             var searchQueryBuilder = new Mock<ISearchQueryBuilder>();
             var searchResponseBuilder = new Mock<ISearchResponseBuilder>();
+            var _platformMemoryCache = new Mock<IPlatformMemoryCache>();
+
+            //  setup cache moqs
+            var _cacheEntry = new Mock<ICacheEntry>();
+            var engineName = string.Join("-", searchOptions.Value.Scope, "testDocumentType").ToLowerInvariant();
+            var cacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSchemaAsync", engineName);
+
+            _cacheEntry.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
+            _platformMemoryCache.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_cacheEntry.Object);
+            _platformMemoryCache.Setup(x => x.GetDefaultCacheEntryOptions()).Returns(() => new MemoryCacheEntryOptions());
 
             searchQueryBuilder
                 .Setup(x => x.ToSearchQueries(It.IsAny<SearchRequest>(), It.IsAny<Schema>()))
@@ -37,13 +50,15 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 appSearchClient.Object,
                 documentConverter.Object,
                 searchQueryBuilder.Object,
-                searchResponseBuilder.Object
+                searchResponseBuilder.Object,
+                _platformMemoryCache.Object
             );
 
             var searchRequest = new SearchRequest
             {
                 RawQuery = testQuery,
             };
+
 
             // Act
             await appSearchProvider.SearchAsync("testDocumentType", searchRequest);

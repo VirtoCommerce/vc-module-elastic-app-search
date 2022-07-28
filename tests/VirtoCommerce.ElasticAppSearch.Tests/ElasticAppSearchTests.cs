@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,7 @@ using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
+using VirtoCommerce.Platform.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using Xunit;
@@ -58,9 +60,12 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var searchQueryBuilder = new SearchQueryBuilder(Mock.Of<ILogger<SearchQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, facetsBuilder);
             var aggrResponsebuilder = new AggregationsResponseBuilder(fieldNameConverter);
             var searchResponseBuilder = new SearchResponseBuilder(documentConverter, aggrResponsebuilder);
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
 
-            // GetSettingsManager(), 
-            var provider = new ElasticAppSearchProvider(searchOptions, apiClient, documentConverter, searchQueryBuilder, searchResponseBuilder);
+            var cachingOptions = Options.Create(new CachingOptions { CacheEnabled = true });
+            var cache = new PlatformMemoryCache(memoryCache, cachingOptions, Mock.Of<ILogger<PlatformMemoryCache>>());
+
+            var provider = new ElasticAppSearchProvider(searchOptions, apiClient, documentConverter, searchQueryBuilder, searchResponseBuilder, cache);
             return provider;
         }
     }
