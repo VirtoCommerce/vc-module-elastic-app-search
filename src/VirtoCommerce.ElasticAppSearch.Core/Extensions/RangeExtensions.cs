@@ -33,8 +33,8 @@ public static class RangeExtensions
             (from, to) => new FacetRangeValue<double>()
             {
                 Name = ragneName,
-                From = from.Include ? from.Value : from.Value?.GetNearestLower(),
-                To = to.Include ? to.Value : to.Value?.GetNearestHigher(),
+                From = from.Include ? from.Value : from.Value?.GetNearestHigher(),
+                To = to.Include ? to.Value?.GetNearestHigher() : to.Value,
             },
             out result);
     }

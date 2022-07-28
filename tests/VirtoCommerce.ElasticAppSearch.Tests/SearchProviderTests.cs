@@ -56,13 +56,13 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             var request = new SearchRequest
             {
-                Skip = 4,
+                Skip = 3,
                 Take = 3,
             };
 
             var response = await provider.SearchAsync(DocumentType, request);
 
-            Assert.Equal(2, response.DocumentsCount);
+            Assert.Equal(3, response.DocumentsCount);
             Assert.Equal(6, response.TotalCount);
         }
 
@@ -223,7 +223,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             request = new SearchRequest
             {
-                SearchKeywords = "red shirt",
+                SearchKeywords = "\"red shirt\"",
                 SearchFields = new[] { "Content" },
                 Take = 10,
             };
@@ -387,7 +387,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 Filter = new TermFilter
                 {
                     FieldName = "HasMultiplePrices",
-                    Values = new[] { "tRue" } // Value should be case insensitive
+                    Values = new[] { "true" } 
                 },
                 Take = 10,
             };
@@ -402,7 +402,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 Filter = new TermFilter
                 {
                     FieldName = "HasMultiplePrices",
-                    Values = new[] { "fAlse" } // Value should be case insensitive
+                    Values = new[] { "false" }
                 },
                 Take = 10,
             };
