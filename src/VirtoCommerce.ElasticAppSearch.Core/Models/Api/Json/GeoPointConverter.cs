@@ -15,6 +15,8 @@ public class GeoPointConverter: JsonConverter<GeoPoint>
 
     public override void WriteJson(JsonWriter writer, GeoPoint value, JsonSerializer serializer)
     {
-        serializer.Serialize(writer, value?.ToString()); 
+        writer.WriteStartArray();
+        writer.WriteRaw(value?.ToString());
+        writer.WriteEndArray();
     }
 }

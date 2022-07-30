@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -113,19 +115,61 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return searchQuery;
     }
 
-    protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
+    protected virtual ISort[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
     {
-        var result = sortingFields?
-            .Select(sortingField => new Field<SortOrder>
+        var result = sortingFields?.Select(GetSortingField).ToArray();
+        return result;
+    }
+
+    protected virtual ISort GetSortingField(SortingField field)
+    {
+        ISort result;
+
+        if (field is GeoDistanceSortingField geoSorting)
+        {
+            result = new GeoDistanceSort
             {
-                FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
-                Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
-            })
-            .Where(x => schema.Fields.ContainsKey(x.FieldName))
-            .ToArray();
+                FieldName = _fieldNameConverter.ToProviderFieldName(field.FieldName),
+                Value = new GeoDistanceSortValue
+                {
+                    Center = geoSorting.Location.ToGeoPoint(),
+                    Order = field.IsDescending ? SortOrder.Desc : SortOrder.Asc
+                }
+            };
+        }
+        //else if (field.FieldName.EqualsInvariant(Score))
+        //{
+        //    result = new FieldSort
+        //    {
+        //        Field = new Field("_score"),
+        //        Order = field.IsDescending ? SortOrder.Descending : SortOrder.Ascending
+        //    };
+        //}
+        else
+        {
+            result = new FieldSort
+            {
+                FieldName = _fieldNameConverter.ToProviderFieldName(field.FieldName),
+                Value = field.IsDescending ? SortOrder.Desc : SortOrder.Asc
+            };
+        }
 
         return result;
     }
+
+    //protected virtual ISort[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
+    //{
+    //    var result = sortingFields?
+    //        .Select(sortingField => new FieldSort
+    //        {
+    //            FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
+    //            Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
+    //        })
+    //        .Where(x => schema.Fields.ContainsKey(x.FieldName))
+    //        .ToArray();
+
+    //    return result;
+    //}
 
     protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
     {
