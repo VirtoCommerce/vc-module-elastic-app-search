@@ -2,7 +2,7 @@
   "query": "test",
   "sort": {
     "location": {
-      "center": [ 38.89, -77.08 ],
+      "center": "38.89,-77.08",
       "order": "asc"
     }
   } 
