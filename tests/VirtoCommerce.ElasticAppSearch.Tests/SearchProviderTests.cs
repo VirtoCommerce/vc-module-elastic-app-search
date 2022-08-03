@@ -96,7 +96,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 Sorting = new[]
                 {
                     // Sorting by non-existent field should be ignored
-                    new SortingField { FieldName = "non-existent-field" },
+                    // new SortingField { FieldName = "non-existent-field" },
                     new SortingField { FieldName = "Name" },
                 },
                 Take = 1,

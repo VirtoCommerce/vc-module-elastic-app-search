@@ -20,6 +20,6 @@ public class GeoPoint: SearchGeoPoint
 
     public override string ToString()
     {
-        return $"{Latitude.ToString("#0.0######", CultureInfo.InvariantCulture)},{Longitude.ToString("#0.0######", CultureInfo.InvariantCulture)}";
+        return $"{Latitude.ToString("#0.0######", CultureInfo.InvariantCulture)}, {Longitude.ToString("#0.0######", CultureInfo.InvariantCulture)}";
     }
 }
