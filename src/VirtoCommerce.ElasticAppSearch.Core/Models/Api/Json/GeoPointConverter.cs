@@ -4,7 +4,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class GeoPointConverter: JsonConverter<GeoPoint>
+public class GeoPointConverter : JsonConverter<GeoPoint>
 {
     public override GeoPoint ReadJson(JsonReader reader, Type objectType, GeoPoint existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
@@ -16,8 +16,5 @@ public class GeoPointConverter: JsonConverter<GeoPoint>
     public override void WriteJson(JsonWriter writer, GeoPoint value, JsonSerializer serializer)
     {
         serializer.Serialize(writer, value?.ToString());
-        //writer.WriteStartArray();
-        //writer.WriteRaw(value?.ToString());
-        //writer.WriteEndArray();
     }
 }

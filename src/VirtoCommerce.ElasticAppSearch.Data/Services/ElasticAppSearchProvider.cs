@@ -28,6 +28,8 @@ public class ElasticAppSearchProvider : ISearchProvider
     private readonly ISearchResponseBuilder _searchResponseBuilder;
     private readonly IPlatformMemoryCache _memoryCache;
 
+    private const int _maxIndexingDocuments = 100;
+
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
         IElasticAppSearchApiClient elasticAppSearch,
@@ -84,9 +86,9 @@ public class ElasticAppSearchProvider : ISearchProvider
         var indexingResultItems = new List<IndexingResultItem>();
 
         // Elastic App Search doesn't allow to create or update more than 100 documents at once and this restriction isn't configurable
-        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += 100)
+        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += _maxIndexingDocuments)
         {
-            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, 100);
+            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, _maxIndexingDocuments);
             var createOrUpdateDocumentsResult = await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray());
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
