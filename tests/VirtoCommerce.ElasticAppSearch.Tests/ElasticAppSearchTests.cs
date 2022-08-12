@@ -25,7 +25,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         protected override ISearchProvider GetSearchProvider()
         {
 
-            var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "http://localhost:9200";
+            var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "http://localhost:3002";
             var privateApiKey = Environment.GetEnvironmentVariable("TestElasticAppSearchPrivateKey") ?? "";
 
             var elasticOptions = Options.Create(new SearchOptions { Scope = "test" });
