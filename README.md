@@ -3,8 +3,8 @@
 ## Overview
 VirtoCommerce.ElasticAppSearch module implements ISearchProvider defined in the VirtoCommerce Search module to provide integration with Elastic App Search API.
 
-Elastic App search provides search, aggregation, and analytics capabilities as a Service, on top of ElasticSearch. It provides tools that cat help tune a search result sets without development:​
-* [Relevance Tuning​](https://www.elastic.co/guide/en/app-search/current/precision-tuning.html/)
+Elastic App search provides search, aggregation, and analytics capabilities as a Service, on top of ElasticSearch. It provides tools that cat help tune a search result sets without development:
+* [Relevance Tuning](https://www.elastic.co/guide/en/app-search/current/precision-tuning.html/)
 * [Synonyms](https://www.elastic.co/guide/en/app-search/current/synonyms-guide.html/)
 * [Curations](https://www.elastic.co/guide/en/app-search/current/curations-guide.html/)
 
@@ -26,7 +26,7 @@ Elastic App Search provider are configurable by these configuration keys:
         "Scope": "default",
         "ElasticAppSearch": {
 			"Endpoint": "https://localhost:3002",
-            "PrivateApiKey": "private-key"
+        	"PrivateApiKey": "private-key"
         }
     }
 ```
