@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
@@ -10,6 +11,8 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.ElasticAppSearch.Data.Caching;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
@@ -23,13 +26,17 @@ public class ElasticAppSearchProvider : ISearchProvider
     private readonly IDocumentConverter _documentConverter;
     private readonly ISearchQueryBuilder _searchQueryBuilder;
     private readonly ISearchResponseBuilder _searchResponseBuilder;
+    private readonly IPlatformMemoryCache _memoryCache;
+
+    private const int _maxIndexingDocuments = 100;
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
         IElasticAppSearchApiClient elasticAppSearch,
         IDocumentConverter documentConverter,
         ISearchQueryBuilder searchQueryBuilder,
-        ISearchResponseBuilder searchResponseBuilder)
+        ISearchResponseBuilder searchResponseBuilder,
+        IPlatformMemoryCache memoryCache)
     {
         if (searchOptions == null)
         {
@@ -43,12 +50,15 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         _searchQueryBuilder = searchQueryBuilder;
         _searchResponseBuilder = searchResponseBuilder;
+
+        _memoryCache = memoryCache;
     }
 
     #region ISearchProvider implementation
 
     public async Task DeleteIndexAsync(string documentType)
     {
+        SearchCacheRegion.ExpireRegion();
         await Task.CompletedTask;
     }
 
@@ -76,14 +86,17 @@ public class ElasticAppSearchProvider : ISearchProvider
         var indexingResultItems = new List<IndexingResultItem>();
 
         // Elastic App Search doesn't allow to create or update more than 100 documents at once and this restriction isn't configurable
-        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += 100)
+        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += _maxIndexingDocuments)
         {
-            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, 100);
+            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, _maxIndexingDocuments);
             var createOrUpdateDocumentsResult = await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray());
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
 
         await UpdateSchemaAsync(engineName, schema);
+
+        // refresh cache
+        SearchCacheRegion.ExpireRegion();
 
         var indexingResult = new IndexingResult { Items = indexingResultItems };
 
@@ -213,7 +226,14 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     protected virtual async Task<Schema> GetSchemaAsync(string engineName)
     {
-        return await _elasticAppSearch.GetSchemaAsync(engineName);
+        var cacheKey = CacheKey.With(GetType(), "GetSchemaAsync", engineName);
+
+        return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+        {
+            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeToken());
+            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+            return await _elasticAppSearch.GetSchemaAsync(engineName);
+        });
     }
 
     protected virtual async Task UpdateSchemaAsync(string engineName, Schema schema)

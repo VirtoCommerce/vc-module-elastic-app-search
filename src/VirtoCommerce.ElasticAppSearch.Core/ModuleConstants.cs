@@ -26,7 +26,7 @@ public static class ModuleConstants
             },
 
             // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
-            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'sszzz",
+            DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffzzz",
             DateTimeZoneHandling = DateTimeZoneHandling.Utc,
         };
 
