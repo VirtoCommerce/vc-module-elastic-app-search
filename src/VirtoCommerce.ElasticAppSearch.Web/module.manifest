@@ -1,29 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <id>VirtoCommerce.ElasticAppSearch</id>
-    <version>3.201.0</version>
-    <version-tag />
-    <platformVersion>3.200.0</platformVersion>
-    <title>Elastic App Search module</title>
-    <description>Search functionality with Elastic App Search service</description>
-    <authors>
-        <author>Aleksandr Vishnyakov</author>
-        <author>Konstantin Savosteev</author>
-        <author>Alexander Siniouguine</author>
-    </authors>
-    <owners>
-        <owner>VirtoCommerce</owner>
-    </owners>
-    <projectUrl>https://github.com/VirtoCommerce/vc-module-elastic-app-search</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.ElasticAppSearch)/Content/logo.png</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2022 VirtoCommerce. All rights reserved</copyright>
-    <tags>elastic app search</tags>
-    <assemblyFile>VirtoCommerce.ElasticAppSearch.Web.dll</assemblyFile>
-    <moduleType>VirtoCommerce.ElasticAppSearch.Web.Module, VirtoCommerce.ElasticAppSearch.Web</moduleType>
-    <dependencies>
-        <dependency id="VirtoCommerce.Search" version="3.200.0" />
-    </dependencies>
-    <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
+  <id>VirtoCommerce.ElasticAppSearch</id>
+  <version>3.202.0</version>
+  <version-tag />
+  <platformVersion>3.200.0</platformVersion>
+  <title>Elastic App Search module</title>
+  <description>Search functionality with Elastic App Search service</description>
+  <authors>
+    <author>Aleksandr Vishnyakov</author>
+    <author>Konstantin Savosteev</author>
+    <author>Alexander Siniouguine</author>
+  </authors>
+  <owners>
+    <owner>VirtoCommerce</owner>
+  </owners>
+  <projectUrl>https://github.com/VirtoCommerce/vc-module-elastic-app-search</projectUrl>
+  <iconUrl>Modules/$(VirtoCommerce.ElasticAppSearch)/Content/logo.png</iconUrl>
+  <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  <releaseNotes>First version.</releaseNotes>
+  <copyright>Copyright © 2022 VirtoCommerce. All rights reserved</copyright>
+  <tags>elastic app search</tags>
+  <assemblyFile>VirtoCommerce.ElasticAppSearch.Web.dll</assemblyFile>
+  <moduleType>VirtoCommerce.ElasticAppSearch.Web.Module, VirtoCommerce.ElasticAppSearch.Web</moduleType>
+  <dependencies>
+    <dependency id="VirtoCommerce.Search" version="3.200.0" />
+  </dependencies>
+  <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
 </module>
