@@ -64,7 +64,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                     FacetFieldName = facet?.Name,
                     Filter = _searchFiltersBuilder.ToFilters(aggregation.Filter, schema),
                     Facet = facet,
-                    FilterName = aggregation.Filter.ToString(),
+                    FilterName = aggregation.Filter != null ? aggregation.Filter.ToString() : aggregation.FieldName,
                 };
 
                 results.Add(facetRequest);

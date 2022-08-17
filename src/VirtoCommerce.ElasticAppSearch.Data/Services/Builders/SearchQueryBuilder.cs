@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -41,7 +42,8 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         // process aggregates
         var facetRequests = GetFacetRequests(request.Aggregations, schema);
 
-        foreach (var filterGroup in facetRequests?.GroupBy(x => x.FilterName) ?? new List<IGrouping<string, FacetRequest>>())
+        var groupedFilters = facetRequests?.GroupBy(x => x.FilterName) ?? new List<IGrouping<string, FacetRequest>>();
+        foreach (var filterGroup in groupedFilters)
         {
             if (filterGroup.Key == request.Filter?.ToString())
             {
@@ -49,12 +51,13 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 mainSearchQuery.Facets = GetFacets(filterGroup);
 
                 // add requests for selected filters
-                var aggregationFilterQueries = ToSearchQueryAggregationWrappers(filterGroup.Where(x => x.FieldName == null), request);
+                var aggregationFilterQueries = ToSearchQueryAggregationWrappers(filterGroup.Where(x => x.FieldName is null), request);
                 result.AddRange(aggregationFilterQueries);
             }
             else
             {
-                foreach (var fieldGroup in filterGroup.GroupBy(x => x.FieldName))
+                var filterGroups = filterGroup.GroupBy(x => x.FieldName);
+                foreach (var fieldGroup in filterGroups)
                 {
                     // add requests for inverted filters
                     if (string.IsNullOrEmpty(fieldGroup.Key))
@@ -105,24 +108,47 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             ResultFields = GetResultFields(request.IncludeFields, schema),
             Page = new Page
             {
-                Current = request.Skip / request.Take + 1,
+                Current = request.Take == 0 ? 1 : request.Skip / request.Take + 1,
                 Size = request.Take
-            },
+            }
         };
 
         return searchQuery;
     }
 
-    protected virtual Field<SortOrder>[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
+    protected virtual ISort[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
     {
-        var result = sortingFields?
-            .Select(sortingField => new Field<SortOrder>
-            {
-                FieldName = _fieldNameConverter.ToProviderFieldName(sortingField.FieldName),
-                Value = sortingField.IsDescending ? SortOrder.Desc : SortOrder.Asc
-            })
+        var result = sortingFields?.Select(GetSortingField)
             .Where(x => schema.Fields.ContainsKey(x.FieldName))
             .ToArray();
+
+        return result;
+    }
+
+    protected virtual ISort GetSortingField(SortingField field)
+    {
+        ISort result;
+
+        if (field is GeoDistanceSortingField geoSorting)
+        {
+            result = new GeoDistanceSort
+            {
+                FieldName = _fieldNameConverter.ToProviderFieldName(field.FieldName),
+                Value = new GeoDistanceSortValue
+                {
+                    Center = geoSorting.Location.ToGeoPoint(),
+                    Order = field.IsDescending ? SortOrder.Desc : SortOrder.Asc
+                }
+            };
+        }
+        else
+        {
+            result = new FieldSort
+            {
+                FieldName = _fieldNameConverter.ToProviderFieldName(field.FieldName),
+                Value = field.IsDescending ? SortOrder.Desc : SortOrder.Asc
+            };
+        }
 
         return result;
     }
@@ -159,9 +185,14 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     private static Dictionary<string, Facet> GetFacets(IEnumerable<FacetRequest> facetRequests)
     {
-        return facetRequests
-            .Where(x => x.Facet != null)
-            .ToDictionary(x => x.FacetFieldName, x => x.Facet);
+        var result = new Dictionary<string, Facet>();
+
+        foreach (var facetRequest in facetRequests.Where(x => x.Facet is not null))
+        {
+            result.TryAdd(facetRequest.FacetFieldName, facetRequest.Facet);
+        }
+
+        return result;
     }
 
     private IEnumerable<SearchQueryAggregationWrapper> ToSearchQueryAggregationWrappers(IEnumerable<FacetRequest> facets, SearchRequest request)

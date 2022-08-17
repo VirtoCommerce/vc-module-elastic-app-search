@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query;
@@ -16,7 +17,7 @@ public class SortSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                Sort = Array.Empty<Field<SortOrder>>()
+                Sort = Array.Empty<FieldSort>()
             },
             Path.Combine("..", "Default.json")
         },
@@ -25,7 +26,7 @@ public class SortSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                Sort = new Field<SortOrder>[]
+                Sort = new FieldSort[]
                 {
                     new()
                     {
@@ -41,7 +42,7 @@ public class SortSerializationTests: SerializationTestsBase
             new SearchQuery
             {
                 Query = "test",
-                Sort = new Field<SortOrder>[]
+                Sort = new FieldSort[]
                 {
                     new()
                     {
@@ -57,6 +58,22 @@ public class SortSerializationTests: SerializationTestsBase
             },
             "Multiple.json"
         },
+        new object[]
+        {
+            new SearchQuery
+            {
+                Query = "test",
+                Sort = new GeoDistanceSort[]
+                {
+                    new()
+                    {
+                        FieldName = "location",
+                        Value = new GeoDistanceSortValue { Center = new GeoPoint(){ Latitude = 38.89, Longitude = -77.08 }, Order = SortOrder.Asc }
+                    }
+                }
+            },
+            "Geo.json"
+        }
     };
 
     [Theory]

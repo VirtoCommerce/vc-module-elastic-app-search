@@ -6,6 +6,7 @@ using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
@@ -23,7 +24,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             new object[]
             {
                 new SortingField[] { new("test") },
-                new Field<SortOrder>[]
+                new FieldSort[]
                 {
                     new()
                     {
@@ -35,7 +36,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             new object[]
             {
                 new SortingField[] { new("test1"), new("test2", true) },
-                new Field<SortOrder>[]
+                new FieldSort[]
                 {
                     new()
                     {
