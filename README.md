@@ -37,6 +37,7 @@ API keys can be managed on the Credential menu on the App Search Dashboard panel
 
 * [Search Fundamentals](https://virtocommerce.com/docs/fundamentals/search/)
 * [Elastic App Search Documentation](https://www.elastic.co/guide/en/app-search/8.1/index.html)
+* [Elastic App Search Storefront Guide](./docs/eas-setup-guide.md)
 
 ## References
 
