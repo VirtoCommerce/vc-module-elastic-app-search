@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="module.manifest">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
