@@ -35,7 +35,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
         _logger = logger;
-        _options = options.Value;
+        _options = options.Value ?? new ElasticAppSearchOptions();
     }
 
     #region Engine
