@@ -201,11 +201,12 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         preSearchInfo.RequestStopWatch.Stop();
 
-        var debugMessage = $"Elastic App Search query ID: {preSearchInfo.RequestId}. Query took: {preSearchInfo.RequestStopWatch.ElapsedMilliseconds} ms.";
-        _logger.Log(LogLevel.Debug, debugMessage);
+        _logger.Log(LogLevel.Debug,
+            "Elastic App Search query ID: {requestId}. Query took: {elapsed} ms.",
+            preSearchInfo.RequestId, preSearchInfo.RequestStopWatch.ElapsedMilliseconds);
     }
 
-    private class PreSearchInfo
+    private sealed class PreSearchInfo
     {
         public string RequestId { get; set; }
 
