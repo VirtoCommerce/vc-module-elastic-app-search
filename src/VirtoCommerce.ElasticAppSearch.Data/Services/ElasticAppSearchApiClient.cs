@@ -1,8 +1,13 @@
+using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
@@ -19,11 +24,18 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 {
     private const string EnginesEndpoint = "engines";
 
-    private readonly HttpClient _httpClient;
+    private const string DebugHeader = "X-Enterprise-Search-Debug";
+    private const string RequestIdHeader = "X-Request-ID";
 
-    public ElasticAppSearchApiClient(IHttpClientFactory httpClientFactory)
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<ElasticAppSearchApiClient> _logger;
+    private readonly ElasticAppSearchOptions _options;
+
+    public ElasticAppSearchApiClient(IHttpClientFactory httpClientFactory, ILogger<ElasticAppSearchApiClient> logger, IOptions<ElasticAppSearchOptions> options)
     {
         _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
+        _logger = logger;
+        _options = options.Value ?? new ElasticAppSearchOptions();
     }
 
     #region Engine
@@ -105,7 +117,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSearchEndpoint(engineName), query, ModuleConstants.Api.JsonSerializerSettings);
+        var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+
+        var preSearchInfo = PreSearch(payload);
+        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), payload, default);
+        PostSearch(preSearchInfo);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
@@ -118,7 +134,9 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content);
+        var preSearchInfo = PreSearch(content);
+        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content, default);
+        PostSearch(preSearchInfo);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
@@ -147,5 +165,51 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private static string GetSearchEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/search";
+    }
+
+    private PreSearchInfo PreSearch(HttpContent payload)
+    {
+        var preSearchInfo = new PreSearchInfo();
+
+        if (_options.EnableSearchQueryDebug)
+        {
+            preSearchInfo.RequestId = Guid.NewGuid().ToString("N");
+
+            if (!payload.Headers.Contains(DebugHeader))
+            {
+                payload.Headers.Add(DebugHeader, "true");
+            }
+
+            if (payload.Headers.Contains(RequestIdHeader))
+            {
+                payload.Headers.Remove(RequestIdHeader);
+            }
+            payload.Headers.Add(RequestIdHeader, preSearchInfo.RequestId);
+
+            preSearchInfo.RequestStopWatch = Stopwatch.StartNew();
+        }
+
+        return preSearchInfo;
+    }
+
+    private void PostSearch(PreSearchInfo preSearchInfo)
+    {
+        if (preSearchInfo?.RequestId == null || preSearchInfo?.RequestStopWatch == null)
+        {
+            return;
+        }
+
+        preSearchInfo.RequestStopWatch.Stop();
+
+        _logger.Log(LogLevel.Debug,
+            "Elastic App Search query ID: {requestId}. Query took: {elapsed} ms.",
+            preSearchInfo.RequestId, preSearchInfo.RequestStopWatch.ElapsedMilliseconds);
+    }
+
+    private sealed class PreSearchInfo
+    {
+        public string RequestId { get; set; }
+
+        public Stopwatch RequestStopWatch { get; set; }
     }
 }

@@ -16,6 +16,7 @@ public static class HttpClientExtensions
         var responseMessage = await client.GetAsync(requestUri, cancellationToken);
         return await responseMessage.Content.ReadFromJsonAsync<TValue>(jsonSerializerSettings, cancellationToken);
     }
+
     public static async Task<TValue> GetFromJsonAsync<TValue>(this HttpClient client, Uri requestUri,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
@@ -82,7 +83,7 @@ public static class HttpClientExtensions
         }
     }
 
-    private static StringContent ToJson<TValue>(this TValue value, JsonSerializerSettings jsonSerializerSettings = null)
+    public static StringContent ToJson<TValue>(this TValue value, JsonSerializerSettings jsonSerializerSettings = null)
     {
         var content = JsonConvert.SerializeObject(value, jsonSerializerSettings);
         return new StringContent(content, Encoding.UTF8, "application/json");

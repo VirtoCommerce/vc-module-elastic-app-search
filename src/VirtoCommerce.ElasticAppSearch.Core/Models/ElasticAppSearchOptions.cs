@@ -7,4 +7,6 @@ public class ElasticAppSearchOptions
     public string PrivateApiKey { get; set; }
 
     public bool EnableHttpCompression { get; set; }
+
+    public bool EnableSearchQueryDebug { get; set; }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
@@ -52,7 +53,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             var httpFactory = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
 
-            var apiClient = new ElasticAppSearchApiClient(httpFactory);
+            var apiClient = new ElasticAppSearchApiClient(httpFactory, Mock.Of<ILogger<ElasticAppSearchApiClient>>(), Mock.Of<IOptions<ElasticAppSearchOptions>>());
             var fieldNameConverter = new FieldNameConverter();
             var documentConverter = new DocumentConverter(Mock.Of<ILogger<DocumentConverter>>(), fieldNameConverter);
             var searchFilterBuilder = new SearchFiltersBuilder(Mock.Of<ILogger<SearchFiltersBuilder>>(), fieldNameConverter);
