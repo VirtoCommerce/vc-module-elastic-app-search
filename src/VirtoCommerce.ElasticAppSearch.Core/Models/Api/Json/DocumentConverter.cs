@@ -5,8 +5,8 @@ using Newtonsoft.Json.Linq;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class DocumentConverter<TDocument, TFieldValue>: DefaultJsonConverter<TDocument>
-    where TDocument: DocumentBase<TFieldValue>
+public class DocumentConverter<TDocument, TFieldValue> : DefaultJsonConverter<TDocument>
+    where TDocument : DocumentBase<TFieldValue>
 {
     public override TDocument ReadJson(JsonReader reader, Type objectType, TDocument existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
@@ -17,10 +17,12 @@ public class DocumentConverter<TDocument, TFieldValue>: DefaultJsonConverter<TDo
         );
         return document;
     }
-    
+
     public override void WriteJson(JsonWriter writer, TDocument value, JsonSerializer serializer)
     {
-        value.RawFields = value.Fields.ToDictionary(field => field.Key, field => JToken.FromObject(field.Value, serializer));
+        value.RawFields = value.Fields
+            .Where(field => field.Value is not null)
+            .ToDictionary(field => field.Key, field => JToken.FromObject(field.Value, serializer));
         base.WriteJson(writer, value, serializer);
     }
 }
