@@ -33,7 +33,11 @@ public class SearchResponseBuilder : ISearchResponseBuilder
     public SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
         // create request based on main request
-        var searchResult = searchResults.FirstOrDefault().SearchResult;
+        var searchResult = searchResults?.FirstOrDefault()?.SearchResult;
+        if (searchResult == null)
+        {
+            return new SearchResponse();
+        }
 
         var searchResponse = new SearchResponse
         {
@@ -41,6 +45,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
             TotalCount = searchResult.Meta.Page.TotalResults,
             Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations),
         };
+
         return searchResponse;
     }
 }
