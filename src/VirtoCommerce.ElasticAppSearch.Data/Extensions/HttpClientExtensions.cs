@@ -62,6 +62,12 @@ public static class HttpClientExtensions
         return await client.SendAsync(httpMessage, cancellationToken);
     }
 
+    public static async Task<HttpResponseMessage> DeleteAsync<TValue>(this HttpClient client, Uri requestUri, CancellationToken cancellationToken = default)
+    {
+        var httpMessage = new HttpRequestMessage(HttpMethod.Delete, requestUri);
+        return await client.SendAsync(httpMessage, cancellationToken);
+    }
+
     public static async Task<TValue> ReadFromJsonAsync<TValue>(this HttpContent httpContent,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {

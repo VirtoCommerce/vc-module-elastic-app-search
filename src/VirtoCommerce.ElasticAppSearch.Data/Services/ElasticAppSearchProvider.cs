@@ -58,8 +58,13 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     public async Task DeleteIndexAsync(string documentType)
     {
-        SearchCacheRegion.ExpireRegion();
-        await Task.CompletedTask;
+        var engineName = GetEngineName(documentType);
+        var result = await _elasticAppSearch.DeleteEngineAsync(engineName);
+
+        if (result.Deleted)
+        {
+            SearchCacheRegion.ExpireRegion();
+        }
     }
 
     public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
