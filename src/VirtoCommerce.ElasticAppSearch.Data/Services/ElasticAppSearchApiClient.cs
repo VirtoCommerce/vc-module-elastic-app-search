@@ -65,6 +65,17 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
+    public async Task<DeleteEngineResult> DeleteEngineAsync(string engineName)
+    {
+        var response = await _httpClient.DeleteAsync(GetEngineEndpoint(engineName));
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<DeleteEngineResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
+    }
+
     #endregion
 
     #region Documents
