@@ -155,7 +155,7 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     protected virtual string GetEngineName(string documentType)
     {
-        return string.Join("-", _searchOptions.Scope, documentType).ToLowerInvariant();
+        return string.Join("-", _searchOptions.GetScope(documentType), documentType).ToLowerInvariant();
     }
 
     protected virtual async Task<bool> GetEngineExistsAsync(string name)
