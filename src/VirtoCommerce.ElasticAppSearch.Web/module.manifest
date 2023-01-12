@@ -23,7 +23,7 @@
   <assemblyFile>VirtoCommerce.ElasticAppSearch.Web.dll</assemblyFile>
   <moduleType>VirtoCommerce.ElasticAppSearch.Web.Module, VirtoCommerce.ElasticAppSearch.Web</moduleType>
   <dependencies>
-    <dependency id="VirtoCommerce.Search" version="3.200.0" />
+    <dependency id="VirtoCommerce.Search" version="3.217.0" />
   </dependencies>
   <useFullTypeNameInSwagger>false</useFullTypeNameInSwagger>
 </module>
