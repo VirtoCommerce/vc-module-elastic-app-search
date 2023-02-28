@@ -63,7 +63,7 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         if (result.Deleted)
         {
-            SearchCacheRegion.ExpireRegion();
+            SearchCacheRegion.ExpireTokenForKey(engineName);
         }
     }
 
@@ -98,10 +98,16 @@ public class ElasticAppSearchProvider : ISearchProvider
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
 
-        await UpdateSchemaAsync(engineName, schema);
+        // Check if schema was changed
+        var oldSchema = await GetSchemaAsync(engineName);
+        var schemaChanged = SchemaChanged(oldSchema, newSchema: schema);
 
-        // refresh cache
-        SearchCacheRegion.ExpireRegion();
+        // Update and refresh cache if schema changed
+        if (schemaChanged)
+        {
+            await UpdateSchemaAsync(engineName, schema);
+            SearchCacheRegion.ExpireTokenForKey(engineName);
+        }
 
         var indexingResult = new IndexingResult { Items = indexingResultItems };
 
@@ -235,8 +241,8 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
         {
-            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeToken());
-            cacheEntry.SetAbsoluteExpiration(TimeSpan.FromMinutes(1));
+            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
+
             return await _elasticAppSearch.GetSchemaAsync(engineName);
         });
     }
@@ -244,6 +250,32 @@ public class ElasticAppSearchProvider : ISearchProvider
     protected virtual async Task UpdateSchemaAsync(string engineName, Schema schema)
     {
         await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
+    }
+
+    private bool SchemaChanged(Schema oldSchema, Schema newSchema)
+    {
+        // added fields
+        if (newSchema.Fields.Count > oldSchema.Fields.Count)
+        {
+            return true;
+        }
+
+        foreach (var newField in newSchema.Fields)
+        {
+            // new field present in the schema
+            if (!oldSchema.Fields.TryGetValue(newField.Key, out var oldField))
+            {
+                return true;
+            }
+
+            // old field changed type
+            if (newField.Value != oldField)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     #endregion
