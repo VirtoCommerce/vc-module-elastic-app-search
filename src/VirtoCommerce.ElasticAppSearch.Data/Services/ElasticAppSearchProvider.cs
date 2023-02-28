@@ -252,7 +252,7 @@ public class ElasticAppSearchProvider : ISearchProvider
         await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
     }
 
-    private bool SchemaChanged(Schema oldSchema, Schema newSchema)
+    private static bool SchemaChanged(Schema oldSchema, Schema newSchema)
     {
         // added fields
         if (newSchema.Fields.Count > oldSchema.Fields.Count)
