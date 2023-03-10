@@ -81,6 +81,10 @@ public static class HttpClientExtensions
             var result = JsonConvert.DeserializeObject<TResult>(content, jsonSerializerSettings);
             throw new SearchException(result?.ToString(), exception);
         }
+        finally
+        {
+            throw new SearchException($"ElasticAppSearch: ({httpResponseMessage.StatusCode}) {httpResponseMessage.ReasonPhrase}");
+        }
     }
 
     public static StringContent ToJson<TValue>(this TValue value, JsonSerializerSettings jsonSerializerSettings = null)
