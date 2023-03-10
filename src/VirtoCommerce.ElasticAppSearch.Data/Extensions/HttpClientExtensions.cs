@@ -78,12 +78,8 @@ public static class HttpClientExtensions
         catch (HttpRequestException exception)
         {
             var content = await httpResponseMessage.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<TResult>(content, jsonSerializerSettings);
+            var result = SafeDeserializeObject<TResult>(content, httpResponseMessage, jsonSerializerSettings);
             throw new SearchException(result?.ToString(), exception);
-        }
-        finally
-        {
-            throw new SearchException($"ElasticAppSearch: ({httpResponseMessage.StatusCode}) {httpResponseMessage.ReasonPhrase}");
         }
     }
 
@@ -91,5 +87,18 @@ public static class HttpClientExtensions
     {
         var content = JsonConvert.SerializeObject(value, jsonSerializerSettings);
         return new StringContent(content, Encoding.UTF8, "application/json");
+    }
+
+    private static TResult SafeDeserializeObject<TResult>(string content, HttpResponseMessage httpResponseMessage, JsonSerializerSettings jsonSerializerSettings = null)
+    {
+        try
+        {
+            var result = JsonConvert.DeserializeObject<TResult>(content, jsonSerializerSettings);
+            return result;
+        }
+        catch
+        {
+            throw new SearchException($"ElasticAppSearch: {httpResponseMessage.ReasonPhrase}");
+        }
     }
 }
