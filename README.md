@@ -15,9 +15,11 @@ Read more about how to deploy Elastic App Search [here](https://www.elastic.co/g
 Elastic App Search provider can be configured through these configuration keys:
 
 + **Search.Provider**: Name of the search provider, must be **ElasticAppSearch**
++ **Search.Scope**: Common name (prefix) of all indexes. Each document type is stored in a separate index. Full index name is `scope-{documenttype}`. One search service can serve multiple indexes. This is an **optional** key, and its default value is set to **default**.
 + **Search.ElasticAppSearch.Endpoint**: Network address and port of the ElasticAppSearch server
 + **Search.ElasticAppSearch.PrivateApiKey**: API access key that can read and write against all available API endpoints. Prefixed with `private-`.
-+ **Search.Scope**: Common name (prefix) of all indexes. Each document type is stored in a separate index. Full index name is `scope-{documenttype}`. One search service can serve multiple indexes. This is an **optional** key, and its default value is set to **default**.
++ **Search.ElasticAppSearch.KibanaBaseUrl**: Kibana base URL for accessing the Kibana Dashboard from the application menu. 
++ **Search.ElasticAppSearch.KibanaPath**: Path to the App Search engine in the Kibana Dashboard. Default value: /app/enterprise_search/app_search/engines/.
 
 [Read more about configuration [here](https://virtocommerce.com/docs/user-guide/configuration-settings/).
 
@@ -27,7 +29,8 @@ Elastic App Search provider can be configured through these configuration keys:
         "Scope": "default",
         "ElasticAppSearch": {
 			"Endpoint": "https://localhost:3002",
-        	"PrivateApiKey": "private-key"
+        	"PrivateApiKey": "private-key",
+            "KibanaBaseUrl": "https://localhost:5601"
         }
     }
 ```
@@ -38,7 +41,7 @@ API keys can be managed in the Credential menu within the App Search Dashboard p
 
 * [Search Fundamentals](https://virtocommerce.com/docs/fundamentals/search/)
 * [Elastic App Search Documentation](https://www.elastic.co/guide/en/app-search/8.1/index.html)
-* [Elastic App Search Storefront Guide](./docs/eas-setup-guide.md)
+* [Elastic App Search Guide](./docs/eas-setup-guide.md)
 
 ## References
 

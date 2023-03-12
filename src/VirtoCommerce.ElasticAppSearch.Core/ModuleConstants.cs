@@ -81,7 +81,10 @@ public static class ModuleConstants
     {
         public static class Permissions
         {
-            public static string[] AllPermissions { get; } = Array.Empty<string>();
+            public const string Access = "elasticappsearch:access";
+
+            public static string[] AllPermissions { get; } = { Access};
+
         }
     }
 
