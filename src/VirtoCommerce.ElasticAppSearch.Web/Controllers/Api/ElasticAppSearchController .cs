@@ -24,7 +24,7 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
         {
             if (string.IsNullOrEmpty(_options.KibanaBaseUrl))
             {
-                return NotFound("ElasticAppSearch is not currently available as an current search provider, or the Kibana Base URL has not been properly configured. Please check your configuration settings and try again.");
+                return NotFound("ElasticAppSearch is not currently available as a current search provider, or the Kibana Base URL has not been properly configured. Please check your configuration settings and try again.");
             }
 
             var uriBuilder = new UriBuilder(_options.KibanaBaseUrl);
