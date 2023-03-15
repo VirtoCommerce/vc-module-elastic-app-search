@@ -84,7 +84,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
         return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
     }
@@ -93,7 +93,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings);
 
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCodeAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
         return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
     }
