@@ -1,73 +1,15 @@
-# Elastic App Search Guide
+# Elastic App Search
+Virto Commerce and Elastic App Search brings the next level of employee experience. You can use analytics to improve ecommerce search relevance without development.
 
-## Table of contents
+Elastic App search provides search, aggregation, and analytic capabilities as a service, on top of ElasticSearch. It also supplies tools that can help you tune search result sets without development:
 
-- [Prerequisites](#prerequisites)
-    - [Install `vc-storefront`](#install-vc-storefront)
-    - [Setup `Vue B2B Theme`](#setup-vue-b2b-theme)
-- [Set up Elastic App Search](#set-up-elastic-app-search)
-    - [Deploy Elastic App Search using Docker](#deploy-elastic-app-search-using-docker)
-    - [Set up Elastic App Search on Platform](#set-up-elastic-app-search-on-platform)
-- [Running Storefont and working with App Search](#running-storefont-and-working-with-app-search)
-    - [Run `vc-storefront` application](#run-vc-storefront-application)
-    - [Inside Elastic App Search](#inside-elastic-app-search)
+* [Relevance Tuning](https://www.elastic.co/guide/en/app-search/current/precision-tuning.html/)
+* [Synonyms](https://www.elastic.co/guide/en/app-search/current/synonyms-guide.html/)
+* [Curations](https://www.elastic.co/guide/en/app-search/current/curations-guide.html/)
 
----
+Read more about how to deploy Elastic App Search [here](https://www.elastic.co/guide/en/app-search/current/installation.html).
 
-## Prerequisites
-
-- Install `vc-platform` 3.x the latest version. [Deploy on Windows](https://github.com/VirtoCommerce/vc-platform/blob/master/docs/getting-started/deploy-from-precompiled-binaries-windows.md) or [Deploy on Linux](https://github.com/VirtoCommerce/vc-platform/blob/master/docs/getting-started/deploy-from-precompiled-binaries-linux.md)
-- Install `vc-module-experience-api` module. [Getting started](https://github.com/VirtoCommerce/vc-module-experience-api/blob/dev/docs/getting-started.md)
-- Install [vc-module-profile-experience-api](https://github.com/VirtoCommerce/vc-module-profile-experience-api) module.
-- Install [Node](https://nodejs.org/en/download/) v.16.X
-- Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable) package manager:
-  ```
-  npm install --global yarn
-  ```
-
-### Install `vc-storefront`
-
-- Clone [https://github.com/VirtoCommerce/vc-storefront](https://github.com/VirtoCommerce/vc-storefront) in to a local folder
-
-- Open the **appsettings.json** file in a text editor.
-- In the **Endpoint** section change **Url**, **UserName**, **Password** with correct path and credentials for Virto Commerce Platform:
-
-```json
- "Endpoint": {
-     "Url": "https://localhost:5001",
-     "UserName": "admin",
-     "Password": "store"
- }
-```
-
-### Setup `Vue B2B Theme`
-
-
-- Clone repo into the folder where storefront is installed
-```bash
-    git clone https://github.com/VirtoCommerce/vue-starter-theme.git "C:\vc-storefront\VirtoCommerce.Storefront\wwwroot\cms-content\themes\{store-name}\default"
-```
-- Change the current directory to the default theme directory (change `{store-name}` to the store you want to use, for example `B2B-store`) 
-```bash
-    cd C:\vc-storefront\VirtoCommerce.Storefront\VirtoCommerce.Storefront\wwwroot\cms-content\themes\{store-name}\default
-```
-- Install dependencies
-```bash
-    npm install
-    yarn
-```
-- Start theme in development mode with hot reload support
-```bash
-yarn dev
-```
-- OR build the theme to get installable artifact
-```bash
-yarn compress
-```
----
-## Set up Elastic App Search
-
-### Deploy Elastic App Search using Docker
+## Deploy Elastic App Search using Docker
 
 - Install `Docker` for [Windows](https://docs.docker.com/desktop/install/windows-install/) or for [Linux](https://www.docker.com/get-started/).
 - Install `Elastic App Search` Container using `Docker-Compose`.
@@ -265,7 +207,7 @@ yarn compress
     - Access Kibana at http://localhost:5601. Log in with user `elastic`. The password is the value you provided for ELASTIC_PASSWORD in your .env file. Access Elasticsearch at http://localhost:9200.
         > More info on deploying using Docker at [Elastic App Search Docker](https://www.elastic.co/guide/en/enterprise-search/8.3/docker.html)
 
-### Set up Elastic App Search on Platform
+## Set up Elastic App Search on Platform
 
 - Install [vc-module-elastic-app-search](https://github.com/VirtoCommerce/vc-module-elastic-app-search) module.
 - Modify Platform configuration to use Elastic App Search
@@ -275,7 +217,8 @@ yarn compress
     "Scope": "default",
     "ElasticAppSearch": {
         "Endpoint": "https://localhost:3002",
-        "PrivateApiKey": "private-key"
+        "PrivateApiKey": "private-key",
+        "KibanaBaseUrl": "https://localhost:5601"
     }
 }
 ```
@@ -292,20 +235,17 @@ yarn compress
     ![image](./media/kibana-overview.png)
 ---
 
-## Running Storefont and working with App Search
+## Setup App Search menu
+To provide seamless naviagation from Commerce Manager to App Search (Kibana), you need to configure two settings: `KibanaBaseUrl` and `KibanaPath`.
 
-### Run `vc-storefront` application
+**KibanaBaseUrl**: A string field that provides the base URL for accessing the Kibana Dashboard from the application menu. The KibanaBaseUrl field is used to construct the URL for accessing the Kibana Dashboard, and should be set to the root URL of the Kibana instance.
 
-- Navigate to the Storefront root directory
-```bash
-cd C:\vc-storefront\VirtoCommerce.Storefront
-```
-- Build and run storefront application
-```bash
-dotnet run
-```
+**KibanaPath**: A string field that specifies the path to the App Search engine in the Kibana Dashboard. The KibanaPath field is used to construct the complete URL for accessing the App Search engine in Kibana. By default, the KibanaPath is set to "/app/enterprise_search/app_search/engines/", but it can be customized to match the specific path used in your Kibana instance.
 
-### Inside Elastic App Search
+Together, these fields allow users to easily access the Kibana Dashboard from the application menu, and navigate directly to the App Search engine without having to manually enter the URL. 
+
+
+## Inside Elastic App Search
 
 - In `Kibana` open App Search `Engines` overview page. Here can see four Engines that were created after we rebuilt the indices. If we click on `products` engine we can see general analytics about incoming queries and can manage indexed documents and tune engine behavior with `Relevance Tuning`, `Synonyms` and `Curations`.
 

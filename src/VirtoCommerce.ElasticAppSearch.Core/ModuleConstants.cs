@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
@@ -81,7 +80,10 @@ public static class ModuleConstants
     {
         public static class Permissions
         {
-            public static string[] AllPermissions { get; } = Array.Empty<string>();
+            public const string Access = "elasticappsearch:access";
+
+            public static string[] AllPermissions { get; } = { Access };
+
         }
     }
 
