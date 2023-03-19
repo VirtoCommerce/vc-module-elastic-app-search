@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
@@ -13,6 +14,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Caching;
 using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.SearchModule.Core.Exceptions;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
@@ -58,7 +60,8 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     public async Task DeleteIndexAsync(string documentType)
     {
-        var engineName = GetEngineName(documentType);
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var engineName = sourceEngineName ?? GetEngineName(documentType);
         var result = await _elasticAppSearch.DeleteEngineAsync(engineName);
 
         if (result.Deleted)
@@ -69,11 +72,32 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
-        var engineName = GetEngineName(documentType);
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var metaEngineName = GetEngineName(documentType);
+        var engineName = sourceEngineName ?? metaEngineName;
+
         var engineExists = await GetEngineExistsAsync(engineName);
         if (!engineExists)
         {
             await CreateEngineAsync(engineName);
+        }
+
+        if (sourceEngineName != null)
+        {
+            var metaEngine = await GetEngineAsync(metaEngineName);
+            if (metaEngine == null)
+            {
+                metaEngine = await CreateEngineAsync(metaEngineName, engineName);
+            }
+            else if (metaEngine.Type != EngineType.Meta)
+            {
+                throw new SearchException($"{ModuleConstants.ModuleName}: Found engine {metaEngineName} with default type, but the meta engine is expected.");
+            }
+
+            if (metaEngine.SourceEngines?.Contains(engineName) != true)
+            {
+                await AddSourceEngineAsync(metaEngineName, engineName);
+            }
         }
 
         var documents = new List<Document>();
@@ -116,10 +140,13 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     public async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
-        var engineName = GetEngineName(documentType);
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var engineName = sourceEngineName ?? GetEngineName(documentType);
+
         var deleteDocumentsResult = await DeleteDocumentsAsync(engineName, indexDocuments.Select(indexDocument => indexDocument.Id).ToArray());
         var indexingItems = ConvertDeleteDocumentResults(deleteDocumentsResult);
         var indexingResult = new IndexingResult { Items = indexingItems };
+
         return indexingResult;
     }
 
@@ -164,14 +191,41 @@ public class ElasticAppSearchProvider : ISearchProvider
         return string.Join("-", _searchOptions.GetScope(documentType), documentType).ToLowerInvariant();
     }
 
+    protected virtual string GetSourceEngineName(ref string documentType)
+    {
+        if (documentType?.Contains('|') != true)
+        {
+            return null;
+        }
+
+        var parts = documentType.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        documentType = parts[0];
+        var sourceEngine = parts.Length > 1 ? parts[1] : null;
+
+        return !string.IsNullOrEmpty(sourceEngine)
+            ? string.Join("-", _searchOptions.GetScope(documentType), documentType, sourceEngine).ToLowerInvariant()
+            : null;
+    }
+
     protected virtual async Task<bool> GetEngineExistsAsync(string name)
     {
         return await _elasticAppSearch.GetEngineExistsAsync(name);
     }
 
-    protected virtual async Task CreateEngineAsync(string name)
+    protected virtual async Task<Engine> GetEngineAsync(string name)
     {
-        await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal);
+        return await _elasticAppSearch.GetEngineAsync(name);
+    }
+
+    protected virtual async Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
+    {
+        return await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
+            !string.IsNullOrEmpty(sourceEngine) ? new []{ sourceEngine } : null);
+    }
+
+    protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
+    {
+        await _elasticAppSearch.AddSourceEnginesAsync(name, new []{ sourceEngine });
     }
 
     #endregion

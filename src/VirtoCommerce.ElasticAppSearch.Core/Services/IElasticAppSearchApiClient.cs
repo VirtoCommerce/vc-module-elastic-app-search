@@ -11,9 +11,15 @@ public interface IElasticAppSearchApiClient
 {
     Task<bool> GetEngineExistsAsync(string name);
 
-    Task<Engine> CreateEngineAsync(string name, string language);
+    Task<Engine> GetEngineAsync(string name);
+
+    Task<Engine> CreateEngineAsync(string name, string language, string[] sourceEngines = null);
 
     Task<DeleteEngineResult> DeleteEngineAsync(string engineName);
+
+    Task<Engine> AddSourceEnginesAsync(string engineName, string[] sourceEngines);
+
+    Task<Engine> DeleteSourceEnginesAsync(string engineName, string[] sourceEngines);
 
     Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents);
 

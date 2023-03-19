@@ -16,6 +16,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
+using VirtoCommerce.Platform.Core.Common;
 using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
@@ -51,13 +52,27 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return response.StatusCode != HttpStatusCode.NotFound;
     }
 
-    public async Task<Engine> CreateEngineAsync(string name, string language)
+    public async Task<Engine> GetEngineAsync(string name)
+    {
+        var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+    }
+
+    public async Task<Engine> CreateEngineAsync(string name, string language, string[] sourceEngines = null)
     {
         var response = await _httpClient.PostAsJsonAsync(EnginesEndpoint, new Engine
         {
             Name = name,
-            Type = EngineType.Default,
-            Language = language
+            Type = sourceEngines.IsNullOrEmpty() ? EngineType.Default : EngineType.Meta,
+            Language = language,
+            SourceEngines = sourceEngines
         }, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
@@ -74,6 +89,26 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var result = await response.Content.ReadFromJsonAsync<DeleteEngineResult>(ModuleConstants.Api.JsonSerializerSettings);
 
         return result;
+    }
+
+    public async Task<Engine> AddSourceEnginesAsync(string engineName, string[] sourceEngines)
+    {
+        var response = await _httpClient.PostAsJsonAsync(GetSourceEnginesEndpoint(engineName),
+            sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+    }
+
+    public async Task<Engine> DeleteSourceEnginesAsync(string engineName, string[] sourceEngines)
+    {
+        var response = await _httpClient.DeleteAsJsonAsync(GetSourceEnginesEndpoint(engineName),
+            sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
     }
 
     #endregion
@@ -163,6 +198,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return $"{EnginesEndpoint}/{engineName}";
     }
 
+    private static string GetSourceEnginesEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/source_engines";
+    }
+
     private static string GetDocumentsEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/documents";
@@ -205,7 +245,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     private void PostSearch(PreSearchInfo preSearchInfo)
     {
-        if (preSearchInfo?.RequestId == null || preSearchInfo?.RequestStopWatch == null)
+        if (preSearchInfo?.RequestId == null || preSearchInfo.RequestStopWatch == null)
         {
             return;
         }
@@ -213,7 +253,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         preSearchInfo.RequestStopWatch.Stop();
 
         _logger.Log(LogLevel.Debug,
-            "Elastic App Search query ID: {requestId}. Query took: {elapsed} ms.",
+            "Elastic App Search query ID: {RequestId}. Query took: {Elapsed} ms",
             preSearchInfo.RequestId, preSearchInfo.RequestStopWatch.ElapsedMilliseconds);
     }
 
