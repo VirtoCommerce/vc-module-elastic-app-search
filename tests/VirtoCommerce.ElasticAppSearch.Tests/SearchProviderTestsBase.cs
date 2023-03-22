@@ -94,9 +94,9 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         {
             var mock = new Mock<ITestSettingsManager>();
 
-            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<string>())).Returns((string name, string defaultValue) => defaultValue);
-            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<bool>())).Returns((string name, bool defaultValue) => defaultValue);
-            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<int>())).Returns((string name, int defaultValue) => defaultValue);
+            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<string>())).Returns((string _, string defaultValue) => defaultValue);
+            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<bool>())).Returns((string _, bool defaultValue) => defaultValue);
+            mock.Setup(s => s.GetValue(It.IsAny<string>(), It.IsAny<int>())).Returns((string _, int defaultValue) => defaultValue);
             mock.Setup(s => s.GetObjectSettingAsync(It.IsAny<string>(), null, null))
                 .Returns(Task.FromResult(new ObjectSettingEntry()));
 
@@ -202,7 +202,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 TestProperties.Add(property);
             }
 
-            public IList<Property> TestProperties { get; set; } = new List<Property>(); 
+            public IList<Property> TestProperties { get; set; } = new List<Property>();
             public string Id { get; set; }
         }
 

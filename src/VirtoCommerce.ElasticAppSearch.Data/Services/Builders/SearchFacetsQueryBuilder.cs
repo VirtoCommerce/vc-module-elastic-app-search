@@ -107,7 +107,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                 };
                 break;
             default:
-                _logger.LogError("Elastic App Search supports value facet only for text, number and date fields.");
+                _logger.LogError("Elastic App Search supports value facet only for text, number and date fields");
                 break;
         }
 
@@ -152,7 +152,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 
                 break;
             default:
-                _logger.LogError("Elastic App Search supports range facet only for date, number and geo location fields.");
+                _logger.LogError("Elastic App Search supports range facet only for date, number and geo location fields");
                 break;
         }
 
@@ -214,19 +214,19 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 
             if (aggregation.Filter is AndFilter andFilter)
             {
-                var clonedFilter = aggregation.Filter.Clone() as AndFilter;
+                var clonedFilter = andFilter.CloneTyped();
 
                 clonedFilter.ChildFilters = clonedFilter.ChildFilters
                     .Where(x =>
                     {
-                        var result = true;
+                        var whereResult = true;
 
                         if (x is INamedFilter namedFilter)
                         {
-                            result = !(aggregationFilterFieldName?.StartsWith(namedFilter.FieldName, true, CultureInfo.InvariantCulture) ?? false);
+                            whereResult = !(aggregationFilterFieldName?.StartsWith(namedFilter.FieldName, true, CultureInfo.InvariantCulture) ?? false);
                         }
 
-                        return result;
+                        return whereResult;
                     })
                     .ToList();
 

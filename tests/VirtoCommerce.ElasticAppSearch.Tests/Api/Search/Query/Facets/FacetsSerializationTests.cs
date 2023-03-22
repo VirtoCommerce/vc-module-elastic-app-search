@@ -27,13 +27,13 @@ public class FacetsSerializationTests : SerializationTestsBase
                                     Size = 5,
                                 }
                     },
-                    { "world_heritage_site", new ValueFacet { } },
+                    { "world_heritage_site", new ValueFacet() },
                 },
             },
             //json
             "Value.json"
         },
-        
+
         // number range facet
         new object[]
         {
@@ -58,7 +58,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             //json
             "RangeNumber.json"
         },
-        
+
         // date range facet
         new object[]
         {
@@ -86,7 +86,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             //json
             "RangeDate.json"
         },
-        
+
         // geopoint range facet
         new object[]
         {

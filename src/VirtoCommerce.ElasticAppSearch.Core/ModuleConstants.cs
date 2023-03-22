@@ -91,7 +91,7 @@ public static class ModuleConstants
     {
         public static class Indexing
         {
-            private static readonly SettingDescriptor IndexTotalFieldsLimit = new()
+            public static readonly SettingDescriptor IndexTotalFieldsLimit = new()
             {
                 Name = "VirtoCommerce.Search.ElasticAppSearch.IndexTotalFieldsLimit",
                 GroupName = "Search|ElasticSearch",

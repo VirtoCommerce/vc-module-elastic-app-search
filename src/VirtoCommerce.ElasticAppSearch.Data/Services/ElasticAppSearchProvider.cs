@@ -30,7 +30,7 @@ public class ElasticAppSearchProvider : ISearchProvider
     private readonly ISearchResponseBuilder _searchResponseBuilder;
     private readonly IPlatformMemoryCache _memoryCache;
 
-    private const int _maxIndexingDocuments = 100;
+    private const int MaxIndexingDocuments = 100;
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
@@ -60,21 +60,50 @@ public class ElasticAppSearchProvider : ISearchProvider
 
     public async Task DeleteIndexAsync(string documentType)
     {
-        var sourceEngineName = GetSourceEngineName(ref documentType);
-        var engineName = sourceEngineName ?? GetEngineName(documentType);
-        var result = await _elasticAppSearch.DeleteEngineAsync(engineName);
+        var sourceEngineName = GetSourceEngineName(ref documentType, out var swapName);
+        var metaEngineName = GetEngineName(documentType);
+        var engineName = sourceEngineName ?? metaEngineName;
 
-        if (result.Deleted)
+        if (sourceEngineName != null && swapName != null)
         {
-            SearchCacheRegion.ExpireTokenForKey(engineName);
+            var metaEngine = await GetEngineAsync(metaEngineName);
+            if (metaEngine != null)
+            {
+                var oldEngineName = metaEngine.SourceEngines?.FirstOrDefault(x => x.StartsWith(sourceEngineName));
+                if (oldEngineName != null && oldEngineName != swapName)
+                {
+                    await DeleteSourceEngineAsync(metaEngineName, oldEngineName);
+                    engineName = oldEngineName;
+                }
+                else
+                {
+                    //Do not delete engine
+                    engineName = null;
+                }
+
+                if (oldEngineName == null || oldEngineName != swapName)
+                {
+                    await AddSourceEngineAsync(metaEngineName, swapName);
+                }
+            }
+        }
+
+        if (engineName != null)
+        {
+            var result = await _elasticAppSearch.DeleteEngineAsync(engineName);
+
+            if (result.Deleted)
+            {
+                SearchCacheRegion.ExpireTokenForKey(engineName);
+            }
         }
     }
 
     public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
     {
-        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var sourceEngineName = GetSourceEngineName(ref documentType, out var swapName);
         var metaEngineName = GetEngineName(documentType);
-        var engineName = sourceEngineName ?? metaEngineName;
+        var engineName = swapName ?? sourceEngineName ?? metaEngineName;
 
         var engineExists = await GetEngineExistsAsync(engineName);
         if (!engineExists)
@@ -94,7 +123,7 @@ public class ElasticAppSearchProvider : ISearchProvider
                 throw new SearchException($"{ModuleConstants.ModuleName}: Found engine {metaEngineName} with default type, but the meta engine is expected.");
             }
 
-            if (metaEngine.SourceEngines?.Contains(engineName) != true)
+            if (swapName == null && metaEngine.SourceEngines?.Contains(engineName) != true)
             {
                 await AddSourceEngineAsync(metaEngineName, engineName);
             }
@@ -115,9 +144,9 @@ public class ElasticAppSearchProvider : ISearchProvider
         var indexingResultItems = new List<IndexingResultItem>();
 
         // Elastic App Search doesn't allow to create or update more than 100 documents at once and this restriction isn't configurable
-        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += _maxIndexingDocuments)
+        for (var currentRangeIndex = 0; currentRangeIndex < documents.Count; currentRangeIndex += MaxIndexingDocuments)
         {
-            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, _maxIndexingDocuments);
+            var currentRangeSize = Math.Min(documents.Count - currentRangeIndex, MaxIndexingDocuments);
             var createOrUpdateDocumentsResult = await CreateOrUpdateDocumentsAsync(engineName, documents.GetRange(currentRangeIndex, currentRangeSize).ToArray());
             indexingResultItems.AddRange(ConvertCreateOrUpdateDocumentResults(createOrUpdateDocumentsResult));
         }
@@ -191,8 +220,9 @@ public class ElasticAppSearchProvider : ISearchProvider
         return string.Join("-", _searchOptions.GetScope(documentType), documentType).ToLowerInvariant();
     }
 
-    protected virtual string GetSourceEngineName(ref string documentType)
+    protected virtual string GetSourceEngineName(ref string documentType, out string swapName)
     {
+        swapName = null;
         if (documentType?.Contains('|') != true)
         {
             return null;
@@ -201,11 +231,22 @@ public class ElasticAppSearchProvider : ISearchProvider
         var parts = documentType.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         documentType = parts[0];
         var sourceEngine = parts.Length > 1 ? parts[1] : null;
+        if (string.IsNullOrEmpty(sourceEngine))
+        {
+            return null;
+        }
 
-        return !string.IsNullOrEmpty(sourceEngine)
-            ? string.Join("-", _searchOptions.GetScope(documentType), documentType, sourceEngine).ToLowerInvariant()
-            : null;
+        sourceEngine = string.Join("-", _searchOptions.GetScope(documentType), documentType, sourceEngine).ToLowerInvariant();
+        swapName = parts.Length > 2 ? parts[2] : null;
+        if (!string.IsNullOrEmpty(swapName))
+        {
+            swapName = $"{sourceEngine}-{swapName.ToLowerInvariant()}";
+        }
+
+        return sourceEngine;
     }
+
+    protected string GetSourceEngineName(ref string documentType) => GetSourceEngineName(ref documentType, out _);
 
     protected virtual async Task<bool> GetEngineExistsAsync(string name)
     {
@@ -226,6 +267,11 @@ public class ElasticAppSearchProvider : ISearchProvider
     protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
     {
         await _elasticAppSearch.AddSourceEnginesAsync(name, new []{ sourceEngine });
+    }
+
+    protected virtual async Task DeleteSourceEngineAsync(string name, string sourceEngine)
+    {
+        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new []{ sourceEngine });
     }
 
     #endregion

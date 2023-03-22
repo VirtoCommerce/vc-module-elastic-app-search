@@ -7,7 +7,6 @@ using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 
@@ -45,7 +44,7 @@ public class DocumentConverter : IDocumentConverter
 
             if (fieldName.Length > ModuleConstants.Api.FieldNames.MaximumLength)
             {
-                _logger.LogCritical("Elastic App Search supports up to 64 symbols in document field name. {fieldName} field name has {fieldNameLength}.", fieldName, fieldName.Length);
+                _logger.LogCritical("Elastic App Search supports up to 64 symbols in document field name. {FieldName} field name has {FieldNameLength}", fieldName, fieldName.Length);
             }
             else
             {
@@ -87,7 +86,7 @@ public class DocumentConverter : IDocumentConverter
             _ => FieldType.Text
         };
 
-        _logger.LogInformation("The {fieldName} field has undefined value type. {fieldType} type was detected automatically based on field value object type.", fieldName, fieldType);
+        _logger.LogInformation("The {FieldName} field has undefined value type. {FieldType} type was detected automatically based on field value object type", fieldName, fieldType);
 
         return fieldType;
     }
