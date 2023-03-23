@@ -66,8 +66,11 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         if (sourceEngineName != null && swapName != null)
         {
+            //Do not delete engine
+            engineName = null;
+
             var metaEngine = await GetEngineAsync(metaEngineName);
-            if (metaEngine != null)
+            if (metaEngine?.Type == EngineType.Meta)
             {
                 var oldEngineName = metaEngine.SourceEngines?.FirstOrDefault(x => x.StartsWith(sourceEngineName));
                 if (oldEngineName != null && oldEngineName != swapName)
@@ -75,12 +78,6 @@ public class ElasticAppSearchProvider : ISearchProvider
                     await DeleteSourceEngineAsync(metaEngineName, oldEngineName);
                     engineName = oldEngineName;
                 }
-                else
-                {
-                    //Do not delete engine
-                    engineName = null;
-                }
-
                 if (oldEngineName == null || oldEngineName != swapName)
                 {
                     await AddSourceEngineAsync(metaEngineName, swapName);
