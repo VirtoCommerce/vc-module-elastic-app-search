@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -21,7 +22,7 @@ using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Docume
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppSearchProvider : ISearchProvider
+public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
 {
     private readonly SearchOptions _searchOptions;
     private readonly IElasticAppSearchApiClient _elasticAppSearch;
@@ -56,51 +57,215 @@ public class ElasticAppSearchProvider : ISearchProvider
         _memoryCache = memoryCache;
     }
 
-    #region ISearchProvider implementation
+    #region Implementation of ISupportIndexSwap
 
-    public async Task DeleteIndexAsync(string documentType)
+    public virtual async Task SwapIndexAsync(string documentType)
     {
-        var sourceEngineName = GetSourceEngineName(ref documentType, out var swapName);
-        var metaEngineName = GetEngineName(documentType);
-        var engineName = sourceEngineName ?? metaEngineName;
-
-        if (sourceEngineName != null && swapName != null)
+        var sourceEngineName = GetSourceEngineName(ref documentType, out var sourceEnginePart);
+        //Pseudo support index swap
+        if (sourceEngineName == null)
         {
-            //Do not delete engine
-            engineName = null;
-
-            var metaEngine = await GetEngineAsync(metaEngineName);
-            if (metaEngine?.Type == EngineType.Meta)
-            {
-                var oldEngineName = metaEngine.SourceEngines?.FirstOrDefault(x => x.StartsWith(sourceEngineName));
-                if (oldEngineName != null && oldEngineName != swapName)
-                {
-                    await DeleteSourceEngineAsync(metaEngineName, oldEngineName);
-                    engineName = oldEngineName;
-                }
-                if (oldEngineName == null || oldEngineName != swapName)
-                {
-                    await AddSourceEngineAsync(metaEngineName, swapName);
-                }
-            }
+            return;
         }
 
-        if (engineName != null)
+        try
         {
-            var result = await _elasticAppSearch.DeleteEngineAsync(engineName);
+            //Do not delete engine on default
+            string deleteEngineName = null;
 
-            if (result.Deleted)
+            var metaEngineName = GetEngineName(documentType);
+            var metaEngine = await GetEngineAsync(metaEngineName);
+            if (metaEngine == null)
             {
-                SearchCacheRegion.ExpireTokenForKey(engineName);
+                ThrowException($"Engine {metaEngineName} not found");
             }
+            else if (metaEngine.Type != EngineType.Meta)
+            {
+                ThrowException($"Found engine {metaEngineName} with default type, but expected meta engine");
+            }
+
+            var oldEngineName = metaEngine.SourceEngines?.FirstOrDefault(x => x.StartsWith(sourceEnginePart));
+            if (oldEngineName != null && oldEngineName != sourceEngineName)
+            {
+                await DeleteSourceEngineAsync(metaEngineName, oldEngineName);
+                deleteEngineName = oldEngineName;
+            }
+
+            if (oldEngineName == null || oldEngineName != sourceEngineName)
+            {
+                await AddSourceEngineAsync(metaEngineName, sourceEngineName);
+            }
+
+            if (deleteEngineName != null)
+            {
+                await DeleteEngineAsync(deleteEngineName);
+            }
+        }
+        catch (Exception ex)
+        {
+            ThrowException("Failed to swap engines", ex);
         }
     }
 
-    public async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
+    public virtual Task<IndexingResult> IndexWithBackupAsync(string documentType, IList<IndexDocument> documents)
     {
-        var sourceEngineName = GetSourceEngineName(ref documentType, out var swapName);
+        return IndexInternalAsync(documentType, documents, true);
+    }
+
+    #endregion
+
+    #region ISearchProvider implementation
+
+    public virtual async Task DeleteIndexAsync(string documentType)
+    {
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var engineName = sourceEngineName ?? GetEngineName(documentType);
+
+        await DeleteEngineAsync(engineName);
+    }
+
+    public virtual Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
+    {
+        return IndexInternalAsync(documentType, indexDocuments);
+    }
+
+    public virtual async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
+    {
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        var engineName = sourceEngineName ?? GetEngineName(documentType);
+
+        var deleteDocumentsResult = await DeleteDocumentsAsync(engineName, indexDocuments.Select(indexDocument => indexDocument.Id).ToArray());
+        var indexingItems = ConvertDeleteDocumentResults(deleteDocumentsResult);
+        var indexingResult = new IndexingResult { Items = indexingItems };
+
+        return indexingResult;
+    }
+
+    public virtual async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
+    {
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+        //Pseudo support index swap
+        if (request.UseBackupIndex && sourceEngineName == null)
+        {
+            return new SearchResponse();
+        }
+
+        var engineName = sourceEngineName ?? GetEngineName(documentType);
+
+        var schema = await GetSchemaAsync(engineName);
+
+        SearchResponse response;
+
+        if (string.IsNullOrEmpty(request.RawQuery))
+        {
+            var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema);
+            var searchTasks = searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
+                ?? new List<Task<SearchResult>>();
+            var searchResponses = await Task.WhenAll(searchTasks);
+
+            var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
+            {
+                AggregationId = searchQueries[i].AggregationId,
+                SearchResult = searchResult,
+            }).ToList();
+
+            response = _searchResponseBuilder.ToSearchResponse(searchResults, request.Aggregations);
+        }
+        else
+        {
+            var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
+            response = _searchResponseBuilder.ToSearchResponse(searchResult);
+        }
+
+        return response;
+    }
+
+    #endregion
+
+    #region Engines
+
+    protected virtual string GetEngineName(string documentType)
+    {
+        return string.Join("-", _searchOptions.GetScope(documentType), documentType).ToLowerInvariant();
+    }
+
+    protected virtual string GetSourceEngineName(ref string documentType, out string sourceEnginePart)
+    {
+        sourceEnginePart = null;
+        if (documentType?.Contains('|') != true)
+        {
+            return null;
+        }
+
+        var parts = documentType.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        documentType = parts[0];
+        var enginePart = parts.Length > 1 ? parts[1] : null;
+        if (string.IsNullOrEmpty(enginePart))
+        {
+            return null;
+        }
+
+        //Part of the source engine name without alias
+        var sourceEngineName = sourceEnginePart = $"{GetEngineName(documentType)}-{enginePart.ToLowerInvariant()}";
+
+        var aliasPart = parts.Length > 2 ? parts[2] : null;
+        if (!string.IsNullOrEmpty(aliasPart))
+        {
+            sourceEngineName = $"{sourceEngineName}-{aliasPart.ToLowerInvariant()}";
+        }
+
+        return sourceEngineName;
+    }
+
+    protected string GetSourceEngineName(ref string documentType) => GetSourceEngineName(ref documentType, out _);
+
+    protected virtual async Task<bool> GetEngineExistsAsync(string name)
+    {
+        return await _elasticAppSearch.GetEngineExistsAsync(name);
+    }
+
+    protected virtual async Task<Engine> GetEngineAsync(string name)
+    {
+        return await _elasticAppSearch.GetEngineAsync(name);
+    }
+
+    protected virtual async Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
+    {
+        return await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
+            !string.IsNullOrEmpty(sourceEngine) ? new []{ sourceEngine } : null);
+    }
+
+    protected virtual async Task DeleteEngineAsync(string name)
+    {
+        var result = await _elasticAppSearch.DeleteEngineAsync(name);
+
+        if (result.Deleted)
+        {
+            SearchCacheRegion.ExpireTokenForKey(name);
+        }
+    }
+
+    protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
+    {
+        await _elasticAppSearch.AddSourceEnginesAsync(name, new []{ sourceEngine });
+    }
+
+    protected virtual async Task DeleteSourceEngineAsync(string name, string sourceEngine)
+    {
+        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new []{ sourceEngine });
+    }
+
+    #endregion
+
+    #region Documents
+
+    #region Create or update
+
+    protected virtual async Task<IndexingResult> IndexInternalAsync(string documentType, IList<IndexDocument> indexDocuments, bool withBackup = false)
+    {
+        var sourceEngineName = GetSourceEngineName(ref documentType);
         var metaEngineName = GetEngineName(documentType);
-        var engineName = swapName ?? sourceEngineName ?? metaEngineName;
+        var engineName = sourceEngineName ?? metaEngineName;
 
         var engineExists = await GetEngineExistsAsync(engineName);
         if (!engineExists)
@@ -117,10 +282,10 @@ public class ElasticAppSearchProvider : ISearchProvider
             }
             else if (metaEngine.Type != EngineType.Meta)
             {
-                throw new SearchException($"{ModuleConstants.ModuleName}: Found engine {metaEngineName} with default type, but the meta engine is expected.");
+                ThrowException($"Found engine {metaEngineName} with default type, but expected meta engine");
             }
 
-            if (swapName == null && metaEngine.SourceEngines?.Contains(engineName) != true)
+            if (!withBackup && metaEngine.SourceEngines?.Contains(engineName) != true)
             {
                 await AddSourceEngineAsync(metaEngineName, engineName);
             }
@@ -163,119 +328,6 @@ public class ElasticAppSearchProvider : ISearchProvider
 
         return indexingResult;
     }
-
-    public async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
-    {
-        var sourceEngineName = GetSourceEngineName(ref documentType);
-        var engineName = sourceEngineName ?? GetEngineName(documentType);
-
-        var deleteDocumentsResult = await DeleteDocumentsAsync(engineName, indexDocuments.Select(indexDocument => indexDocument.Id).ToArray());
-        var indexingItems = ConvertDeleteDocumentResults(deleteDocumentsResult);
-        var indexingResult = new IndexingResult { Items = indexingItems };
-
-        return indexingResult;
-    }
-
-    public async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
-    {
-        var engineName = GetEngineName(documentType);
-
-        var schema = await GetSchemaAsync(engineName);
-
-        SearchResponse response;
-
-        if (string.IsNullOrEmpty(request.RawQuery))
-        {
-            var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema);
-            var searchTasks = searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
-                ?? new List<Task<SearchResult>>();
-            var searchResponses = await Task.WhenAll(searchTasks);
-
-            var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
-            {
-                AggregationId = searchQueries[i].AggregationId,
-                SearchResult = searchResult,
-            }).ToList();
-
-            response = _searchResponseBuilder.ToSearchResponse(searchResults, request.Aggregations);
-        }
-        else
-        {
-            var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
-            response = _searchResponseBuilder.ToSearchResponse(searchResult);
-        }
-
-        return response;
-    }
-
-    #endregion
-
-    #region Engines
-
-    protected virtual string GetEngineName(string documentType)
-    {
-        return string.Join("-", _searchOptions.GetScope(documentType), documentType).ToLowerInvariant();
-    }
-
-    protected virtual string GetSourceEngineName(ref string documentType, out string swapName)
-    {
-        swapName = null;
-        if (documentType?.Contains('|') != true)
-        {
-            return null;
-        }
-
-        var parts = documentType.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        documentType = parts[0];
-        var sourceEngine = parts.Length > 1 ? parts[1] : null;
-        if (string.IsNullOrEmpty(sourceEngine))
-        {
-            return null;
-        }
-
-        sourceEngine = string.Join("-", _searchOptions.GetScope(documentType), documentType, sourceEngine).ToLowerInvariant();
-        swapName = parts.Length > 2 ? parts[2] : null;
-        if (!string.IsNullOrEmpty(swapName))
-        {
-            swapName = $"{sourceEngine}-{swapName.ToLowerInvariant()}";
-        }
-
-        return sourceEngine;
-    }
-
-    protected string GetSourceEngineName(ref string documentType) => GetSourceEngineName(ref documentType, out _);
-
-    protected virtual async Task<bool> GetEngineExistsAsync(string name)
-    {
-        return await _elasticAppSearch.GetEngineExistsAsync(name);
-    }
-
-    protected virtual async Task<Engine> GetEngineAsync(string name)
-    {
-        return await _elasticAppSearch.GetEngineAsync(name);
-    }
-
-    protected virtual async Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
-    {
-        return await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
-            !string.IsNullOrEmpty(sourceEngine) ? new []{ sourceEngine } : null);
-    }
-
-    protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
-    {
-        await _elasticAppSearch.AddSourceEnginesAsync(name, new []{ sourceEngine });
-    }
-
-    protected virtual async Task DeleteSourceEngineAsync(string name, string sourceEngine)
-    {
-        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new []{ sourceEngine });
-    }
-
-    #endregion
-
-    #region Documents
-
-    #region Create or update
 
     protected virtual async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
@@ -376,4 +428,10 @@ public class ElasticAppSearchProvider : ISearchProvider
     }
 
     #endregion
+
+    [DoesNotReturn]
+    protected virtual void ThrowException(string message, Exception innerException = null)
+    {
+        throw new SearchException($"{ModuleConstants.ModuleName}: {message}.", innerException);
+    }
 }
