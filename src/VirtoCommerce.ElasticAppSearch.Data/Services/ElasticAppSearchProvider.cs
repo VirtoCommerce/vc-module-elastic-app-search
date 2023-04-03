@@ -124,17 +124,17 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
         await DeleteEngineAsync(engineName);
     }
 
-    public virtual Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> indexDocuments)
+    public virtual Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> documents)
     {
-        return IndexInternalAsync(documentType, indexDocuments);
+        return IndexInternalAsync(documentType, documents);
     }
 
-    public virtual async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> indexDocuments)
+    public virtual async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> documents)
     {
         var sourceEngineName = GetSourceEngineName(ref documentType);
         var engineName = sourceEngineName ?? GetEngineName(documentType);
 
-        var deleteDocumentsResult = await DeleteDocumentsAsync(engineName, indexDocuments.Select(indexDocument => indexDocument.Id).ToArray());
+        var deleteDocumentsResult = await DeleteDocumentsAsync(engineName, documents.Select(document => document.Id).ToArray());
         var indexingItems = ConvertDeleteDocumentResults(deleteDocumentsResult);
         var indexingResult = new IndexingResult { Items = indexingItems };
 
