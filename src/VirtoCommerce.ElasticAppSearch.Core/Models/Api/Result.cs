@@ -8,6 +8,6 @@ public record Result
 
     public override string ToString()
     {
-        return Errors == null ? null : string.Join(Environment.NewLine, Errors);
+        return Errors == null ? nameof(Result) : string.Join(Environment.NewLine, Errors);
     }
 }
