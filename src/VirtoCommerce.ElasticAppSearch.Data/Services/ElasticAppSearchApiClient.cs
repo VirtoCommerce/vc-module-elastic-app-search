@@ -22,10 +22,10 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
 public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 {
-    private const string EnginesEndpoint = "engines";
+    protected const string EnginesEndpoint = "engines";
 
-    private const string DebugHeader = "X-Enterprise-Search-Debug";
-    private const string RequestIdHeader = "X-Request-ID";
+    protected const string DebugHeader = "X-Enterprise-Search-Debug";
+    protected const string RequestIdHeader = "X-Request-ID";
 
     private readonly HttpClient _httpClient;
     private readonly ILogger<ElasticAppSearchApiClient> _logger;
@@ -205,7 +205,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     private void PostSearch(PreSearchInfo preSearchInfo)
     {
-        if (preSearchInfo?.RequestId == null || preSearchInfo?.RequestStopWatch == null)
+        if (preSearchInfo?.RequestId == null || preSearchInfo.RequestStopWatch == null)
         {
             return;
         }

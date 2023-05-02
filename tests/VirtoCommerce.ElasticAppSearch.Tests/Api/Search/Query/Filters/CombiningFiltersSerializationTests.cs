@@ -7,7 +7,7 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Filters;
 
-public class CombiningFiltersSerializationTests: SerializationTestsBase
+public class CombiningFiltersSerializationTests : SerializationTestsBase
 {
     private static IFilter[] Filters => new IFilter[]
     {

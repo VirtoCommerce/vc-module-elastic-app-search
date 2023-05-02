@@ -6,18 +6,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
-      <!-- Project is not a test project -->
-      <SonarQubeTestProject>false</SonarQubeTestProject>
+    <!-- Project is not a test project -->
+    <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Core\VirtoCommerce.ElasticAppSearch.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Data\VirtoCommerce.ElasticAppSearch.Data.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="module.manifest">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

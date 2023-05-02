@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 16
-VisualStudioVersion = 16.0.29920.165
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CFC1B42A-2604-4030-BD28-7706B47C6365}"
 EndProject
@@ -40,13 +40,13 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-    GlobalSection(NestedProjects) = preSolution
+	GlobalSection(NestedProjects) = preSolution
 		{0DF3FA9A-7210-43C9-B6AE-FBC02231436A} = {CFC1B42A-2604-4030-BD28-7706B47C6365}
 		{F22056E3-CE80-40E1-9EDF-AA4345F533E1} = {CFC1B42A-2604-4030-BD28-7706B47C6365}
-		{1DDA4F46-91BA-431A-864C-84F73A03C720} = {CFC1B42A-2604-4030-BD28-7706B47C6365}
 		{A808924A-BEA1-41E5-ADEE-EBA1A9A6DE55} = {60C5F34E-58CA-43A7-AFAF-57F20755E996}
+		{1DDA4F46-91BA-431A-864C-84F73A03C720} = {CFC1B42A-2604-4030-BD28-7706B47C6365}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EA20B459-FFBD-44E1-809C-0097C4A9E412 = {EA20B459-FFBD-44E1-809C-0097C4A9E412}
+		SolutionGuid = {EA20B459-FFBD-44E1-809C-0097C4A9E412}
 	EndGlobalSection
 EndGlobal

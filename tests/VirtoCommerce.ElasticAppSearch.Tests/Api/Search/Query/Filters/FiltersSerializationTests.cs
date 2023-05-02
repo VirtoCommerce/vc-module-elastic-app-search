@@ -5,9 +5,8 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Filters;
 
-public class FiltersSerializationTests: SerializationTestsBase
+public class FiltersSerializationTests : SerializationTestsBase
 {
-
     public static IEnumerable<object[]> SerializationData => new[]
     {
         new object[] { new SearchQuery

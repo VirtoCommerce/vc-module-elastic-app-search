@@ -5,7 +5,7 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests
 {
-    [TestCaseOrderer(PriorityTestCaseOrderer.TypeName, PriorityTestCaseOrderer.AssembyName)]
+    [TestCaseOrderer(PriorityTestCaseOrderer.TypeName, PriorityTestCaseOrderer.AssemblyName)]
     [Trait("Category", "IntegrationTest")]
     public abstract class SearchProviderTests : SearchProviderTestsBase
     {
@@ -67,7 +67,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         }
 
         [Fact]
-        public virtual async Task CanRetriveStringCollection()
+        public virtual async Task CanRetrieveStringCollection()
         {
             var provider = GetSearchProvider();
 
@@ -387,7 +387,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 Filter = new TermFilter
                 {
                     FieldName = "HasMultiplePrices",
-                    Values = new[] { "true" } 
+                    Values = new[] { "true" }
                 },
                 Take = 10,
             };
@@ -507,7 +507,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 {
                     FieldName = "Location",
                     Location = GeoPoint.TryParse("0, 14"),
-                    Distance = 1110, // less than 10 degrees (1 degree at the equater is about 111 km)
+                    Distance = 1110, // less than 10 degrees (1 degree at the equator is about 111 km)
                 },
                 Take = 10,
             };

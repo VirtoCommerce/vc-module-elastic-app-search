@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query;
 
-public class SortSerializationTests: SerializationTestsBase
+public class SortSerializationTests : SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {

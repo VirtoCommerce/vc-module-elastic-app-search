@@ -7,7 +7,6 @@ using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 
@@ -71,7 +70,9 @@ public class DocumentConverter : IDocumentConverter
             IndexDocumentFieldValueType.Byte or IndexDocumentFieldValueType.Short or IndexDocumentFieldValueType.Integer or IndexDocumentFieldValueType.Long or IndexDocumentFieldValueType.Float or IndexDocumentFieldValueType.Double or IndexDocumentFieldValueType.Decimal => FieldType.Number,
             IndexDocumentFieldValueType.DateTime => FieldType.Date,
             IndexDocumentFieldValueType.GeoPoint => FieldType.Geolocation,
+#pragma warning disable CS0618 // Type or member is obsolete
             IndexDocumentFieldValueType.Undefined => ToProviderFieldType(indexDocumentField.Name, indexDocumentField.Value),
+#pragma warning restore CS0618 // Type or member is obsolete
             _ => FieldType.Text,
         };
     }

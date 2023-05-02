@@ -15,7 +15,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
 public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 {
-    private const int MaxFacetValues = 250;
+    protected const int MaxFacetValues = 250;
 
     private readonly ILogger<SearchFacetsQueryBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;

@@ -32,7 +32,7 @@ public class SerializationTestsBase
         // Assert
         Assert.Throws<JsonSerializationException>(Serialize);
     }
-    
+
     public virtual void Deserialize_Json_CorrectlyDeserializes<T>(T expected, string actualJsonFileName)
     {
         // Arrange

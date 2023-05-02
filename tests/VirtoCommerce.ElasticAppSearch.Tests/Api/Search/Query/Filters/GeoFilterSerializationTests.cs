@@ -1,16 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.GeoFilter;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters.RangeFilters;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Filters;
 
-public class GeoFilterSerializationTests: SerializationTestsBase
+public class GeoFilterSerializationTests : SerializationTestsBase
 {
-
     public static IEnumerable<object[]> SerializationData => new[]
     {
         new object[] { new SearchQuery

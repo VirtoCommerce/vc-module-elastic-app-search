@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class FieldConverter: JsonConverter
+public class FieldConverter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {

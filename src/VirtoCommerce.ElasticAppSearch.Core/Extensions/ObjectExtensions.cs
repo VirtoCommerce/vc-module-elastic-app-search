@@ -14,6 +14,6 @@ public static class ObjectExtensions
 
     public static GeoPoint ToGeoPoint(this SearchGeoPoint point)
     {
-        return point == null ? null : new GeoPoint(point) { };
+        return point == null ? null : new GeoPoint(point);
     }
 }

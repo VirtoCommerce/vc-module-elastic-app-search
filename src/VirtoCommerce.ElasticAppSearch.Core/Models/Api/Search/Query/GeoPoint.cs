@@ -6,7 +6,7 @@ using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 
 [JsonConverter(typeof(GeoPointConverter))]
-public class GeoPoint: SearchGeoPoint
+public class GeoPoint : SearchGeoPoint
 {
     public GeoPoint()
     {

@@ -167,10 +167,10 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         // combine all __object properties into one property
         if (includeFields?.Any(x => x.StartsWith(ModuleConstants.Api.FieldNames.ObjectFieldName)) == true)
         {
-            var newIncludeFeilds = includeFields.Where(x => !x.StartsWith(ModuleConstants.Api.FieldNames.ObjectFieldName)).ToList();
-            newIncludeFeilds.Add(ModuleConstants.Api.FieldNames.ObjectFieldName);
+            var newIncludeFields = includeFields.Where(x => !x.StartsWith(ModuleConstants.Api.FieldNames.ObjectFieldName)).ToList();
+            newIncludeFields.Add(ModuleConstants.Api.FieldNames.ObjectFieldName);
 
-            includeFields = newIncludeFeilds;
+            includeFields = newIncludeFields;
         }
 
         var result = includeFields?

@@ -25,28 +25,28 @@ public static class RangeExtensions
             (from, to) => new DateTimeRangeFilter(fieldName, from, to), out result);
     }
 
-    public static bool TryParse(string ragneName, bool includeFrom, string fromValue, bool includeTo, string toValue, out FacetRangeValue<double> result)
+    public static bool TryParse(string rangeName, bool includeFrom, string fromValue, bool includeTo, string toValue, out FacetRangeValue<double> result)
     {
         return TryParse<FacetRangeValue<double>, double>(
             includeFrom, fromValue, RangeBoundExtensions.TryParseFrom,
             includeTo, toValue, RangeBoundExtensions.TryParseTo,
-            (from, to) => new FacetRangeValue<double>()
+            (from, to) => new FacetRangeValue<double>
             {
-                Name = ragneName,
+                Name = rangeName,
                 From = from.Include ? from.Value : from.Value?.GetNearestHigher(),
                 To = to.Include ? to.Value?.GetNearestHigher() : to.Value,
             },
             out result);
     }
 
-    public static bool TryParse(string ragneName, bool includeFrom, string fromValue, bool includeTo, string toValue, out FacetRangeValue<DateTime> result)
+    public static bool TryParse(string rangeName, bool includeFrom, string fromValue, bool includeTo, string toValue, out FacetRangeValue<DateTime> result)
     {
         return TryParse<FacetRangeValue<DateTime>, DateTime>(
             includeFrom, fromValue, RangeBoundExtensions.TryParseFrom,
             includeTo, toValue, RangeBoundExtensions.TryParseTo,
-            (from, to) => new FacetRangeValue<DateTime>()
+            (from, to) => new FacetRangeValue<DateTime>
             {
-                Name = ragneName,
+                Name = rangeName,
                 From = from.Include ? from.Value : from.Value?.GetPreviousMillisecond(),
                 To = to.Include ? to.Value?.GetNextMillisecond() : to.Value,
             },
