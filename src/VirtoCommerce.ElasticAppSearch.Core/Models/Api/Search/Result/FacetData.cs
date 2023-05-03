@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 
 public record FacetData
 {

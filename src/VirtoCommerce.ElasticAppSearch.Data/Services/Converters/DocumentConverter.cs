@@ -70,7 +70,9 @@ public class DocumentConverter : IDocumentConverter
             IndexDocumentFieldValueType.Byte or IndexDocumentFieldValueType.Short or IndexDocumentFieldValueType.Integer or IndexDocumentFieldValueType.Long or IndexDocumentFieldValueType.Float or IndexDocumentFieldValueType.Double or IndexDocumentFieldValueType.Decimal => FieldType.Number,
             IndexDocumentFieldValueType.DateTime => FieldType.Date,
             IndexDocumentFieldValueType.GeoPoint => FieldType.Geolocation,
+#pragma warning disable CS0618 // Type or member is obsolete
             IndexDocumentFieldValueType.Undefined => ToProviderFieldType(indexDocumentField.Name, indexDocumentField.Value),
+#pragma warning restore CS0618 // Type or member is obsolete
             _ => FieldType.Text,
         };
     }

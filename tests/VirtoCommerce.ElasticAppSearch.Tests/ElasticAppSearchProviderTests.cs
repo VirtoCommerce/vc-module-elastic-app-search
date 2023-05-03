@@ -32,7 +32,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var searchResponseBuilder = new Mock<ISearchResponseBuilder>();
             var platformMemoryCache = new Mock<IPlatformMemoryCache>();
 
-            //  setup cache moqs
+            //  setup cache mocks
             var cacheEntry = new Mock<ICacheEntry>();
             var engineName = string.Join("-", searchOptions.Value.Scope, "testDocumentType").ToLowerInvariant();
             var cacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSchemaAsync", engineName);

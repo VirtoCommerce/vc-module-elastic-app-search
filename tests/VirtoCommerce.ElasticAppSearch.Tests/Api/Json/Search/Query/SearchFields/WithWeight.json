@@ -2,7 +2,7 @@
   "query": "test",
   "search_fields": {
     "test": {
-      "weight": 1 
+      "weight": 1
     }
   }
 }

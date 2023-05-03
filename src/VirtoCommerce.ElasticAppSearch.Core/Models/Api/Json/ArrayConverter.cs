@@ -8,7 +8,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json
 {
-    public class ArrayConverter: JsonConverter
+    public class ArrayConverter : JsonConverter
     {
         private readonly SingleValueHandling _singleValueHandling;
         private readonly JsonConverter _itemConverter;

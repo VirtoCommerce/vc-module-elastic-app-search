@@ -4,7 +4,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppSearchOptionsValidator: IValidateOptions<ElasticAppSearchOptions>
+public class ElasticAppSearchOptionsValidator : IValidateOptions<ElasticAppSearchOptions>
 {
     public ValidateOptionsResult Validate(string name, ElasticAppSearchOptions options)
     {

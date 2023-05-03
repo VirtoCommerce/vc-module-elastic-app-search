@@ -1,28 +1,28 @@
 {
-    "ElasticAppSearch": {
-        "blades": {
-            "hello-world": {
-                "title": "Hello world blade"
-            }
-        }
-    },
-    "permissions": {
-        "ElasticAppSearch:access": "Open ElasticAppSearch menu",
-        "ElasticAppSearch:create": "Create ElasticAppSearch related data",
-        "ElasticAppSearch:read": "View ElasticAppSearch related data",
-        "ElasticAppSearch:update": "Update ElasticAppSearch related data",
-        "ElasticAppSearch:delete": "Delete ElasticAppSearch related data"
-    },
-    "settings": {
-        "ElasticAppSearch": {
-            "ElasticAppSearchPassword": {
-                "title": "ElasticAppSearch Password",
-                "description": "ElasticAppSearch Password setting"
-            },
-            "ElasticAppSearchEnabled": {
-                "title": "ElasticAppSearch Enabled",
-                "description": "ElasticAppSearch Enabled setting"
-            }
-        }
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hello world blade"
+      }
     }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Open ElasticAppSearch menu",
+    "ElasticAppSearch:create": "Create ElasticAppSearch related data",
+    "ElasticAppSearch:read": "View ElasticAppSearch related data",
+    "ElasticAppSearch:update": "Update ElasticAppSearch related data",
+    "ElasticAppSearch:delete": "Delete ElasticAppSearch related data"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch Password",
+        "description": "ElasticAppSearch Password setting"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch Enabled",
+        "description": "ElasticAppSearch Enabled setting"
+      }
+    }
+  }
 }

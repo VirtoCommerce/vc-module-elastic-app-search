@@ -87,7 +87,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             "RangeDate.json"
         },
 
-        // geopoint range facet
+        // GeoPoint range facet
         new object[]
         {
             //query
@@ -126,7 +126,7 @@ public class FacetsSerializationTests : SerializationTestsBase
                 },
             },
             //json
-            "RangeGeopoint.json"
+            "RangeGeoPoint.json"
         },
     };
 

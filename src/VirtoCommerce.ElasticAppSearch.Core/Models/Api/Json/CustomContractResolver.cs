@@ -7,7 +7,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class CustomContractResolver: DefaultContractResolver
+public class CustomContractResolver : DefaultContractResolver
 {
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {

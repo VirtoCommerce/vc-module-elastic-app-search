@@ -59,8 +59,8 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var searchFilterBuilder = new SearchFiltersBuilder(Mock.Of<ILogger<SearchFiltersBuilder>>(), fieldNameConverter);
             var facetsBuilder = new SearchFacetsQueryBuilder(Mock.Of<ILogger<SearchFacetsQueryBuilder>>(), fieldNameConverter, searchFilterBuilder);
             var searchQueryBuilder = new SearchQueryBuilder(Mock.Of<ILogger<SearchQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, facetsBuilder);
-            var aggrResponsebuilder = new AggregationsResponseBuilder(fieldNameConverter);
-            var searchResponseBuilder = new SearchResponseBuilder(documentConverter, aggrResponsebuilder);
+            var aggregationsResponseBuilder = new AggregationsResponseBuilder(fieldNameConverter);
+            var searchResponseBuilder = new SearchResponseBuilder(documentConverter, aggregationsResponseBuilder);
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
 
             var cachingOptions = Options.Create(new CachingOptions { CacheEnabled = true });

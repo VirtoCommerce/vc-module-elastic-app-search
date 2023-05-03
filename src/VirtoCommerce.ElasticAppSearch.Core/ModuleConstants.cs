@@ -91,15 +91,15 @@ public static class ModuleConstants
     {
         public static class Indexing
         {
-            public static readonly SettingDescriptor IndexTotalFieldsLimit = new()
+            public static SettingDescriptor IndexTotalFieldsLimit { get; } = new()
             {
                 Name = "VirtoCommerce.Search.ElasticAppSearch.IndexTotalFieldsLimit",
                 GroupName = "Search|ElasticSearch",
                 ValueType = SettingValueType.Integer,
-                DefaultValue = 1000
+                DefaultValue = 1000,
             };
 
-            public static IEnumerable<SettingDescriptor> AllSettings
+            public static IEnumerable<SettingDescriptor> AllIndexingSettings
             {
                 get
                 {
@@ -108,6 +108,6 @@ public static class ModuleConstants
             }
         }
 
-        public static IEnumerable<SettingDescriptor> AllSettings => Indexing.AllSettings;
+        public static IEnumerable<SettingDescriptor> AllSettings => Indexing.AllIndexingSettings;
     }
 }

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query;
 
-public class SortSerializationTests: SerializationTestsBase
+public class SortSerializationTests : SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {

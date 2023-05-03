@@ -6,7 +6,7 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api;
 
-public class DocumentSerializationTests: SerializationTestsBase
+public class DocumentSerializationTests : SerializationTestsBase
 {
     public static IEnumerable<object[]> SerializationData => new[]
     {

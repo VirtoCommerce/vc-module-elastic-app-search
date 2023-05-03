@@ -6,7 +6,7 @@ using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api;
 
-public class SerializationTests: SerializationTestsBase
+public class SerializationTests : SerializationTestsBase
 {
     public static readonly IEnumerable<object[]> WriteJsonData = new List<object[]>
     {

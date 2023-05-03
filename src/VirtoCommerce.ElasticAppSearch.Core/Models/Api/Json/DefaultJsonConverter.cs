@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class DefaultJsonConverter<T>: JsonConverter<T>
+public class DefaultJsonConverter<T> : JsonConverter<T>
 {
     [ThreadStatic]
     private static bool _isReading;

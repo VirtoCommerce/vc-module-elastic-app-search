@@ -8,5 +8,5 @@ public record GeoDistanceSortValue
     public GeoPoint Center { get; init; }
 
     [JsonRequired]
-    public SortOrder Order { get;set; }
+    public SortOrder Order { get; set; }
 }

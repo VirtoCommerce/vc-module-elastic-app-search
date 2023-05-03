@@ -1,12 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <id>VirtoCommerce.ElasticAppSearch</id>
   <version>3.209.0</version>
   <version-tag />
+
   <platformVersion>3.210.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Search" version="3.217.0" />
   </dependencies>
+
   <apps>
     <app id="app_search">
       <title>App Search</title>
@@ -29,7 +31,7 @@
   <iconUrl>Modules/$(VirtoCommerce.ElasticAppSearch)/Content/logo.png</iconUrl>
   <requireLicenseAcceptance>false</requireLicenseAcceptance>
   <releaseNotes>First version.</releaseNotes>
-  <copyright>Copyright © 2023 VirtoCommerce. All rights reserved</copyright>
+  <copyright>Copyright © 2022–2023 VirtoCommerce. All rights reserved</copyright>
   <tags>elastic app search</tags>
   <assemblyFile>VirtoCommerce.ElasticAppSearch.Web.dll</assemblyFile>
   <moduleType>VirtoCommerce.ElasticAppSearch.Web.Module, VirtoCommerce.ElasticAppSearch.Web</moduleType>

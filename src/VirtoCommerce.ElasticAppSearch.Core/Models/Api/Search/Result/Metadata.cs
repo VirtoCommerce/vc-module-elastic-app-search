@@ -13,6 +13,6 @@ public record Metadata
     public Page Page { get; init; }
 
     public Engine Engine { get; init; }
-    
+
     public string RequestId { get; init; }
 }
