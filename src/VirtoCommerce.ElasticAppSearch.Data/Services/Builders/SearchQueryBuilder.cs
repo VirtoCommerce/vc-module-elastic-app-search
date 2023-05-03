@@ -96,7 +96,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     {
         if (request.IsFuzzySearch)
         {
-            _logger.LogWarning("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead.");
+            _logger.LogWarning("Fuzzy search is not supported by Elastic App Search provider. Please use the Precision Tuning feature, which is part of Relevance Tuning, instead");
         }
 
         var searchQuery = new SearchQuery

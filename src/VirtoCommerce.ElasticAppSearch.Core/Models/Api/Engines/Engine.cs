@@ -7,4 +7,6 @@ public record Engine
     public EngineType Type { get; set; }
 
     public string Language { get; set; }
+
+    public string[] SourceEngines { get; set; }
 }

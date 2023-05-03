@@ -30,13 +30,13 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                 var dataValue = x.Value.FirstOrDefault();
                 if (dataValue?.Data.Any() == true)
                 {
-                    aggregation.Values = dataValue.Data.Select(x => GetAggregationResponseValue(x.Value, x.Count)).ToList();
+                    aggregation.Values = dataValue.Data.Select(d => GetAggregationResponseValue(d.Value, d.Count)).ToList();
                 }
 
                 return aggregation;
             });
 
-            return result.ToList();
+            return result?.ToList();
         }
 
         public IList<AggregationResponse> ToAggregationResult(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)

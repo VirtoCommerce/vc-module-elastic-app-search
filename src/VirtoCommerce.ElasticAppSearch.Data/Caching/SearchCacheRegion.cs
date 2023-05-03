@@ -1,8 +1,7 @@
 using VirtoCommerce.Platform.Core.Caching;
 
-namespace VirtoCommerce.ElasticAppSearch.Data.Caching
+namespace VirtoCommerce.ElasticAppSearch.Data.Caching;
+
+public class SearchCacheRegion : CancellableCacheRegion<SearchCacheRegion>
 {
-    public class SearchCacheRegion : CancellableCacheRegion<SearchCacheRegion>
-    {
-    }
 }

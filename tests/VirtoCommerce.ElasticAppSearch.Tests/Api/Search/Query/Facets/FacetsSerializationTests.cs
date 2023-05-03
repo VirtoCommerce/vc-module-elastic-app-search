@@ -33,7 +33,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             //json
             "Value.json"
         },
-        
+
         // number range facet
         new object[]
         {
@@ -58,7 +58,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             //json
             "RangeNumber.json"
         },
-        
+
         // date range facet
         new object[]
         {
@@ -86,7 +86,7 @@ public class FacetsSerializationTests : SerializationTestsBase
             //json
             "RangeDate.json"
         },
-        
+
         // GeoPoint range facet
         new object[]
         {

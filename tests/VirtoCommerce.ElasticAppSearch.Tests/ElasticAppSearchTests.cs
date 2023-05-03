@@ -34,14 +34,14 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             IServiceCollection services = new ServiceCollection(); // [1]
 
-            services.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
+            services.AddHttpClient(ModuleConstants.ModuleName, (_, httpClient) =>
             {
 
                 httpClient.BaseAddress = new Uri($"{host}/api/as/v1/");
 
                 httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {privateApiKey}");
 
-            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            }).ConfigurePrimaryHttpMessageHandler(_ =>
             {
                 var handler = new HttpClientHandler
                 {

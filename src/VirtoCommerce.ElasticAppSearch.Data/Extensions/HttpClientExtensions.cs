@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Extensions;
@@ -98,7 +99,7 @@ public static class HttpClientExtensions
         }
         catch
         {
-            throw new SearchException($"ElasticAppSearch: {httpResponseMessage.ReasonPhrase}");
+            throw new SearchException($"{ModuleConstants.ModuleName}: {httpResponseMessage.ReasonPhrase}");
         }
     }
 }
