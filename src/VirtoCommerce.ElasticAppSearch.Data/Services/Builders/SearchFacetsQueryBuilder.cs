@@ -30,7 +30,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         _searchFiltersBuilder = searchFiltersBuilder;
     }
 
-    public IList<FacetRequest> GetFacetRequests(IEnumerable<AggregationRequest> aggregations, Schema schema)
+    public IList<FacetRequest> GetFacetRequests(IList<AggregationRequest> aggregations, Schema schema)
     {
         var results = new List<FacetRequest>();
 
@@ -74,7 +74,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         return results;
     }
 
-    protected virtual IEnumerable<AggregationRequest> PreProcessAggregations(IEnumerable<AggregationRequest> aggregations)
+    protected virtual IList<AggregationRequest> PreProcessAggregations(IList<AggregationRequest> aggregations)
     {
         return PrepareFacets(aggregations);
     }
@@ -203,8 +203,8 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
     }
 
 
-    /// Try to fix faulty xapi logic
-    private static IEnumerable<AggregationRequest> PrepareFacets(IEnumerable<AggregationRequest> aggregations)
+    /// Try to fix faulty XAPI logic
+    private static IList<AggregationRequest> PrepareFacets(IList<AggregationRequest> aggregations)
     {
         var result = new List<AggregationRequest>();
 

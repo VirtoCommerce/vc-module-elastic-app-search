@@ -69,7 +69,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                     {
                         // add requests for inverted facets
                         var invertedFacets = GetFacets(filterGroup);
-                        var filter = filterGroup.FirstOrDefault().Filter;
+                        var filter = filterGroup.First().Filter;
 
                         var wrapper = new SearchQueryAggregationWrapper
                         {
@@ -162,7 +162,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
-    protected virtual Dictionary<string, ResultFieldValue> GetResultFields(IEnumerable<string> includeFields, Schema schema)
+    protected virtual Dictionary<string, ResultFieldValue> GetResultFields(IList<string> includeFields, Schema schema)
     {
         // combine all __object properties into one property
         if (includeFields?.Any(x => x.StartsWith(ModuleConstants.Api.FieldNames.ObjectFieldName)) == true)

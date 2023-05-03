@@ -31,9 +31,9 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
     private readonly ISearchResponseBuilder _searchResponseBuilder;
     private readonly IPlatformMemoryCache _memoryCache;
 
-    private const int MaxIndexingDocuments = 100;
-    private const string EngineAlias1 = "one";
-    private const string EngineAlias2 = "two";
+    protected const int MaxIndexingDocuments = 100;
+    protected const string EngineAlias1 = "one";
+    protected const string EngineAlias2 = "two";
 
     public ElasticAppSearchProvider(
         IOptions<SearchOptions> searchOptions,
@@ -266,7 +266,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
     protected virtual async Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
     {
         return await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
-            !string.IsNullOrEmpty(sourceEngine) ? new []{ sourceEngine } : null);
+            !string.IsNullOrEmpty(sourceEngine) ? new[] { sourceEngine } : null);
     }
 
     protected virtual async Task DeleteEngineAsync(string name)
@@ -281,12 +281,12 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
 
     protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
     {
-        await _elasticAppSearch.AddSourceEnginesAsync(name, new []{ sourceEngine });
+        await _elasticAppSearch.AddSourceEnginesAsync(name, new[] { sourceEngine });
     }
 
     protected virtual async Task DeleteSourceEngineAsync(string name, string sourceEngine)
     {
-        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new []{ sourceEngine });
+        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new[] { sourceEngine });
     }
 
     #endregion
@@ -434,7 +434,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
 
             var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
             {
-                AggregationId = searchQueries[i].AggregationId,
+                AggregationId = searchQueries?[i].AggregationId,
                 SearchResult = searchResult,
             }).ToList();
 
