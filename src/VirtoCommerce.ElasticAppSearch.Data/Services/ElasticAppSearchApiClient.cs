@@ -84,6 +84,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var response = await _httpClient.DeleteAsync(GetEngineEndpoint(engineName));
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DeleteEngineResult { Deleted = true };
+        }
+
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
         var result = await response.Content.ReadFromJsonAsync<DeleteEngineResult>(ModuleConstants.Api.JsonSerializerSettings);
