@@ -4,6 +4,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Services;
 
@@ -32,4 +33,6 @@ public interface IElasticAppSearchApiClient
     Task<SearchResult> SearchAsync(string engineName, SearchQuery query);
 
     Task<SearchResult> SearchAsync(string engineName, string rawQuery);
+
+    Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query);
 }

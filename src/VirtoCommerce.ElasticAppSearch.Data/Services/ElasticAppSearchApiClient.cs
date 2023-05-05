@@ -14,6 +14,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.Platform.Core.Common;
@@ -198,6 +199,19 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #endregion
 
+    public async Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query)
+    {
+        var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+        var response = await _httpClient.PostAsync(GetSuggestionEndpoint(engineName), payload, cancellationToken: default);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<SuggestionApiResponse>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
+    }
+
+
     private static string GetEngineEndpoint(string engineName)
     {
         return $"{EnginesEndpoint}/{engineName}";
@@ -221,6 +235,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private static string GetSearchEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/search";
+    }
+
+    private static string GetSuggestionEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/query_suggestion";
     }
 
     private PreSearchInfo PreSearch(HttpContent payload)

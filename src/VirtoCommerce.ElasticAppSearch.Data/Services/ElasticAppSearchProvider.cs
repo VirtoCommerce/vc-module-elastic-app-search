@@ -22,7 +22,7 @@ using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Docume
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
+public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISupportSuggestions
 {
     private readonly SearchOptions _searchOptions;
     private readonly IElasticAppSearchApiClient _elasticAppSearch;
@@ -182,7 +182,43 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap
 
     #endregion
 
+    public virtual async Task<SuggestionResponse> GetSuggestionsAsync(string documentType, SuggestionRequest request)
+    {
+        var engineName = await GetEngineNameAsync(documentType, request.UseBackupIndex);
+        if (engineName == null)
+        {
+            return new SuggestionResponse();
+        }
+
+        var apiQuery = _searchQueryBuilder.ToSuggestionQuery(request);
+        var apiResponse = await _elasticAppSearch.GetSuggestionsAsync(engineName, apiQuery);
+        var response = _searchResponseBuilder.ToSuggestionResponse(apiResponse);
+
+        return response;
+    }
+
+
     #region Engines
+
+    protected virtual async Task<string> GetEngineNameAsync(string documentType, bool useBackupIndex)
+    {
+        var sourceEngineName = GetSourceEngineName(ref documentType);
+
+        // Pseudo support index swap
+        if (useBackupIndex && sourceEngineName == null)
+        {
+            return null;
+        }
+
+        var engineName = GetEngineName(documentType);
+
+        if (sourceEngineName != null)
+        {
+            engineName = await GetAliasName(sourceEngineName, engineName, useBackupIndex);
+        }
+
+        return engineName;
+    }
 
     protected virtual string GetEngineName(string documentType)
     {
