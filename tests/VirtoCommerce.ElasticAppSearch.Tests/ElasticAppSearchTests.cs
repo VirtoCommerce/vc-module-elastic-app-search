@@ -26,7 +26,56 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
     public class ElasticAppSearchTests : SearchProviderTests
     {
         [Fact]
-        public async Task CanMakeSuggestions()
+        public async Task CanMakeSuggestionsWithoutFields()
+        {
+            var provider = GetSearchProvider();
+
+            if (provider is not ISupportSuggestions supportSuggestions)
+            {
+                return;
+            }
+
+            var request = new SuggestionRequest
+            {
+                Query = "bl",
+                Size = 10,
+            };
+
+            var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Suggestions);
+
+            response.Suggestions.Should().BeEquivalentTo("black", "black sox", "black sox2", "blue", "blue shirt", "blue shirt 2");
+        }
+
+        [Fact]
+        public async Task CanMakeSuggestionsWithEmptyFields()
+        {
+            var provider = GetSearchProvider();
+
+            if (provider is not ISupportSuggestions supportSuggestions)
+            {
+                return;
+            }
+
+            var request = new SuggestionRequest
+            {
+                Query = "bl",
+                Fields = Array.Empty<string>(),
+                Size = 10,
+            };
+
+            var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Suggestions);
+
+            response.Suggestions.Should().BeEquivalentTo("black", "black sox", "black sox2", "blue", "blue shirt", "blue shirt 2");
+        }
+
+        [Fact]
+        public async Task CanMakeSuggestionsWithSpecificFields()
         {
             var provider = GetSearchProvider();
 
@@ -39,7 +88,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             {
                 Query = "bl",
                 Fields = new[] { "Name" },
-                Size = 5,
+                Size = 10,
             };
 
             var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);

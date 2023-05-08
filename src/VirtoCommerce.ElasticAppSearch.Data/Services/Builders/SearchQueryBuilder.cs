@@ -98,15 +98,19 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         var apiQuery = new SuggestionApiQuery
         {
             Query = request.Query,
-            Types = new SuggestionsApiQueryType
+            Size = request.Size,
+        };
+
+        if (request.Fields != null && request.Fields.Any())
+        {
+            apiQuery.Types = new SuggestionsApiQueryType
             {
                 Documents = new SuggestionsApiQueryTypeDocument
                 {
                     Fields = request.Fields.Select(x => _fieldNameConverter.ToProviderFieldName(x)).ToArray(),
                 },
-            },
-            Size = request.Size,
-        };
+            };
+        }
 
         return apiQuery;
     }
