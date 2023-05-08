@@ -28,13 +28,21 @@ public class CustomContractResolver : DefaultContractResolver
 
     private static bool ShouldDo(JsonProperty jsonProperty, object obj, bool shouldIgnoreEmpty, Predicate<object> callback)
     {
-        var value = jsonProperty.ValueProvider?.GetValue(obj);
-        var enumerable = value?.AsArray();
-        var result = !shouldIgnoreEmpty || enumerable != null && enumerable.Any();
+        var result = !shouldIgnoreEmpty || IsNotEmptyCollection(jsonProperty, obj);
+
         if (callback != null)
         {
             result &= callback(obj);
         }
+
+        return result;
+    }
+
+    private static bool IsNotEmptyCollection(JsonProperty jsonProperty, object obj)
+    {
+        var value = jsonProperty.ValueProvider?.GetValue(obj);
+        var array = value?.AsArray();
+        var result = array != null && array.Any();
 
         return result;
     }
