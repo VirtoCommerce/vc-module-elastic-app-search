@@ -248,7 +248,6 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         if (schemaChanged)
         {
             await UpdateSchemaAsync(engineName, schema);
-            SearchCacheRegion.ExpireTokenForKey(engineName);
         }
 
         var indexingResult = new IndexingResult { Items = indexingResultItems };
@@ -360,7 +359,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     protected virtual async Task UpdateSchemaAsync(string engineName, Schema schema)
     {
-        await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
+        try
+        {
+            await _elasticAppSearch.UpdateSchemaAsync(engineName, schema);
+        }
+        finally
+        {
+            SearchCacheRegion.ExpireTokenForKey(engineName);
+        }
     }
 
     private static bool SchemaChanged(Schema oldSchema, Schema newSchema)
