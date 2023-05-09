@@ -101,13 +101,18 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             Size = request.Size,
         };
 
-        if (request.Fields != null && request.Fields.Any())
+        var fields = request.Fields
+            ?.Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => _fieldNameConverter.ToProviderFieldName(x))
+            .ToArray();
+
+        if (fields?.Any() == true)
         {
             apiQuery.Types = new SuggestionsApiQueryType
             {
                 Documents = new SuggestionsApiQueryTypeDocument
                 {
-                    Fields = request.Fields.Select(x => _fieldNameConverter.ToProviderFieldName(x)).ToArray(),
+                    Fields = fields,
                 },
             };
         }
