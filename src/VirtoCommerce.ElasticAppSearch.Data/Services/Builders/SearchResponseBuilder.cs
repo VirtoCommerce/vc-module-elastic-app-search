@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -47,5 +48,15 @@ public class SearchResponseBuilder : ISearchResponseBuilder
         };
 
         return searchResponse;
+    }
+
+    public virtual SuggestionResponse ToSuggestionResponse(SuggestionApiResponse apiResponse)
+    {
+        var response = new SuggestionResponse
+        {
+            Suggestions = apiResponse.Results.Documents.Select(x => x.Suggestion).ToArray(),
+        };
+
+        return response;
     }
 }

@@ -8,6 +8,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -91,6 +92,34 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
         return result;
     }
+
+    public virtual SuggestionApiQuery ToSuggestionQuery(SuggestionRequest request)
+    {
+        var apiQuery = new SuggestionApiQuery
+        {
+            Query = request.Query,
+            Size = request.Size,
+        };
+
+        var fields = request.Fields
+            ?.Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => _fieldNameConverter.ToProviderFieldName(x))
+            .ToArray();
+
+        if (fields?.Any() == true)
+        {
+            apiQuery.Types = new SuggestionsApiQueryType
+            {
+                Documents = new SuggestionsApiQueryTypeDocument
+                {
+                    Fields = fields,
+                },
+            };
+        }
+
+        return apiQuery;
+    }
+
 
     protected virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema)
     {

@@ -1,9 +1,8 @@
 using System;
-using System.Linq;
+using System.Collections;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
@@ -15,27 +14,28 @@ public class CustomContractResolver : DefaultContractResolver
         if (!jsonProperty.Ignored)
         {
             var emptyValueHandling = member.GetCustomAttribute<CustomJsonPropertyAttribute>()?.EmptyValueHandling;
-            var shouldIgnoreEmpty = emptyValueHandling == EmptyValueHandling.Ignore;
+            var ignoreEmpty = emptyValueHandling == EmptyValueHandling.Ignore;
 
             var shouldSerialize = jsonProperty.ShouldSerialize;
-            jsonProperty.ShouldSerialize = obj => ShouldDo(jsonProperty, obj, shouldIgnoreEmpty, shouldSerialize);
+            jsonProperty.ShouldSerialize = obj => ShouldDo(jsonProperty, obj, ignoreEmpty, shouldSerialize);
 
             var shouldDeserialize = jsonProperty.ShouldDeserialize;
-            jsonProperty.ShouldDeserialize = obj => ShouldDo(jsonProperty, obj, shouldIgnoreEmpty, shouldDeserialize);
+            jsonProperty.ShouldDeserialize = obj => ShouldDo(jsonProperty, obj, ignoreEmpty, shouldDeserialize);
         }
         return jsonProperty;
     }
 
-    private static bool ShouldDo(JsonProperty jsonProperty, object obj, bool shouldIgnoreEmpty, Predicate<object> callback)
+    private static bool ShouldDo(JsonProperty jsonProperty, object obj, bool ignoreEmpty, Predicate<object> callback)
     {
-        var value = jsonProperty.ValueProvider?.GetValue(obj);
-        var enumerable = value?.AsArray();
-        var result = !shouldIgnoreEmpty || enumerable != null && enumerable.Any();
-        if (callback != null)
+        if (ignoreEmpty)
         {
-            result &= callback(obj);
+            var value = jsonProperty.ValueProvider?.GetValue(obj);
+            if (value is IEnumerable enumerable && !enumerable.GetEnumerator().MoveNext())
+            {
+                return false;
+            }
         }
 
-        return result;
+        return callback == null || callback(obj);
     }
 }

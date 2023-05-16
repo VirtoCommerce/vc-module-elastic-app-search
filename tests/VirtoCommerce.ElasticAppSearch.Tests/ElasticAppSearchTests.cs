@@ -1,6 +1,8 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,6 +25,81 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
     [Trait("Category", "IntegrationTest")]
     public class ElasticAppSearchTests : SearchProviderTests
     {
+        [Fact]
+        public async Task CanMakeSuggestionsWithoutFields()
+        {
+            var provider = GetSearchProvider();
+
+            if (provider is not ISupportSuggestions supportSuggestions)
+            {
+                return;
+            }
+
+            var request = new SuggestionRequest
+            {
+                Query = "bl",
+                Size = 10,
+            };
+
+            var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Suggestions);
+
+            response.Suggestions.Should().BeEquivalentTo("black", "black sox", "black sox2", "blue", "blue shirt", "blue shirt 2");
+        }
+
+        [Fact]
+        public async Task CanMakeSuggestionsWithEmptyFields()
+        {
+            var provider = GetSearchProvider();
+
+            if (provider is not ISupportSuggestions supportSuggestions)
+            {
+                return;
+            }
+
+            var request = new SuggestionRequest
+            {
+                Query = "bl",
+                Fields = Array.Empty<string>(),
+                Size = 10,
+            };
+
+            var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Suggestions);
+
+            response.Suggestions.Should().BeEquivalentTo("black", "black sox", "black sox2", "blue", "blue shirt", "blue shirt 2");
+        }
+
+        [Fact]
+        public async Task CanMakeSuggestionsWithSpecificFields()
+        {
+            var provider = GetSearchProvider();
+
+            if (provider is not ISupportSuggestions supportSuggestions)
+            {
+                return;
+            }
+
+            var request = new SuggestionRequest
+            {
+                Query = "bl",
+                Fields = new[] { "Name" },
+                Size = 10,
+            };
+
+            var response = await supportSuggestions.GetSuggestionsAsync(DocumentType, request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Suggestions);
+
+            response.Suggestions.Should().BeEquivalentTo("black", "black sox", "black sox2", "blue", "blue shirt");
+        }
+
+
         protected override ISearchProvider GetSearchProvider()
         {
 
