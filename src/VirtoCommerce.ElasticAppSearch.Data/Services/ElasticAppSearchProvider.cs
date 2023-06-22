@@ -255,9 +255,9 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         return indexingResult;
     }
 
-    protected virtual async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
+    protected virtual Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
-        return await _elasticAppSearch.CreateOrUpdateDocumentsAsync(engineName, documents);
+        return _elasticAppSearch.CreateOrUpdateDocumentsAsync(engineName, documents);
     }
 
     protected virtual IndexingResultItem[] ConvertCreateOrUpdateDocumentResults(CreateOrUpdateDocumentResult[] createOrUpdateDocumentResults)
@@ -345,11 +345,11 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #region Schema
 
-    protected virtual async Task<Schema> GetSchemaAsync(string engineName)
+    protected virtual Task<Schema> GetSchemaAsync(string engineName)
     {
         var cacheKey = CacheKey.With(GetType(), "GetSchemaAsync", engineName);
 
-        return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+        return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
         {
             cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
 
@@ -474,9 +474,9 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         return $"{sourceEngineName}-{alias.ToLowerInvariant()}";
     }
 
-    protected virtual async Task<bool> GetEngineExistsAsync(string name)
+    protected virtual Task<bool> GetEngineExistsAsync(string name)
     {
-        return await _elasticAppSearch.GetEngineExistsAsync(name);
+        return _elasticAppSearch.GetEngineExistsAsync(name);
     }
 
     protected virtual async Task<Engine> GetMetaEngineAsync(string name, bool required)
@@ -496,14 +496,16 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         return metaEngine;
     }
 
-    protected virtual async Task<Engine> GetEngineAsync(string name)
+    protected virtual Task<Engine> GetEngineAsync(string name)
     {
-        return await _elasticAppSearch.GetEngineAsync(name);
+        return _elasticAppSearch.GetEngineAsync(name);
     }
 
-    protected virtual async Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
+    protected virtual Task<Engine> CreateEngineAsync(string name, string sourceEngine = null)
     {
-        return await _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
+        SearchCacheRegion.ExpireTokenForKey(name);
+
+        return _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
             !string.IsNullOrEmpty(sourceEngine) ? new[] { sourceEngine } : null);
     }
 
@@ -517,14 +519,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         }
     }
 
-    protected virtual async Task AddSourceEngineAsync(string name, string sourceEngine)
+    protected virtual Task AddSourceEngineAsync(string name, string sourceEngine)
     {
-        await _elasticAppSearch.AddSourceEnginesAsync(name, new[] { sourceEngine });
+        return _elasticAppSearch.AddSourceEnginesAsync(name, new[] { sourceEngine });
     }
 
-    protected virtual async Task DeleteSourceEngineAsync(string name, string sourceEngine)
+    protected virtual Task DeleteSourceEngineAsync(string name, string sourceEngine)
     {
-        await _elasticAppSearch.DeleteSourceEnginesAsync(name, new[] { sourceEngine });
+        return _elasticAppSearch.DeleteSourceEnginesAsync(name, new[] { sourceEngine });
     }
 
     #endregion
