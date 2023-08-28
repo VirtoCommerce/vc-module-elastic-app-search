@@ -54,6 +54,8 @@ public static class ModuleConstants
 
             public const string ObjectFieldName = "__object";
 
+            public const string ScoreFieldName = "_score";
+
             public static readonly string[] Reserved = { "external_id", "engine_id", "highlight", "or", "and", "not", "any", "all", "none" };
 
             public const string ReservedFieldNamesPrefix = "field_";
