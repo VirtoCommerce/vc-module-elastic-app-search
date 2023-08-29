@@ -148,7 +148,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     protected virtual ISort[] GetSorting(IEnumerable<SortingField> sortingFields, Schema schema)
     {
         var result = sortingFields?.Select(GetSortingField)
-            .Where(x => schema.Fields.ContainsKey(x.FieldName))
+            .Where(x => schema.Fields.ContainsKey(x.FieldName) || x.FieldName == ModuleConstants.Api.FieldNames.ScoreFieldName)
             .ToArray();
 
         return result;
