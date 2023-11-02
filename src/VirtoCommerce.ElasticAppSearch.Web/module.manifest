@@ -3,12 +3,12 @@
   <id>VirtoCommerce.ElasticAppSearch</id>
   <version>3.213.0</version>
   <version-tag />
-  
+
   <platformVersion>3.400.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.Search" version="3.403.0" />
   </dependencies>
-  
+
   <apps>
     <app id="app_search">
       <title>App Search</title>
