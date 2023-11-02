@@ -76,6 +76,28 @@ public static class ModuleConstants
         {
             public const int MaxDepth = 5;
         }
+
+        public static class BoostTypes
+        {
+            public const string Value = "value";
+            public const string Functional = "functional";
+            public const string Proximity = "proximity";
+            public const string Recency = "proximity";
+        }
+
+        public static class BoostOperations
+        {
+            public const string Multiply = "multiply";
+            public const string Add = "add";
+        }
+
+        public static class BoostFunctions
+        {
+            public const string Linear = "linear";
+            public const string Exponential = "exponential";
+            public const string Logarithmic = "logarithmic";
+            public const string Gaussian = "gaussian";
+        }
     }
 
     public static class Security

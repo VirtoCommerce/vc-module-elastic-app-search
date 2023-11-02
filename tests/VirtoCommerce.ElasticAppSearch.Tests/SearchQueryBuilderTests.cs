@@ -126,7 +126,8 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var fieldNameConverter = GetFieldNameConverter();
             var searchFiltersBuilder = GetSearchFiltersBuilder();
             var searchFacetsQueryBuilder = GetSearchFacetsQueryBuilder();
-            var searchQueryBuilder = new SearchQueryBuilder(logger, fieldNameConverter, searchFiltersBuilder, searchFacetsQueryBuilder);
+            var searchBoostsBuilder = GetSearchBoostsBulder();
+            var searchQueryBuilder = new SearchQueryBuilder(logger, fieldNameConverter, searchFiltersBuilder, searchFacetsQueryBuilder, searchBoostsBuilder);
             var request = searchRequest();
             var schema = GetSchema();
 
@@ -176,6 +177,12 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         private static ISearchFacetsQueryBuilder GetSearchFacetsQueryBuilder()
         {
             var mock = new Mock<ISearchFacetsQueryBuilder>();
+            return mock.Object;
+        }
+
+        private static ISearchBoostsBuilder GetSearchBoostsBulder()
+        {
+            var mock = new Mock<ISearchBoostsBuilder>();
             return mock.Object;
         }
     }

@@ -102,7 +102,6 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
         protected override ISearchProvider GetSearchProvider()
         {
-
             var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "http://localhost:3002";
             var privateApiKey = Environment.GetEnvironmentVariable("TestElasticAppSearchPrivateKey") ?? "";
 
@@ -113,7 +112,6 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             services.AddHttpClient(ModuleConstants.ModuleName, (_, httpClient) =>
             {
-
                 httpClient.BaseAddress = new Uri($"{host}/api/as/v1/");
 
                 httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {privateApiKey}");
@@ -130,12 +128,14 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             var httpFactory = services.BuildServiceProvider().GetRequiredService<IHttpClientFactory>();
 
-            var apiClient = new ElasticAppSearchApiClient(httpFactory, Mock.Of<ILogger<ElasticAppSearchApiClient>>(), Mock.Of<IOptions<ElasticAppSearchOptions>>());
+            var appSearchOptionsMock = Mock.Of<IOptions<ElasticAppSearchOptions>>();
+            var apiClient = new ElasticAppSearchApiClient(httpFactory, Mock.Of<ILogger<ElasticAppSearchApiClient>>(), appSearchOptionsMock);
             var fieldNameConverter = new FieldNameConverter();
             var documentConverter = new DocumentConverter(Mock.Of<ILogger<DocumentConverter>>(), fieldNameConverter);
             var searchFilterBuilder = new SearchFiltersBuilder(Mock.Of<ILogger<SearchFiltersBuilder>>(), fieldNameConverter);
             var facetsBuilder = new SearchFacetsQueryBuilder(Mock.Of<ILogger<SearchFacetsQueryBuilder>>(), fieldNameConverter, searchFilterBuilder);
-            var searchQueryBuilder = new SearchQueryBuilder(Mock.Of<ILogger<SearchQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, facetsBuilder);
+            var boostsBuilder = new SearchBoostsBuilder(appSearchOptionsMock, fieldNameConverter);
+            var searchQueryBuilder = new SearchQueryBuilder(Mock.Of<ILogger<SearchQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, facetsBuilder, boostsBuilder);
             var aggregationsResponseBuilder = new AggregationsResponseBuilder(fieldNameConverter);
             var searchResponseBuilder = new SearchResponseBuilder(documentConverter, aggregationsResponseBuilder);
             var memoryCache = new MemoryCache(new MemoryCacheOptions());

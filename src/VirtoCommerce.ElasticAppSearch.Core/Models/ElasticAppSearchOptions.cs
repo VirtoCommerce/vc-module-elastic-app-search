@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace VirtoCommerce.ElasticAppSearch.Core.Models;
 
 public class ElasticAppSearchOptions
@@ -19,4 +21,6 @@ public class ElasticAppSearchOptions
     /// Gets or sets the path to the App Search engine in the Kibana Dashboard. Default value: /app/enterprise_search/app_search/engines/.
     /// </summary>
     public string KibanaPath { get; set; } = "/app/enterprise_search/app_search/engines/";
+
+    public List<BoostPreset> BoostPresets { get; set; } = new();
 }

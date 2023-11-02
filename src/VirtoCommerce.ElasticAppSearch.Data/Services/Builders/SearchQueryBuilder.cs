@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -5,6 +6,7 @@ using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
@@ -22,16 +24,19 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     private readonly IFieldNameConverter _fieldNameConverter;
     private readonly ISearchFiltersBuilder _searchFiltersBuilder;
     private readonly ISearchFacetsQueryBuilder _facetsBuilder;
+    private readonly ISearchBoostsBuilder _boostsBuilder;
 
     public SearchQueryBuilder(ILogger<SearchQueryBuilder> logger,
         IFieldNameConverter fieldNameConverter,
         ISearchFiltersBuilder searchFiltersBuilder,
-        ISearchFacetsQueryBuilder facetsBuilder)
+        ISearchFacetsQueryBuilder facetsBuilder,
+        ISearchBoostsBuilder boostsBuilder)
     {
         _logger = logger;
         _fieldNameConverter = fieldNameConverter;
         _searchFiltersBuilder = searchFiltersBuilder;
         _facetsBuilder = facetsBuilder;
+        _boostsBuilder = boostsBuilder;
     }
 
     public IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema)
@@ -135,6 +140,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             Filters = GetFilters(request.Filter, schema),
             SearchFields = GetSearchFields(request.SearchFields),
             ResultFields = GetResultFields(request.IncludeFields, schema),
+            Boosts = GetBoosts(request.Boosts, schema),
             Page = new Page
             {
                 Current = request.Take == 0 ? 1 : request.Skip / request.Take + 1,
@@ -208,6 +214,12 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             .ToDictionary(x => x, _ => new ResultFieldValue());
 
         return result;
+    }
+
+
+    protected virtual Dictionary<string, Boost[]> GetBoosts(IList<SearchBoost> boosts, Schema schema)
+    {
+        return _boostsBuilder.ToBoosts(boosts, schema);
     }
 
     protected virtual IFilters GetFilters(ISearchFilter filter, Schema schema)
