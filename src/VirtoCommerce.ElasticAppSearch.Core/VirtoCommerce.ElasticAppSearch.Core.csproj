@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="VirtoCommerce.SearchModule.Core" Version="3.403.0-alpha.719-pt-14224" />
+    <PackageReference Include="VirtoCommerce.SearchModule.Core" Version="3.403.0-alpha.723-pt-14218" />
   </ItemGroup>
 
 </Project>
