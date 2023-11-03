@@ -35,6 +35,7 @@ public class Module : IModule, IHasConfiguration
         serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
         serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
         serviceCollection.AddSingleton<ISearchFiltersBuilder, SearchFiltersBuilder>();
+        serviceCollection.AddSingleton<ISearchBoostsBuilder, SearchBoostsBuilder>();
         serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
         serviceCollection.AddSingleton<ISearchResponseBuilder, SearchResponseBuilder>();
         serviceCollection.AddSingleton<ElasticAppSearchProvider>();

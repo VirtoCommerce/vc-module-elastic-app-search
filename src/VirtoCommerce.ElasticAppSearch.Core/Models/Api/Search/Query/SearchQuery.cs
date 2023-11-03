@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Filters;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
@@ -34,4 +35,8 @@ public record SearchQuery
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
     public Dictionary<string, Facet> Facets { get; set; } = new();
+
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    [CustomJsonProperty(EmptyValueHandling = EmptyValueHandling.Ignore)]
+    public Dictionary<string, Boost[]> Boosts { get; set; } = new();
 }
