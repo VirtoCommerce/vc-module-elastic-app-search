@@ -43,12 +43,10 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         {
             var doc = new IndexDocument(id);
 
-            doc.Add(new IndexDocumentField("Content", name, IndexDocumentFieldValueType.String) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
-            doc.Add(new IndexDocumentField("Content", color, IndexDocumentFieldValueType.String) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
+            doc.AddFilterableStringAndContentString("Name", name);
+            doc.AddFilterableStringAndContentString("Color", color);
 
             doc.AddFilterableString("Code", id);
-            doc.AddFilterableString("Name", name);
-            doc.AddFilterableString("Color", color);
             doc.AddFilterableInteger("Size", size);
             doc.AddFilterableDateTime("Date", DateTime.Parse(date));
             doc.Add(new IndexDocumentField("Location", GeoPoint.TryParse(location), IndexDocumentFieldValueType.GeoPoint) { IsRetrievable = true, IsFilterable = true });
