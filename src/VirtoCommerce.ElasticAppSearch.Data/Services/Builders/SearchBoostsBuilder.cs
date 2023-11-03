@@ -30,7 +30,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         {
             if (boosts.IsNullOrEmpty() || _boostPresets.IsNullOrEmpty())
             {
-                return null;
+                return new Dictionary<string, Boost[]>();
             }
 
             var result = boosts
