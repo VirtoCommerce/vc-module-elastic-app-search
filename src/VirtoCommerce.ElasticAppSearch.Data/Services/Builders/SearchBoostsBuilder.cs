@@ -21,7 +21,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             IOptions<ElasticAppSearchOptions> options,
             IFieldNameConverter fieldNameConverter)
         {
-            _boostPresets = options.Value.BoostPresets;
+            _boostPresets = options.Value?.BoostPresets ?? new List<BoostPreset>();
 
             _fieldNameConverter = fieldNameConverter;
         }
