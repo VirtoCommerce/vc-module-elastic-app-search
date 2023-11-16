@@ -1,0 +1,19 @@
+{
+  "query": "park",
+  "boosts": {
+    "state": [
+      {
+        "type": "value",
+        "value": "TX",
+        "operation": "multiply",
+        "factor": 10.0
+      },
+      {
+        "type": "value",
+        "value": "MN",
+        "operation": "add",
+        "factor": 5.0
+      }
+    ]
+  }
+}

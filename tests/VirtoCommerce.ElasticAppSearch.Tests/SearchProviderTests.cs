@@ -235,7 +235,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var request = new SearchRequest
             {
                 SearchKeywords = " shirt ",
-                SearchFields = new[] { "Content" },
+                SearchFields = new[] { "__content" },
                 Take = 10,
             };
 
@@ -247,7 +247,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             request = new SearchRequest
             {
                 SearchKeywords = "\"red shirt\"",
-                SearchFields = new[] { "Content" },
+                SearchFields = new[] { "__content" },
                 Take = 10,
             };
 
