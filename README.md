@@ -5,9 +5,9 @@ VirtoCommerce.ElasticAppSearch module implements `ISearchProvider` defined in th
 
 Elastic App search provides search, aggregation, and analytic capabilities as a service, on top of ElasticSearch. It also supplies tools that can help you tune search result sets without development:
 
-* [Relevance Tuning](https://www.elastic.co/guide/en/app-search/current/precision-tuning.html/)
-* [Synonyms](https://www.elastic.co/guide/en/app-search/current/synonyms-guide.html/)
-* [Curations](https://www.elastic.co/guide/en/app-search/current/curations-guide.html/)
+* [Relevance Tuning](https://www.elastic.co/guide/en/app-search/current/precision-tuning.html)
+* [Synonyms](https://www.elastic.co/guide/en/app-search/current/synonyms-guide.html)
+* [Curations](https://www.elastic.co/guide/en/app-search/current/curations-guide.html)
 
 Read more about how to deploy Elastic App Search [here](https://www.elastic.co/guide/en/app-search/current/installation.html).
 
@@ -40,7 +40,7 @@ API keys can be managed in the Credential menu within the App Search Dashboard p
 ## Documentation
 
 * [Search Fundamentals](https://virtocommerce.com/docs/fundamentals/search/)
-* [Elastic App Search Documentation](https://www.elastic.co/guide/en/app-search/8.1/index.html)
+* [Elastic App Search Documentation](https://www.elastic.co/guide/en/app-search/current/getting-started.html)
 * [Elastic App Search Guide](./docs/eas-setup-guide.md)
 
 ## References
@@ -49,7 +49,7 @@ API keys can be managed in the Credential menu within the App Search Dashboard p
 * Installation: https://www.virtocommerce.com/docs/latest/user-guide/modules/
 * Home: https://virtocommerce.com
 * Community: https://www.virtocommerce.org
-* Download Latest Release: (https://github.com/VirtoCommerce/vc-module-catalog/releases/latest)
+* Download Latest Release: https://github.com/VirtoCommerce/vc-module-catalog/releases/latest
 
 ## License
 
