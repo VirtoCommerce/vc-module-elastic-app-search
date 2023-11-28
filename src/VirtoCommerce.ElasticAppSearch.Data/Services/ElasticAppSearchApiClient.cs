@@ -147,6 +147,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var response = await _httpClient.GetAsync(GetSchemaEndpoint(engineName));
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
         await response.EnsureSuccessStatusCodeAsync<Result>();
 
         var result = await response.Content.ReadFromJsonAsync<Schema>();
@@ -175,6 +180,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), payload, default);
         PostSearch(preSearchInfo);
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
         var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
@@ -189,6 +199,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var preSearchInfo = PreSearch(content);
         var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content, default);
         PostSearch(preSearchInfo);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
