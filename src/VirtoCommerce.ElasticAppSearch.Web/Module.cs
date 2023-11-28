@@ -28,43 +28,46 @@ public class Module : IModule, IHasConfiguration
 
     public void Initialize(IServiceCollection serviceCollection)
     {
-        serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
-        serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
-
-        serviceCollection.AddSingleton<IElasticAppSearchApiClient, ElasticAppSearchApiClient>();
-        serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
-        serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
-        serviceCollection.AddSingleton<ISearchFiltersBuilder, SearchFiltersBuilder>();
-        serviceCollection.AddSingleton<ISearchBoostsBuilder, SearchBoostsBuilder>();
-        serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
-        serviceCollection.AddSingleton<ISearchResponseBuilder, SearchResponseBuilder>();
-        serviceCollection.AddSingleton<ElasticAppSearchProvider>();
-        serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
-        serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
-
-        serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
+        if (Configuration.SearchProviderActive(ModuleConstants.ModuleName))
         {
-            var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+            serviceCollection.Configure<ElasticAppSearchOptions>(Configuration.GetSection($"Search:{ModuleConstants.ModuleName}"));
+            serviceCollection.AddSingleton<IValidateOptions<ElasticAppSearchOptions>, ElasticAppSearchOptionsValidator>();
 
-            httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+            serviceCollection.AddSingleton<IElasticAppSearchApiClient, ElasticAppSearchApiClient>();
+            serviceCollection.AddSingleton<IFieldNameConverter, FieldNameConverter>();
+            serviceCollection.AddSingleton<IDocumentConverter, DocumentConverter>();
+            serviceCollection.AddSingleton<ISearchFiltersBuilder, SearchFiltersBuilder>();
+            serviceCollection.AddSingleton<ISearchBoostsBuilder, SearchBoostsBuilder>();
+            serviceCollection.AddSingleton<ISearchQueryBuilder, SearchQueryBuilder>();
+            serviceCollection.AddSingleton<ISearchResponseBuilder, SearchResponseBuilder>();
+            serviceCollection.AddSingleton<ElasticAppSearchProvider>();
+            serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
+            serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
 
-            httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
-
-            if (elasticAppSearchOptions.EnableHttpCompression)
+            serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
             {
-                httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
-            }
-        }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-        {
-            var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-            var handler = new HttpClientHandler
+                httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+
+                httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
+
+                if (elasticAppSearchOptions.EnableHttpCompression)
+                {
+                    httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
+                }
+            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
             {
-                AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
-            };
+                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-            return handler;
-        });
+                var handler = new HttpClientHandler
+                {
+                    AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
+                };
+
+                return handler;
+            });
+        }
     }
 
     public void PostInitialize(IApplicationBuilder appBuilder)
@@ -77,7 +80,10 @@ public class Module : IModule, IHasConfiguration
         var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
         permissionsRegistrar.RegisterPermissions(ModuleInfo.Id, ModuleConstants.ModuleName, ModuleConstants.Security.Permissions.AllPermissions);
 
-        appBuilder.UseSearchProvider<ElasticAppSearchProvider>(ModuleConstants.ModuleName);
+        if (Configuration.SearchProviderActive(ModuleConstants.ModuleName))
+        {
+            appBuilder.UseSearchProvider<ElasticAppSearchProvider>(ModuleConstants.ModuleName);
+        }
     }
 
     public void Uninstall()
