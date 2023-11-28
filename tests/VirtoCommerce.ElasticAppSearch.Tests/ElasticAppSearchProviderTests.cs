@@ -25,6 +25,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         {
             // Arrange
             var appSearchClient = new Mock<IElasticAppSearchApiClient>();
+            appSearchClient.Setup(x => x.GetSchemaAsync(It.IsAny<string>())).ReturnsAsync(() => new Schema());
 
             var searchOptions = Options.Create(new SearchOptions());
             var documentConverter = new Mock<IDocumentConverter>();
