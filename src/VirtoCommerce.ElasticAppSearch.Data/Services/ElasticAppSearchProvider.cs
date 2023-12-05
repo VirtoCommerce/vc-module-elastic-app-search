@@ -312,6 +312,11 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
     {
         var schema = await GetSchemaAsync(engineName);
 
+        if (schema is null)
+        {
+            return new SearchResponse();
+        }
+
         SearchResponse response;
 
         if (string.IsNullOrEmpty(request.RawQuery))
@@ -372,7 +377,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
     private static bool SchemaChanged(Schema oldSchema, Schema newSchema)
     {
         // added fields
-        if (newSchema.Fields.Count > oldSchema.Fields.Count)
+        if (oldSchema is null || newSchema.Fields.Count > oldSchema.Fields.Count)
         {
             return true;
         }
