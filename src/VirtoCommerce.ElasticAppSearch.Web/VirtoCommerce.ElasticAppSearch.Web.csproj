@@ -1,18 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
   </PropertyGroup>
-
   <PropertyGroup>
     <!-- Project is not a test project -->
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Core\VirtoCommerce.ElasticAppSearch.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Data\VirtoCommerce.ElasticAppSearch.Data.csproj" />
   </ItemGroup>
-
 </Project>
