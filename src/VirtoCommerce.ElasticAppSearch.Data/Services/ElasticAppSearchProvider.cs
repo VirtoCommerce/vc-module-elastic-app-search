@@ -9,6 +9,7 @@ using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -290,9 +291,9 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #region Delete
 
-    protected virtual async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] documentIds)
+    protected virtual Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] documentIds)
     {
-        return await _elasticAppSearch.DeleteDocumentsAsync(engineName, documentIds);
+        return _elasticAppSearch.DeleteDocumentsAsync(engineName, documentIds);
     }
 
     protected virtual IndexingResultItem[] ConvertDeleteDocumentResults(DeleteDocumentResult[] deleteDocumentResults)
@@ -317,11 +318,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
             return new SearchResponse();
         }
 
+        var searchSettings = await GetSearchSettingsAsync(engineName);
+
         SearchResponse response;
 
         if (string.IsNullOrEmpty(request.RawQuery))
         {
-            var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema);
+            var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema, searchSettings);
+
             var searchTasks =
                 searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
                 ?? new List<Task<SearchResult>>();
@@ -344,7 +348,23 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         return response;
     }
 
+
     #endregion
+
+    #endregion
+
+    #region
+    protected virtual Task<SearchSettings> GetSearchSettingsAsync(string engineName)
+    {
+        var cacheKey = CacheKey.With(GetType(), "GetSearchSettingsAsync", engineName);
+
+        return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+        {
+            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
+
+            return await _elasticAppSearch.GetSearchSettingsAsync(engineName);
+        });
+    }
 
     #endregion
 

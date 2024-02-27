@@ -21,12 +21,13 @@ public static class ModuleConstants
             Converters = new List<JsonConverter>
             {
                 new StringEnumConverter(new CamelCaseNamingStrategy()),
-                new SearchModuleCoreGeoPointConverter()
+                new SearchModuleCoreGeoPointConverter(),
+                new BoostConverter(),
             },
 
             // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
             DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffzzz",
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+            DateTimeZoneHandling = DateTimeZoneHandling.Utc
         };
 
         public static class Languages

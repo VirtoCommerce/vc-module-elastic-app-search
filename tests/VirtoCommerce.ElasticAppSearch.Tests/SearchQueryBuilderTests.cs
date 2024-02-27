@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -130,9 +131,10 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var searchQueryBuilder = new SearchQueryBuilder(logger, fieldNameConverter, searchFiltersBuilder, searchFacetsQueryBuilder, searchBoostsBuilder);
             var request = searchRequest();
             var schema = GetSchema();
+            var settings = new SearchSettings();
 
             // Act
-            var searchQueries = searchQueryBuilder.ToSearchQueries(request, schema);
+            var searchQueries = searchQueryBuilder.ToSearchQueries(request, schema, settings);
 
             // Assert
             var searchQuery = searchQueries.FirstOrDefault(x => x.AggregationId == null).SearchQuery;
