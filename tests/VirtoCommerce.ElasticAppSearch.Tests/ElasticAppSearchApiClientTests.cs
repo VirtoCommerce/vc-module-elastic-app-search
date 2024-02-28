@@ -36,7 +36,7 @@ public class ElasticAppSearchApiClientTests
     [Fact]
     public async Task CanSearchExplain()
     {
-        var engineName = "default-product";
+        var engineName = Environment.GetEnvironmentVariable("TestElasticAppSearchEngineName") ?? "default-product";
 
         var client = GetSearchClient();
 
@@ -47,8 +47,8 @@ public class ElasticAppSearchApiClientTests
 
     protected IElasticAppSearchApiClient GetSearchClient()
     {
-        var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "https://bc9b603e27e14757803709f6e2b57888.ent-search.us-central1.gcp.cloud.es.io";
-        var privateApiKey = Environment.GetEnvironmentVariable("TestElasticAppSearchPrivateKey") ?? "private-zdqez5efwrmonegt4pqfs88g";
+        var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "http://localhost:3002";
+        var privateApiKey = Environment.GetEnvironmentVariable("TestElasticAppSearchPrivateKey") ?? "";
 
         IServiceCollection services = new ServiceCollection(); // [1]
 
