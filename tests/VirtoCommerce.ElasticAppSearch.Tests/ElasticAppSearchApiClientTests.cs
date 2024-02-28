@@ -23,7 +23,7 @@ public class ElasticAppSearchApiClientTests
     [Fact]
     public async Task CanGetSearchSettings()
     {
-        var engineName = "default-product";
+        var engineName = Environment.GetEnvironmentVariable("TestElasticAppSearchEngineName") ?? "default-product";
 
         var client = GetSearchClient();
 
