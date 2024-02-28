@@ -22,7 +22,6 @@ public static class ModuleConstants
             {
                 new StringEnumConverter(new CamelCaseNamingStrategy()),
                 new SearchModuleCoreGeoPointConverter(),
-                new BoostConverter(),
             },
 
             // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)

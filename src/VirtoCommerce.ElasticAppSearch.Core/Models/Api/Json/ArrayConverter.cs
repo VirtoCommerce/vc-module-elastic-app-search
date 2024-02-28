@@ -45,13 +45,7 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json
 
             if (token.Type != JTokenType.Null)
             {
-                if (_singleValueHandling == SingleValueHandling.AsArray || token.Type == JTokenType.Array)
-                {
-                    return Deserialize(token, objectType, existingValue, serializer);
-                }
-
-                var elementType = objectType.GetEnumerableElementType();
-                return Deserialize(token, elementType, existingValue, serializer);
+                return Deserialize(token, objectType, existingValue, serializer);
             }
 
             return token.ToObject(objectType, serializer);
@@ -80,15 +74,16 @@ namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json
 
         private object Deserialize(JToken token, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            var elementType = objectType.GetEnumerableElementType();
+
             var list = new List<object>();
             if (token.Type == JTokenType.Array)
             {
-                var elementType = objectType.GetEnumerableElementType();
                 list.AddRange(((JArray)token).Select(elementToken => _itemConverter.ReadJson(elementToken.CreateReader(), elementType, null, serializer)));
             }
             else
             {
-                list.Add(_itemConverter.ReadJson(token.CreateReader(), objectType, existingValue, serializer));
+                list.Add(_itemConverter.ReadJson(token.CreateReader(), elementType, existingValue, serializer));
             }
 
             var result = serializer.Deserialize(JToken.FromObject(list, serializer).CreateReader(), objectType);

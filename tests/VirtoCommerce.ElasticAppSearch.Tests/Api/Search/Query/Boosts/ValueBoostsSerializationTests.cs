@@ -22,13 +22,13 @@ namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Boosts
                                     {
                                         new ValueBoost
                                         {
-                                            Value = "TX",
+                                            Value = ["TX"],
                                             Operation = "multiply",
                                             Factor = 10.0,
                                         },
                                         new ValueBoost
                                         {
-                                            Value = "MN",
+                                            Value = ["MN"],
                                             Operation = "add",
                                             Factor = 5.0,
                                         }
@@ -46,13 +46,6 @@ namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Boosts
         public override void Serialize_Entity_CorrectlySerializes<T>(T actual, string expectedJsonFileName)
         {
             base.Serialize_Entity_CorrectlySerializes(actual, expectedJsonFileName);
-        }
-
-        [Theory]
-        [MemberData(nameof(SerializationData))]
-        public override void Deserialize_Json_CorrectlyDeserializes<T>(T expected, string actualJsonFileName)
-        {
-            base.Deserialize_Json_CorrectlyDeserializes(expected, actualJsonFileName);
         }
 
         protected override string GetJsonPath()

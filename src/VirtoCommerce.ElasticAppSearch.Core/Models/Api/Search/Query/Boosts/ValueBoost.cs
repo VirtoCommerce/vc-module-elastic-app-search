@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 using static VirtoCommerce.ElasticAppSearch.Core.ModuleConstants.Api;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
@@ -11,7 +12,8 @@ public class ValueBoost : Boost
     public override string Type => BoostTypes.Value;
 
     [JsonRequired]
-    public string Value { get; set; }
+    [JsonConverter(typeof(ArrayConverter), SingleValueHandling.AsObject)]
+    public string[] Value { get; set; }
 
     /// <summary>
     /// Can be "add" or "multiply". Defaults to "add".

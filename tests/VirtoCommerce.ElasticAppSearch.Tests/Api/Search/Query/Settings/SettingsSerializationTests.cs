@@ -23,7 +23,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Boosts
                                     {
                                         new ValueBoost
                                         {
-                                            Value = "Apple",
+                                            Value = ["Apple", "Samsung"],
                                             Factor = 1,
                                         }
                                     }

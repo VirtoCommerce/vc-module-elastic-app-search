@@ -1,59 +1,33 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using static VirtoCommerce.ElasticAppSearch.Core.ModuleConstants.Api;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
-public class BoostConverter : JsonConverter<Dictionary<string, Boost[]>>
+public class BoostConverter : CustomCreationConverter<Boost>
 {
-    public override Dictionary<string, Boost[]> ReadJson(JsonReader reader, Type objectType, Dictionary<string, Boost[]> existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
-        var boosts = new Dictionary<string, Boost[]>();
-
-        var jsonObject = JObject.Load(reader);
-        foreach (var (key, value) in jsonObject)
-        {
-            var boostArray = value.Children().Select<JToken, Boost>(token =>
-            {
-                var boostObject = (JObject)token;
-                var type = boostObject.GetValue("type", StringComparison.OrdinalIgnoreCase)?.Value<string>();
-                if (type == null)
-                {
-                    throw new JsonSerializationException("Boost type is required.");
-                }
-
-                return type switch
-                {
-                    BoostTypes.Value => boostObject.ToObject<ValueBoost>(serializer),
-                    BoostTypes.Functional => boostObject.ToObject<FunctionalBoost>(serializer),
-                    BoostTypes.Proximity => boostObject.ToObject<ProximityBoost>(serializer),
-                    _ => throw new JsonSerializationException($"Unknown boost type: {type}"),
-                };
-            }).ToArray();
-
-            boosts.Add(key, boostArray);
-        }
-
-        return boosts;
+        var boostObject = JObject.ReadFrom(reader);
+        var type = boostObject["type"].ToString();
+        var actualObjectType = GetBoostType(type);
+        var result = base.ReadJson(boostObject.CreateReader(), actualObjectType, existingValue, serializer);
+        return result;
     }
 
-    public override void WriteJson(JsonWriter writer, Dictionary<string, Boost[]> value, JsonSerializer serializer)
+    public override Boost Create(Type objectType)
     {
-        writer.WriteStartObject();
-        foreach (var (key, boostArray) in value)
-        {
-            writer.WritePropertyName(key);
-            writer.WriteStartArray();
-            foreach (var boost in boostArray)
-            {
-                serializer.Serialize(writer, boost);
-            }
-            writer.WriteEndArray();
-        }
-        writer.WriteEndObject();
+        return (Boost)Activator.CreateInstance(objectType);
     }
+
+    private static Type GetBoostType(string type) => type switch
+    {
+        BoostTypes.Value => typeof(ValueBoost),
+        BoostTypes.Functional => typeof(FunctionalBoost),
+        BoostTypes.Proximity => typeof(ProximityBoost),
+        _ => throw new JsonSerializationException($"Unknown boost type: {type}"),
+    };
 }

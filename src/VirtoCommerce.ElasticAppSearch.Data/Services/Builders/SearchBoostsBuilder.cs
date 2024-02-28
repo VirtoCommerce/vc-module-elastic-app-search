@@ -89,7 +89,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             {
                 BoostTypes.Value => new ValueBoost
                 {
-                    Value = searchBoost.Value,
+                    Value = [searchBoost.Value],
                     Operation = preset.Operation,
                     Factor = preset.Factor,
                 },
