@@ -31,7 +31,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             var presetsBoost = ResolveDynamicBoostingFromPresets(boosts, schema);
 
             // Join Dynamic and Static boosts
-            if (presetsBoost.Any())
+            if (presetsBoost.Count > 0)
             {
                 var result = new Dictionary<string, Boost[]>();
                 return result

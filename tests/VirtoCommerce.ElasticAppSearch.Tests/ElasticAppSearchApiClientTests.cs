@@ -45,7 +45,7 @@ public class ElasticAppSearchApiClientTests
         Assert.NotNull(response);
     }
 
-    protected IElasticAppSearchApiClient GetSearchClient()
+    protected static IElasticAppSearchApiClient GetSearchClient()
     {
         var host = Environment.GetEnvironmentVariable("TestElasticAppSearchHost") ?? "http://localhost:3002";
         var privateApiKey = Environment.GetEnvironmentVariable("TestElasticAppSearchPrivateKey") ?? "";
