@@ -1,9 +1,14 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+using VirtoCommerce.ElasticAppSearch.Core.Services;
 
 namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
 {
@@ -11,10 +16,12 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
     public class ElasticAppSearchController : Controller
     {
         private readonly ElasticAppSearchOptions _options;
+        private readonly IElasticAppSearchApiClient _appSearchApiClient;
 
-        public ElasticAppSearchController(IOptions<ElasticAppSearchOptions> options)
+        public ElasticAppSearchController(IOptions<ElasticAppSearchOptions> options, IElasticAppSearchApiClient appSearchApiClient)
         {
             _options = options.Value ?? new ElasticAppSearchOptions();
+            _appSearchApiClient = appSearchApiClient;
         }
 
         [HttpGet]
@@ -33,5 +40,28 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
             return Redirect(uriBuilder.ToString());
         }
 
+        [HttpGet]
+        [Route("diagnotic/{engineName}/search_settings")]
+        [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
+        public Task<SearchSettings> GetSearchSettings(string engineName)
+        {
+            return _appSearchApiClient.GetSearchSettingsAsync(engineName);
+        }
+
+        [HttpGet]
+        [Route("diagnotic/{engineName}/search_explain")]
+        [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
+        public Task<SearchExplainResult> SearchExplain(string engineName, string query)
+        {
+            return _appSearchApiClient.SearchExplainAsync(engineName, new SearchQuery { Query = query });
+        }
+
+        [HttpGet]
+        [Route("diagnotic/{engineName}/search")]
+        [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
+        public Task<SearchResult> Search(string engineName, string query)
+        {
+            return _appSearchApiClient.SearchAsync(engineName, new SearchQuery { Query = query });
+        }
     }
 }

@@ -105,8 +105,9 @@ public static class ModuleConstants
         public static class Permissions
         {
             public const string Access = "elasticappsearch:access";
+            public const string Diagnostic = "elasticappsearch:diagnostic";
 
-            public static string[] AllPermissions { get; } = { Access };
+            public static string[] AllPermissions { get; } = { Access, Diagnostic };
 
         }
     }
