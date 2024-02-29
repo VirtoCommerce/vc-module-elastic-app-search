@@ -320,6 +320,11 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         var searchSettings = await GetSearchSettingsAsync(engineName);
 
+        if (searchSettings is null)
+        {
+            return new SearchResponse();
+        }
+
         SearchResponse response;
 
         if (string.IsNullOrEmpty(request.RawQuery))
@@ -353,7 +358,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #endregion
 
-    #region
+    #region SearchSettings
     protected virtual Task<SearchSettings> GetSearchSettingsAsync(string engineName)
     {
         var cacheKey = CacheKey.With(GetType(), "GetSearchSettingsAsync", engineName);
