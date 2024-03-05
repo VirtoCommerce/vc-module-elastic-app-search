@@ -361,7 +361,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
     #region SearchSettings
     protected virtual Task<SearchSettings> GetSearchSettingsAsync(string engineName)
     {
-        var cacheKey = CacheKey.With(GetType(), "GetSearchSettingsAsync", engineName);
+        var cacheKey = CacheKey.With(GetType(), nameof(GetSearchSettingsAsync), engineName);
 
         return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
         {
@@ -377,7 +377,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     protected virtual Task<Schema> GetSchemaAsync(string engineName)
     {
-        var cacheKey = CacheKey.With(GetType(), "GetSchemaAsync", engineName);
+        var cacheKey = CacheKey.With(GetType(), nameof(GetSchemaAsync), engineName);
 
         return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
         {

@@ -41,7 +41,7 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
         }
 
         [HttpGet]
-        [Route("diagnotic/{engineName}/search_settings")]
+        [Route("diagnostic/{engineName}/search_settings")]
         [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
         public Task<SearchSettings> GetSearchSettings(string engineName)
         {
@@ -49,7 +49,7 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
         }
 
         [HttpGet]
-        [Route("diagnotic/{engineName}/search_explain")]
+        [Route("diagnostic/{engineName}/search_explain")]
         [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
         public Task<SearchExplainResult> SearchExplain(string engineName, string query)
         {
@@ -57,7 +57,7 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
         }
 
         [HttpGet]
-        [Route("diagnotic/{engineName}/search")]
+        [Route("diagnostic/{engineName}/search")]
         [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
         public Task<SearchResult> Search(string engineName, string query)
         {

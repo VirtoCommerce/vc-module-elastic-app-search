@@ -30,21 +30,21 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
         {
             var presetsBoost = ResolveDynamicBoostingFromPresets(boosts, schema);
 
-            // Join Dynamic and Static boosts
-            if (presetsBoost.Count > 0)
+            if (presetsBoost.Count == 0)
             {
-                var result = new Dictionary<string, Boost[]>();
-                return result
-                    .Concat(settings.Boosts ?? new Dictionary<string, Boost[]>())
-                    .Concat(presetsBoost)
-                    .GroupBy(kvp => kvp.Key)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.SelectMany(kvp => kvp.Value).ToArray()
-                    );
+                return [];
             }
 
-            return [];
+            // Join Dynamic and Static boosts
+            var result = new Dictionary<string, Boost[]>();
+            return result
+                .Concat(settings.Boosts ?? new Dictionary<string, Boost[]>())
+                .Concat(presetsBoost)
+                .GroupBy(kvp => kvp.Key)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.SelectMany(kvp => kvp.Value).ToArray()
+                );
         }
 
 
