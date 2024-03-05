@@ -1,8 +1,10 @@
 using Newtonsoft.Json;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Json;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 
-public class Boost
+[JsonConverter(typeof(BoostConverter))]
+public abstract class Boost
 {
     [JsonRequired]
     public virtual string Type { get; set; }

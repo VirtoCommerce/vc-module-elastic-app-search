@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
@@ -22,18 +23,39 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             IFieldNameConverter fieldNameConverter)
         {
             _boostPresets = options.Value?.BoostPresets ?? new List<BoostPreset>();
-
             _fieldNameConverter = fieldNameConverter;
         }
 
-        public Dictionary<string, Boost[]> ToBoosts(IList<SearchBoost> boosts, Schema schema)
+        public Dictionary<string, Boost[]> ToBoosts(IList<SearchBoost> boosts, Schema schema, SearchSettings settings)
+        {
+            var presetsBoost = ResolveDynamicBoostingFromPresets(boosts, schema);
+
+            if (presetsBoost.Count == 0)
+            {
+                return [];
+            }
+
+            // Join Dynamic and Static boosts
+            var result = new Dictionary<string, Boost[]>();
+            return result
+                .Concat(settings.Boosts ?? new Dictionary<string, Boost[]>())
+                .Concat(presetsBoost)
+                .GroupBy(kvp => kvp.Key)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.SelectMany(kvp => kvp.Value).ToArray()
+                );
+        }
+
+
+        protected virtual Dictionary<string, Boost[]> ResolveDynamicBoostingFromPresets(IList<SearchBoost> boosts, Schema schema)
         {
             if (boosts.IsNullOrEmpty() || _boostPresets.IsNullOrEmpty())
             {
-                return new Dictionary<string, Boost[]>();
+                return [];
             }
 
-            var result = boosts
+            return boosts
                 .GroupBy(x => _fieldNameConverter.ToProviderFieldName(x.FieldName))
                 .Where(x => schema.Fields.ContainsKey(x.Key))
                 .ToDictionary(x => x.Key, x =>
@@ -51,8 +73,6 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
 
                     return apiBoosts.Any() ? apiBoosts.ToArray() : null;
                 });
-
-            return result;
         }
 
         private Boost ToApiBoost(SearchBoost searchBoost)
@@ -65,22 +85,16 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                 return null;
             }
 
-            var boost = default(Boost);
-
-            switch (preset.Type)
+            return preset.Type switch
             {
-                case BoostTypes.Value:
-                    boost = new ValueBoost
-                    {
-                        Value = searchBoost.Value,
-                        Operation = preset.Operation,
-                        Factor = preset.Factor,
-                    };
-
-                    break;
-            }
-
-            return boost;
+                BoostTypes.Value => new ValueBoost
+                {
+                    Value = [searchBoost.Value],
+                    Operation = preset.Operation,
+                    Factor = preset.Factor,
+                },
+                _ => null
+            };
         }
     }
 }

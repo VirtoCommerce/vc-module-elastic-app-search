@@ -1,0 +1,15 @@
+{
+  "search_fields": null,
+  "result_fields": null,
+  "boosts": {
+    "brand": [
+      {
+        "type": "value",
+        "value": ["Apple", "Samsung"],
+        "factor": 1.0
+      }
+    ]
+  },
+  "precision": 2,
+  "precision_enabled": true
+}

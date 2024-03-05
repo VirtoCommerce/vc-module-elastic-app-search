@@ -12,6 +12,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
@@ -214,6 +215,70 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #endregion
 
+    #region Search Explain
+
+    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, SearchQuery query)
+    {
+        var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+
+        var preSearchInfo = PreSearch(payload);
+        var response = await _httpClient.PostAsync(GetSearchExplainEndpoint(engineName), payload, default);
+        PostSearch(preSearchInfo);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
+    }
+
+    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, string rawQuery)
+    {
+        var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+
+        var preSearchInfo = PreSearch(content);
+        var response = await _httpClient.PostAsync(GetSearchExplainEndpoint(engineName), content, default);
+        PostSearch(preSearchInfo);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
+    }
+
+    #endregion
+
+    #region GetSearchSettingsAsync
+
+    public async Task<SearchSettings> GetSearchSettingsAsync(string engineName)
+    {
+        var response = await _httpClient.GetAsync(GetSearchSettingsEndpoint(engineName));
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<SearchSettings>(ModuleConstants.Api.JsonSerializerSettings);
+
+        return result;
+    }
+
+    #endregion
+
     public async Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query)
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
@@ -254,7 +319,17 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     private static string GetSuggestionEndpoint(string engineName)
     {
-        return $"{GetEngineEndpoint(engineName)}/query_suggestion";
+        return $"{GetEngineEndpoint(engineName)}/search_explain";
+    }
+
+    private static string GetSearchExplainEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/search_explain";
+    }
+
+    private static string GetSearchSettingsEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/search_settings";
     }
 
     private PreSearchInfo PreSearch(HttpContent payload)

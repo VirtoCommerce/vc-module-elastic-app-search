@@ -21,7 +21,7 @@ public static class ModuleConstants
             Converters = new List<JsonConverter>
             {
                 new StringEnumConverter(new CamelCaseNamingStrategy()),
-                new SearchModuleCoreGeoPointConverter()
+                new SearchModuleCoreGeoPointConverter(),
             },
 
             // Elastic App Search API doesn't support fraction in seconds (probably bug in their ISO 8160 / RFC3399 specification support)
@@ -105,8 +105,9 @@ public static class ModuleConstants
         public static class Permissions
         {
             public const string Access = "elasticappsearch:access";
+            public const string Diagnostic = "elasticappsearch:diagnostic";
 
-            public static string[] AllPermissions { get; } = { Access };
+            public static string[] AllPermissions { get; } = { Access, Diagnostic };
 
         }
     }

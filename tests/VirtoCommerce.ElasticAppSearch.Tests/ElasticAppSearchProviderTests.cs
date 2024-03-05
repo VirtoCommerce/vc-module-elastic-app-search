@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -26,6 +27,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             // Arrange
             var appSearchClient = new Mock<IElasticAppSearchApiClient>();
             appSearchClient.Setup(x => x.GetSchemaAsync(It.IsAny<string>())).ReturnsAsync(() => new Schema());
+            appSearchClient.Setup(x => x.GetSearchSettingsAsync(It.IsAny<string>())).ReturnsAsync(() => new SearchSettings());
 
             var searchOptions = Options.Create(new SearchOptions());
             var documentConverter = new Mock<IDocumentConverter>();
@@ -35,15 +37,20 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
 
             //  setup cache mocks
             var cacheEntry = new Mock<ICacheEntry>();
-            var engineName = string.Join("-", searchOptions.Value.Scope, "testDocumentType").ToLowerInvariant();
-            var cacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSchemaAsync", engineName);
-
             cacheEntry.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
-            platformMemoryCache.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(cacheEntry.Object);
+
+            var engineName = string.Join("-", searchOptions.Value.Scope, "testDocumentType").ToLowerInvariant();
+
+            var schemaCacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSchemaAsync", engineName);
+            platformMemoryCache.Setup(pmc => pmc.CreateEntry(schemaCacheKey)).Returns(cacheEntry.Object);
+
+            var settingsCacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSearchSettingsAsync", engineName);
+            platformMemoryCache.Setup(pmc => pmc.CreateEntry(settingsCacheKey)).Returns(cacheEntry.Object);
+
             platformMemoryCache.Setup(x => x.GetDefaultCacheEntryOptions()).Returns(() => new MemoryCacheEntryOptions());
 
             searchQueryBuilder
-                .Setup(x => x.ToSearchQueries(It.IsAny<SearchRequest>(), It.IsAny<Schema>()))
+                .Setup(x => x.ToSearchQueries(It.IsAny<SearchRequest>(), It.IsAny<Schema>(), It.IsAny<SearchSettings>()))
                 .Returns(new List<SearchQueryAggregationWrapper> { new SearchQueryAggregationWrapper() });
 
             var appSearchProvider = new ElasticAppSearchProvider(

@@ -25,42 +25,42 @@ public static class HttpClientExtensions
         return await responseMessage.Content.ReadFromJsonAsync<TValue>(jsonSerializerSettings, cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
+    public static Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
+        return client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
+    public static Task<HttpResponseMessage> PostAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
+        return client.PostAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
+    public static Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
+        return client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
+    public static Task<HttpResponseMessage> PutAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
-        return await client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
+        return client.PutAsync(requestUri, value.ToJson(jsonSerializerSettings), cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> DeleteAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
+    public static Task<HttpResponseMessage> DeleteAsJsonAsync<TValue>(this HttpClient client, string requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
         var httpMessage = new HttpRequestMessage(HttpMethod.Delete, requestUri) { Content = value.ToJson(jsonSerializerSettings) };
-        return await client.SendAsync(httpMessage, cancellationToken);
+        return client.SendAsync(httpMessage, cancellationToken);
     }
 
-    public static async Task<HttpResponseMessage> DeleteAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
+    public static Task<HttpResponseMessage> DeleteAsJsonAsync<TValue>(this HttpClient client, Uri requestUri, TValue value,
         JsonSerializerSettings jsonSerializerSettings = null, CancellationToken cancellationToken = default)
     {
         var httpMessage = new HttpRequestMessage(HttpMethod.Delete, requestUri) { Content = value.ToJson(jsonSerializerSettings) };
-        return await client.SendAsync(httpMessage, cancellationToken);
+        return client.SendAsync(httpMessage, cancellationToken);
     }
 
     public static async Task<TValue> ReadFromJsonAsync<TValue>(this HttpContent httpContent,

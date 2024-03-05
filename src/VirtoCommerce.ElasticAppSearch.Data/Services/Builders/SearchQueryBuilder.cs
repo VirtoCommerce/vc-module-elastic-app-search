@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
@@ -39,9 +40,9 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         _boostsBuilder = boostsBuilder;
     }
 
-    public IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema)
+    public IList<SearchQueryAggregationWrapper> ToSearchQueries(SearchRequest request, Schema schema, SearchSettings searchSettings)
     {
-        var mainSearchQuery = ToSearchQuery(request, schema);
+        var mainSearchQuery = ToSearchQuery(request, schema, searchSettings);
         var mainSearchQueryWrapper = new SearchQueryAggregationWrapper { SearchQuery = mainSearchQuery };
         var result = new List<SearchQueryAggregationWrapper> { mainSearchQueryWrapper };
 
@@ -126,7 +127,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     }
 
 
-    protected virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema)
+    protected virtual SearchQuery ToSearchQuery(SearchRequest request, Schema schema, SearchSettings settings)
     {
         if (request.IsFuzzySearch)
         {
@@ -140,7 +141,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             Filters = GetFilters(request.Filter, schema),
             SearchFields = GetSearchFields(request.SearchFields),
             ResultFields = GetResultFields(request.IncludeFields, schema),
-            Boosts = GetBoosts(request.Boosts, schema),
+            Boosts = GetBoosts(request.Boosts, schema, settings),
             Page = new Page
             {
                 Current = request.Take == 0 ? 1 : request.Skip / request.Take + 1,
@@ -217,9 +218,9 @@ public class SearchQueryBuilder : ISearchQueryBuilder
     }
 
 
-    protected virtual Dictionary<string, Boost[]> GetBoosts(IList<SearchBoost> boosts, Schema schema)
+    protected virtual Dictionary<string, Boost[]> GetBoosts(IList<SearchBoost> boosts, Schema schema, SearchSettings settings)
     {
-        return _boostsBuilder.ToBoosts(boosts, schema);
+        return _boostsBuilder.ToBoosts(boosts, schema, settings);
     }
 
     protected virtual IFilters GetFilters(ISearchFilter filter, Schema schema)

@@ -1,43 +1,37 @@
 using System.Collections.Generic;
 using System.IO;
-using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Boosts;
 using Xunit;
 
 namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Boosts
 {
-    public class ValueBoostsSerializationTests : SerializationTestsBase
+    public class SettingsSerializationTests : SerializationTestsBase
     {
         public static IEnumerable<object[]> SerializationData => new[]
         {
             new object[]
             {
                 //query
-                new SearchQuery
+                new SearchSettings
                 {
-                    Query = "park",
+                    Precision = 2,
+                    PrecisionEnabled = true,
                     Boosts = new Dictionary<string, Boost[]>
                     {
-                        { "state", new Boost[]
+                        { "brand", new Boost[]
                                     {
                                         new ValueBoost
                                         {
-                                            Value = ["TX"],
-                                            Operation = "multiply",
-                                            Factor = 10.0,
-                                        },
-                                        new ValueBoost
-                                        {
-                                            Value = ["MN"],
-                                            Operation = "add",
-                                            Factor = 5.0,
+                                            Value = ["Apple", "Samsung"],
+                                            Factor = 1,
                                         }
                                     }
                         },
                     },
                 },
                 //json
-                "Value.json"
+                "Settings.json"
             },
         };
 
@@ -48,9 +42,16 @@ namespace VirtoCommerce.ElasticAppSearch.Tests.Api.Search.Query.Boosts
             base.Serialize_Entity_CorrectlySerializes(actual, expectedJsonFileName);
         }
 
+        [Theory]
+        [MemberData(nameof(SerializationData))]
+        public override void Deserialize_Json_CorrectlyDeserializes<T>(T expected, string actualJsonFileName)
+        {
+            base.Deserialize_Json_CorrectlyDeserializes(expected, actualJsonFileName);
+        }
+
         protected override string GetJsonPath()
         {
-            return Path.Combine(base.GetJsonPath(), "Search", "Query", "Boosts");
+            return Path.Combine(base.GetJsonPath(), "Search", "Query", "Settings");
         }
     }
 }
