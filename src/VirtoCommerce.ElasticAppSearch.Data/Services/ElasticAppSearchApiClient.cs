@@ -30,13 +30,16 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     protected const string DebugHeader = "X-Enterprise-Search-Debug";
     protected const string RequestIdHeader = "X-Request-ID";
 
-    private readonly HttpClient _httpClient;
     private readonly ILogger<ElasticAppSearchApiClient> _logger;
     private readonly ElasticAppSearchOptions _options;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public ElasticAppSearchApiClient(IHttpClientFactory httpClientFactory, ILogger<ElasticAppSearchApiClient> logger, IOptions<ElasticAppSearchOptions> options)
+    public ElasticAppSearchApiClient(
+        IHttpClientFactory httpClientFactory,
+        ILogger<ElasticAppSearchApiClient> logger,
+        IOptions<ElasticAppSearchOptions> options)
     {
-        _httpClient = httpClientFactory.CreateClient(ModuleConstants.ModuleName);
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
         _options = options.Value ?? new ElasticAppSearchOptions();
     }
@@ -45,7 +48,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<bool> GetEngineExistsAsync(string name)
     {
-        var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
+        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name));
         if (response.StatusCode != HttpStatusCode.NotFound)
         {
             await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
@@ -56,7 +59,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Engine> GetEngineAsync(string name)
     {
-        var response = await _httpClient.GetAsync(GetEngineEndpoint(name));
+        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name));
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             return null;
@@ -69,7 +72,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Engine> CreateEngineAsync(string name, string language, string[] sourceEngines = null)
     {
-        var response = await _httpClient.PostAsJsonAsync(EnginesEndpoint, new Engine
+        var response = await GetHttpClient().PostAsJsonAsync(EnginesEndpoint, new Engine
         {
             Name = name,
             Type = sourceEngines.IsNullOrEmpty() ? EngineType.Default : EngineType.Meta,
@@ -84,7 +87,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<DeleteEngineResult> DeleteEngineAsync(string engineName)
     {
-        var response = await _httpClient.DeleteAsync(GetEngineEndpoint(engineName));
+        var response = await GetHttpClient().DeleteAsync(GetEngineEndpoint(engineName));
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -100,7 +103,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Engine> AddSourceEnginesAsync(string engineName, string[] sourceEngines)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSourceEnginesEndpoint(engineName),
+        var response = await GetHttpClient().PostAsJsonAsync(GetSourceEnginesEndpoint(engineName),
             sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
@@ -110,7 +113,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Engine> DeleteSourceEnginesAsync(string engineName, string[] sourceEngines)
     {
-        var response = await _httpClient.DeleteAsJsonAsync(GetSourceEnginesEndpoint(engineName),
+        var response = await GetHttpClient().DeleteAsJsonAsync(GetSourceEnginesEndpoint(engineName),
             sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
@@ -124,7 +127,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
@@ -133,7 +136,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids)
     {
-        var response = await _httpClient.DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
@@ -146,7 +149,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Schema> GetSchemaAsync(string engineName)
     {
-        var response = await _httpClient.GetAsync(GetSchemaEndpoint(engineName));
+        var response = await GetHttpClient().GetAsync(GetSchemaEndpoint(engineName));
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -162,7 +165,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema)
     {
-        var response = await _httpClient.PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings);
 
         await response.EnsureSuccessStatusCodeAsync<Result>();
 
@@ -178,7 +181,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
         var preSearchInfo = PreSearch(payload);
-        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), payload, default);
+        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), payload, default);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -198,7 +201,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
         var preSearchInfo = PreSearch(content);
-        var response = await _httpClient.PostAsync(GetSearchEndpoint(engineName), content, default);
+        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), content, default);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -222,7 +225,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
         var preSearchInfo = PreSearch(payload);
-        var response = await _httpClient.PostAsync(GetSearchExplainEndpoint(engineName), payload, default);
+        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), payload, default);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -242,7 +245,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
         var preSearchInfo = PreSearch(content);
-        var response = await _httpClient.PostAsync(GetSearchExplainEndpoint(engineName), content, default);
+        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), content, default);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -263,7 +266,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     public async Task<SearchSettings> GetSearchSettingsAsync(string engineName)
     {
-        var response = await _httpClient.GetAsync(GetSearchSettingsEndpoint(engineName));
+        var response = await GetHttpClient().GetAsync(GetSearchSettingsEndpoint(engineName));
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -282,7 +285,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     public async Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query)
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
-        var response = await _httpClient.PostAsync(GetSuggestionEndpoint(engineName), payload, cancellationToken: default);
+        var response = await GetHttpClient().PostAsync(GetSuggestionEndpoint(engineName), payload, cancellationToken: default);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
@@ -371,6 +374,10 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
             preSearchInfo.RequestId, preSearchInfo.RequestStopWatch.ElapsedMilliseconds);
     }
 
+    private HttpClient GetHttpClient()
+    {
+        return _httpClientFactory.CreateClient(ModuleConstants.ModuleName);
+    }
     private sealed class PreSearchInfo
     {
         public string RequestId { get; set; }
