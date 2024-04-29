@@ -4,8 +4,12 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.Retry;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
@@ -45,30 +49,42 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
-            {
-                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
-
-                httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
-
-                httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
-
-                if (elasticAppSearchOptions.EnableHttpCompression)
                 {
-                    httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
-                }
-            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-            {
-                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+                    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-                var handler = new HttpClientHandler
+                    httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+
+                    httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
+
+                    if (elasticAppSearchOptions.EnableHttpCompression)
+                    {
+                        httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
+                    }
+                })
+                .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
                 {
-                    AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
-                };
+                    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-                return handler;
-            });
+                    var handler = new HttpClientHandler
+                    {
+                        AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None,
+                    };
+
+                    return handler;
+                })
+                .AddPolicyHandler((serviceProvider, _) => GetRetryPolicy(serviceProvider));
         }
     }
+
+    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy(IServiceProvider services) =>
+        HttpPolicyExtensions.HandleTransientHttpError()
+            .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 2)),
+                (outcome, timespan, retryAttempt, _) =>
+                {
+                    services.GetService<ILogger<ElasticAppSearchApiClient>>()?
+                        .LogWarning("Request failed with status code {StatusCode}, delaying for {Delay} milliseconds then making retry {RetryAttempt}",
+                            outcome.Result?.StatusCode ?? (outcome.Exception as HttpRequestException)?.StatusCode, timespan.TotalMilliseconds, retryAttempt);
+                });
 
     public void PostInitialize(IApplicationBuilder appBuilder)
     {
