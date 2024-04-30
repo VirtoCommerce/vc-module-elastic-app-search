@@ -76,15 +76,21 @@ public class Module : IModule, IHasConfiguration
         }
     }
 
-    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy(IServiceProvider services) =>
-        HttpPolicyExtensions.HandleTransientHttpError()
-            .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt - 2)),
+    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy(IServiceProvider services)
+    {
+        const int retryCount = 2;
+        const int sleepDurationPowerBase = 2;
+        return HttpPolicyExtensions.HandleTransientHttpError()
+            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(sleepDurationPowerBase, retryAttempt - retryCount)),
                 (outcome, timespan, retryAttempt, _) =>
                 {
                     services.GetService<ILogger<ElasticAppSearchApiClient>>()?
-                        .LogWarning("Request failed with status code {StatusCode}, delaying for {Delay} milliseconds then making retry {RetryAttempt}",
-                            outcome.Result?.StatusCode ?? (outcome.Exception as HttpRequestException)?.StatusCode, timespan.TotalMilliseconds, retryAttempt);
+                        .LogWarning(
+                            "Request failed with status code {StatusCode}, delaying for {Delay} milliseconds then making retry {RetryAttempt}",
+                            outcome.Result?.StatusCode ?? (outcome.Exception as HttpRequestException)?.StatusCode,
+                            timespan.TotalMilliseconds, retryAttempt);
                 });
+    }
 
     public void PostInitialize(IApplicationBuilder appBuilder)
     {
