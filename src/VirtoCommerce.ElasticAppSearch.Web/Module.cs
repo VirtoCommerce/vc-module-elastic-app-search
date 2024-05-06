@@ -43,30 +43,33 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<ElasticAppSearchProvider>();
             serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
             serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
+            serviceCollection.AddSingleton<IElasticAppSearchPolicySelector, ElasticAppSearchPolicySelector>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
-            {
-                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
-
-                httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
-
-                httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
-
-                if (elasticAppSearchOptions.EnableHttpCompression)
                 {
-                    httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
-                }
-            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-            {
-                var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
+                    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-                var handler = new HttpClientHandler
+                    httpClient.BaseAddress = new Uri($"{elasticAppSearchOptions.Endpoint}/api/as/v1/");
+
+                    httpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, $"Bearer {elasticAppSearchOptions.PrivateApiKey}");
+
+                    if (elasticAppSearchOptions.EnableHttpCompression)
+                    {
+                        httpClient.DefaultRequestHeaders.Add(HeaderNames.AcceptEncoding, DecompressionMethods.GZip.ToString());
+                    }
+                })
+                .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
                 {
-                    AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None
-                };
+                    var elasticAppSearchOptions = serviceProvider.GetRequiredService<IOptions<ElasticAppSearchOptions>>().Value;
 
-                return handler;
-            });
+                    var handler = new HttpClientHandler
+                    {
+                        AutomaticDecompression = elasticAppSearchOptions.EnableHttpCompression ? DecompressionMethods.GZip : DecompressionMethods.None,
+                    };
+
+                    return handler;
+                })
+                .AddPolicyHandler((serviceProvider, _) => serviceProvider.GetRequiredService<IElasticAppSearchPolicySelector>().GetRetryPolicy());
         }
     }
 
