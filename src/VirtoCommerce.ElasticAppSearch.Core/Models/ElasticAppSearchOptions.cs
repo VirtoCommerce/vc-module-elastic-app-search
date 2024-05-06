@@ -23,4 +23,8 @@ public class ElasticAppSearchOptions
     public string KibanaPath { get; set; } = "/app/enterprise_search/app_search/engines/";
 
     public List<BoostPreset> BoostPresets { get; set; } = new();
+
+    public int RetryCount { get; set; } = 2;
+
+    public int SleepDurationPowerBase { get; set; } = 2;
 }

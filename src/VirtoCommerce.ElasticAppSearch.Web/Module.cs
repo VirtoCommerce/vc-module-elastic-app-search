@@ -4,12 +4,8 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using Polly;
-using Polly.Extensions.Http;
-using Polly.Retry;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
@@ -47,6 +43,7 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<ElasticAppSearchProvider>();
             serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
             serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
+            serviceCollection.AddSingleton<ElasticAppSearchPolicySelector>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
                 {
@@ -72,24 +69,13 @@ public class Module : IModule, IHasConfiguration
 
                     return handler;
                 })
-                .AddPolicyHandler((serviceProvider, _) => GetRetryPolicy(serviceProvider));
-        }
-    }
-
-    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy(IServiceProvider services)
-    {
-        const int retryCount = 2;
-        const int sleepDurationPowerBase = 2;
-        return HttpPolicyExtensions.HandleTransientHttpError()
-            .WaitAndRetryAsync(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(sleepDurationPowerBase, retryAttempt - retryCount)),
-                (outcome, timespan, retryAttempt, _) =>
+                .AddPolicyHandler((serviceProvider, _) =>
                 {
-                    services.GetService<ILogger<ElasticAppSearchApiClient>>()?
-                        .LogWarning(
-                            "Request failed with status code {StatusCode}, delaying for {Delay} milliseconds then making retry {RetryAttempt}",
-                            outcome.Result?.StatusCode ?? (outcome.Exception as HttpRequestException)?.StatusCode,
-                            timespan.TotalMilliseconds, retryAttempt);
+                    var policySelector = serviceProvider.GetRequiredService<ElasticAppSearchPolicySelector>();
+
+                    return policySelector.GetRetryPolicy();
                 });
+        }
     }
 
     public void PostInitialize(IApplicationBuilder appBuilder)
