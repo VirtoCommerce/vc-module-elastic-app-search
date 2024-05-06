@@ -43,7 +43,7 @@ public class Module : IModule, IHasConfiguration
             serviceCollection.AddSingleton<ElasticAppSearchProvider>();
             serviceCollection.AddSingleton<ISearchFacetsQueryBuilder, SearchFacetsQueryBuilder>();
             serviceCollection.AddSingleton<IAggregationsResponseBuilder, AggregationsResponseBuilder>();
-            serviceCollection.AddSingleton<IElasticAppSearchRetryPolicySelector, ElasticAppSearchPolicySelector>();
+            serviceCollection.AddSingleton<IElasticAppSearchPolicySelector, ElasticAppSearchPolicySelector>();
 
             serviceCollection.AddHttpClient(ModuleConstants.ModuleName, (serviceProvider, httpClient) =>
                 {
@@ -69,12 +69,7 @@ public class Module : IModule, IHasConfiguration
 
                     return handler;
                 })
-                .AddPolicyHandler((serviceProvider, _) =>
-                {
-                    var policySelector = serviceProvider.GetRequiredService<IElasticAppSearchRetryPolicySelector>();
-
-                    return policySelector.GetRetryPolicy();
-                });
+                .AddPolicyHandler((serviceProvider, _) => serviceProvider.GetRequiredService<IElasticAppSearchPolicySelector>().GetRetryPolicy());
         }
     }
 
