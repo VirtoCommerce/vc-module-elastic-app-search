@@ -6,10 +6,11 @@ using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
+using VirtoCommerce.ElasticAppSearch.Core.Services;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services;
 
-public class ElasticAppSearchPolicySelector
+public class ElasticAppSearchPolicySelector : IElasticAppSearchRetryPolicySelector
 {
     private readonly ElasticAppSearchOptions _options;
     private readonly ILogger<ElasticAppSearchApiClient> _logger;
