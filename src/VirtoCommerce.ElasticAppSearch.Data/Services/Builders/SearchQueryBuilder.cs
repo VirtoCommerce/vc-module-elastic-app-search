@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
@@ -190,7 +189,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
     {
-        searchFields = searchFields?.Where(x => !ModuleConstants.Api.FieldNames.IgnoredForSearch.Contains(x));
+        searchFields = searchFields?.Where(x => !ModuleConstants.Api.FieldNames.IgnoredForSearch.Any(ignoredField => x.StartsWith(ignoredField)));
 
         var result = searchFields?.ToDictionary(searchField => _fieldNameConverter.ToProviderFieldName(searchField), _ => new SearchFieldValue());
 

@@ -113,27 +113,6 @@ public static class ModuleConstants
 
     public static class Settings
     {
-        public const int DefaultTotalFieldsLimit = 1000;
-
-        public static class Indexing
-        {
-            public static SettingDescriptor IndexTotalFieldsLimit { get; } = new()
-            {
-                Name = "VirtoCommerce.Search.ElasticAppSearch.IndexTotalFieldsLimit",
-                GroupName = "Search|ElasticSearch",
-                ValueType = SettingValueType.Integer,
-                DefaultValue = DefaultTotalFieldsLimit,
-            };
-
-            public static IEnumerable<SettingDescriptor> AllIndexingSettings
-            {
-                get
-                {
-                    yield return IndexTotalFieldsLimit;
-                }
-            }
-        }
-
-        public static IEnumerable<SettingDescriptor> AllSettings => Indexing.AllIndexingSettings;
+        public static IEnumerable<SettingDescriptor> AllSettings => [];
     }
 }
