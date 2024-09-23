@@ -7,6 +7,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.SearchModule.Core.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
 using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 
@@ -110,6 +111,8 @@ public class DocumentConverter : IDocumentConverter
 
             searchDocument.Add(indexFieldName, indexFieldValue);
         }
+
+        searchDocument.SetRelevanceScore(searchResultDocument.Meta?.Score);
 
         return searchDocument;
     }
