@@ -10,13 +10,8 @@
     <ProjectReference Include="..\VirtoCommerce.ElasticAppSearch.Core\VirtoCommerce.ElasticAppSearch.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.825.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.0" />
+    <PackageReference Include="VirtoCommerce.Platform.Data" Version="3.853.0" />
   </ItemGroup>
 </Project>
