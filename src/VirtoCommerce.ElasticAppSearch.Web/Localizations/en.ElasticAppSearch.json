@@ -16,12 +16,12 @@
   "settings": {
     "ElasticAppSearch": {
       "ElasticAppSearchPassword": {
-        "title": "ElasticAppSearch Password",
-        "description": "ElasticAppSearch Password setting"
+        "title": "ElasticAppSearch password",
+        "description": "Set ElasticAppSearch password"
       },
       "ElasticAppSearchEnabled": {
-        "title": "ElasticAppSearch Enabled",
-        "description": "ElasticAppSearch Enabled setting"
+        "title": "ElasticAppSearch activation",
+        "description": "Enable/ disable ElasticAppSearch"
       }
     }
   }

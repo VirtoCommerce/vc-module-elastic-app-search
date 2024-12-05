@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hoja de Hola Mundo"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Abrir menú ElasticAppSearch",
+    "ElasticAppSearch:create": "Crear datos relacionados con ElasticAppSearch",
+    "ElasticAppSearch:read": "Ver datos relacionados con ElasticAppSearch",
+    "ElasticAppSearch:update": "Actualizar datos relacionados con ElasticAppSearch",
+    "ElasticAppSearch:delete": "Eliminar datos relacionados con ElasticAppSearch"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "Contraseña de ElasticAppSearch",
+        "description": "Establecer la contraseña de ElasticAppSearch"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "Activación de ElasticAppSearch",
+        "description": "Activar/desactivar ElasticAppSearch"
+      }
+    }
+  }
+}

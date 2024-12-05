@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Лезвие Hello World"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Открыть меню ElasticAppSearch",
+    "ElasticAppSearch:create": "Создать данные, связанные с ElasticAppSearch",
+    "ElasticAppSearch:read": "Просмотреть данные, связанные с ElasticAppSearch",
+    "ElasticAppSearch:update": "Обновить данные, связанные с ElasticAppSearch",
+    "ElasticAppSearch:delete": "Удалить данные, связанные с ElasticAppSearch"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "Пароль ElasticAppSearch",
+        "description": "Установите пароль ElasticAppSearch"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "Активация ElasticAppSearch",
+        "description": "Включить/отключить ElasticAppSearch"
+      }
+    }
+  }
+}
