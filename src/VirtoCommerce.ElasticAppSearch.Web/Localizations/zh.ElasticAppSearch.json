@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hello World 面板"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "打开 ElasticAppSearch 菜单",
+    "ElasticAppSearch:create": "创建 ElasticAppSearch 相关数据",
+    "ElasticAppSearch:read": "查看 ElasticAppSearch 相关数据",
+    "ElasticAppSearch:update": "更新 ElasticAppSearch 相关数据",
+    "ElasticAppSearch:delete": "删除 ElasticAppSearch 相关数据"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch 密码",
+        "description": "设置 ElasticAppSearch 密码"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch 启用",
+        "description": "启用/禁用 ElasticAppSearch"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hello World ブレード"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "ElasticAppSearch メニューを開く",
+    "ElasticAppSearch:create": "ElasticAppSearch 関連データを作成する",
+    "ElasticAppSearch:read": "ElasticAppSearch 関連データを表示する",
+    "ElasticAppSearch:update": "ElasticAppSearch 関連データを更新する",
+    "ElasticAppSearch:delete": "ElasticAppSearch 関連データを削除する"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch パスワード",
+        "description": "ElasticAppSearch パスワードを設定する"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch の有効化",
+        "description": "ElasticAppSearch を有効化/無効化する"
+      }
+    }
+  }
+}

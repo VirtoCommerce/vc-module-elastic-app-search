@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hallo-Welt-Klinge"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "ElasticAppSearch-Menü öffnen",
+    "ElasticAppSearch:create": "ElasticAppSearch-Daten erstellen",
+    "ElasticAppSearch:read": "ElasticAppSearch-Daten anzeigen",
+    "ElasticAppSearch:update": "ElasticAppSearch-Daten aktualisieren",
+    "ElasticAppSearch:delete": "ElasticAppSearch-Daten löschen"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch-Passwort",
+        "description": "ElasticAppSearch-Passwort festlegen"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch-Aktivierung",
+        "description": "ElasticAppSearch aktivieren/deaktivieren"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Panneau Bonjour le monde"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Ouvrir le menu ElasticAppSearch",
+    "ElasticAppSearch:create": "Créer des données liées à ElasticAppSearch",
+    "ElasticAppSearch:read": "Afficher les données liées à ElasticAppSearch",
+    "ElasticAppSearch:update": "Mettre à jour les données liées à ElasticAppSearch",
+    "ElasticAppSearch:delete": "Supprimer les données liées à ElasticAppSearch"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "Mot de passe ElasticAppSearch",
+        "description": "Définir le mot de passe ElasticAppSearch"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "Activation de ElasticAppSearch",
+        "description": "Activer/désactiver ElasticAppSearch"
+      }
+    }
+  }
+}
