@@ -1,7 +1,6 @@
 # Virto Commerce Elastic App Search Module 
 
-## Overview
-VirtoCommerce.ElasticAppSearch module implements `ISearchProvider` defined in the VirtoCommerce Search module to provide integration with Elastic App Search API.
+Virto Commerce Elastic App Search module implements `ISearchProvider` defined in the VirtoCommerce Search module to provide integration with Elastic App Search API.
 
 Elastic App search provides search, aggregation, and analytic capabilities as a service, on top of ElasticSearch. It also supplies tools that can help you tune search result sets without development:
 
@@ -9,16 +8,15 @@ Elastic App search provides search, aggregation, and analytic capabilities as a 
 * [Synonyms](https://www.elastic.co/guide/en/app-search/current/synonyms-guide.html)
 * [Curations](https://www.elastic.co/guide/en/app-search/current/curations-guide.html)
 
-For more information on deploying Elastic App Search, refer to the official documentation [here](https://www.elastic.co/guide/en/app-search/current/installation.html).
+For more information on deploying Elastic App Search, refer to the [official documentation](https://www.elastic.co/guide/en/app-search/current/installation.html).
 
-## Features
-1. Fulltext Search Provider compatible with Elastic App Search version 8.12 and above.
-1. Boosting Profile functionality.
-1. Dynamic Boosting Concatenation: The provider combines dynamic boosting with query and static boosting from the Search Relevance Tuning panel.
-
-## Known limitations
+## Key features
+* Fulltext Search Provider compatible with Elastic App Search version 8.12 and above.
+* Boosting Profile functionality.
+* Dynamic Boosting Concatenation: The provider combines dynamic boosting with query and static boosting from the Search Relevance Tuning panel.
 
 ## Configuration
+
 Elastic App Search provider can be configured through these configuration keys:
 
 + **Search.Provider**: Name of the search provider, must be **ElasticAppSearch**
@@ -28,7 +26,7 @@ Elastic App Search provider can be configured through these configuration keys:
 + **Search.ElasticAppSearch.KibanaBaseUrl**: Kibana base URL for accessing the Kibana Dashboard from the application menu. 
 + **Search.ElasticAppSearch.KibanaPath**: Path to the App Search engine in the Kibana Dashboard. Default value is `/app/enterprise_search/app_search/engines/`.
 
-[Read more about configuration [here](https://docs.virtocommerce.org/platform/developer-guide/Configuration-Reference/appsettingsjson/).
+Read more about configuration [here](https://docs.virtocommerce.org/platform/developer-guide/Configuration-Reference/appsettingsjson/#elastic-app-search).
 
 ```json
 	"Search": {
@@ -46,7 +44,7 @@ Endpoint and API key can be managed in the Credential menu within the App Search
 
 ## App Menu 
 
-## Dynamic Boosting
+## Dynamic boosting
 The Elastic App Search provider combines static boosting from the Search Relevance Tuning panel with dynamic boosting that can be passed at runtime.
 
 Dynamic Boosting supports both Value Boost and Functional Boosting.
@@ -120,16 +118,19 @@ The module offers a diagnostic API accessible from the Swagger panel for the fol
 
 ## Documentation
 
-* [Search Fundamentals](https://docs.virtocommerce.org/platform/developer-guide/Fundamentals/Indexed-Search/overview/)
-* [Elastic App Search Documentation](https://www.elastic.co/guide/en/app-search/current/getting-started.html)
-* [Elastic App Search Boosting](https://www.elastic.co/guide/en/app-search/current/boosts.html)
-* [Elastic App Search Guide](./docs/eas-setup-guide.md)
+* [Elastic App Search module user documentation](https://docs.virtocommerce.org/platform/user-guide/elastic-app-search/overview/)
+* [Elastic App Search module developer documentation](https://docs.virtocommerce.org/platform/developer-guide/Fundamentals/Indexed-Search/integration/elastic-app-search-overview/)
+* [Elastic App Search configuration](https://docs.virtocommerce.org/platform/developer-guide/Configuration-Reference/appsettingsjson/#elastic-app-search)
+* [REST API](https://virtostart-demo-admin.govirto.com/docs/index.html?urls.primaryName=VirtoCommerce.ElasticAppSearch)
+* [View on GitHub](https://github.com/VirtoCommerce/vc-module-elastic-app-search/)
 
 ## References
 
-* Documentation: https://docs.virtocommerce.org
-* Home: https://virtocommerce.com
-* Community: https://www.virtocommerce.org
+* [Deployment](https://docs.virtocommerce.org/platform/developer-guide/Tutorials-and-How-tos/Tutorials/deploy-module-from-source-code/)
+* [Installation](https://docs.virtocommerce.org/platform/user-guide/modules-installation/)
+* [Home](https://virtocommerce.com)
+* [Community](https://www.virtocommerce.org)
+* [Download latest release](https://github.com/VirtoCommerce/vc-module-elastic-app-search/releases/latest)
 
 ## License
 
