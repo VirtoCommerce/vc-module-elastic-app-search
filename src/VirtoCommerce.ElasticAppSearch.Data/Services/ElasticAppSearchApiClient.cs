@@ -322,7 +322,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     private static string GetSuggestionEndpoint(string engineName)
     {
-        return $"{GetEngineEndpoint(engineName)}/search_explain";
+        return $"{GetEngineEndpoint(engineName)}/query_suggestion";
     }
 
     private static string GetSearchExplainEndpoint(string engineName)
