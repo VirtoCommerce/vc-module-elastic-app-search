@@ -305,18 +305,18 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return result;
     }
 
-    public async Task<Curation[]> GetCurationAsync(string engineName, string curationName, CancellationToken cancellationToken = default)
+    public async Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetCurationEndpoint(engineName, curationName), cancellationToken);
+        var response = await GetHttpClient().GetAsync(GetCurationEndpoint(engineName, curationId, skipAnalytics), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            return [];
+            return null;
         }
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<Curation[]>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<Curation>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }

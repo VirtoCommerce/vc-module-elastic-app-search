@@ -48,5 +48,5 @@ public interface IElasticAppSearchApiClient
 
     Task<Curation[]> GetCurationsAsync(string engineName, CancellationToken cancellationToken = default);
 
-    Task<Curation[]> GetCurationAsync(string engineName, string curationName, CancellationToken cancellationToken = default);
+    Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default);
 }
