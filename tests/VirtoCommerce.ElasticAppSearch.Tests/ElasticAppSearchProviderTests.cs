@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -26,8 +27,8 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         {
             // Arrange
             var appSearchClient = new Mock<IElasticAppSearchApiClient>();
-            appSearchClient.Setup(x => x.GetSchemaAsync(It.IsAny<string>())).ReturnsAsync(() => new Schema());
-            appSearchClient.Setup(x => x.GetSearchSettingsAsync(It.IsAny<string>())).ReturnsAsync(() => new SearchSettings());
+            appSearchClient.Setup(x => x.GetSchemaAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => new Schema());
+            appSearchClient.Setup(x => x.GetSearchSettingsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => new SearchSettings());
 
             var searchOptions = Options.Create(new SearchOptions());
             var documentConverter = new Mock<IDocumentConverter>();
@@ -72,8 +73,8 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             await appSearchProvider.SearchAsync("testDocumentType", searchRequest);
 
             // Assert
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>()), rawQueryTimesCall);
-            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<SearchQuery>()), regularSearchQueryTimesCall);
+            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), rawQueryTimesCall);
+            appSearchClient.Verify(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<SearchQuery>(), It.IsAny<CancellationToken>()), regularSearchQueryTimesCall);
         }
 
         private class QueryTestData : IEnumerable<object[]>
