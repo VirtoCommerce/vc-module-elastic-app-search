@@ -565,7 +565,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #region Curations
 
-    protected virtual Task<Curation[]> GetCurationsAsync(string engineName, CancellationToken cancellationToken = default)
+    protected virtual Task<CurationsResponse> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
     {
         var cacheKey = CacheKey.With(GetType(), nameof(GetCurationsAsync), engineName);
 
@@ -573,7 +573,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         {
             cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
 
-            return await _elasticAppSearch.GetCurationsAsync(engineName, cancellationToken);
+            return await _elasticAppSearch.GetCurationsAsync(engineName, skip, take, cancellationToken);
         });
     }
 

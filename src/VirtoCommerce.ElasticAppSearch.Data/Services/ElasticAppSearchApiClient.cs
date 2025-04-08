@@ -13,6 +13,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Curations;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Pagination;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -289,20 +290,24 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region Curations
 
-    public async Task<Curation[]> GetCurationsAsync(string engineName, CancellationToken cancellationToken = default)
+    public async Task<CurationsResponse> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetCurationsEndpoint(engineName), cancellationToken);
+        var response = await GetHttpClient().GetAsync(GetCurationsEndpoint(engineName, skip, take), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            return [];
+            return null;
         }
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<Curation[]>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<PaginatedResponse>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
-        return result;
+        return new CurationsResponse
+        {
+            Curations = result.Results.ToObject<Curation[]>(),
+            Total = result.Meta.Page.TotalResults,
+        };
     }
 
     public async Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default)
@@ -380,9 +385,14 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return $"{GetEngineEndpoint(engineName)}/search_settings";
     }
 
-    private static string GetCurationsEndpoint(string engineName)
+    private static string GetCurationsEndpoint(string engineName, int skip, int take = 1)
     {
-        return $"{GetEngineEndpoint(engineName)}/curations";
+        if (take <= 0)
+        {
+            take = 1;
+        }
+
+        return $"{GetEngineEndpoint(engineName)}/curations?page%5Bcurrent%5D={skip / take + 1}&page%5Bsize%5D={take}";
     }
 
     private static string GetCurationEndpoint(string engineName, string curationName, bool skipAnalytics = true)
