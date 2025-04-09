@@ -565,7 +565,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #region Curations
 
-    protected virtual Task<CurationsResponse> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
+    protected virtual Task<CurationSearchResult> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
     {
         var cacheKey = CacheKey.With(GetType(), nameof(GetCurationsAsync), engineName);
 

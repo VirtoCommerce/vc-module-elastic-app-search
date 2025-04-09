@@ -290,7 +290,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region Curations
 
-    public async Task<CurationsResponse> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
+    public async Task<CurationSearchResult> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
     {
         var response = await GetHttpClient().GetAsync(GetCurationsEndpoint(engineName, skip, take), cancellationToken);
 
@@ -303,7 +303,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         var result = await response.Content.ReadFromJsonAsync<PaginatedResponse>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
-        return new CurationsResponse
+        return new CurationSearchResult
         {
             Results = result.Results.ToObject<Curation[]>(),
             TotalCount = result.Meta.Page.TotalResults,
