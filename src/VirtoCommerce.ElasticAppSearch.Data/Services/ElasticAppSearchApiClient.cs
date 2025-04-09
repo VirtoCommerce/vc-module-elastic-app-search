@@ -305,8 +305,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         return new CurationsResponse
         {
-            Curations = result.Results.ToObject<Curation[]>(),
-            Total = result.Meta.Page.TotalResults,
+            Results = result.Results.ToObject<Curation[]>(),
+            TotalCount = result.Meta.Page.TotalResults,
         };
     }
 
