@@ -3,14 +3,17 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Curations;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Pagination;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
@@ -46,9 +49,9 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region Engine
 
-    public async Task<bool> GetEngineExistsAsync(string name)
+    public async Task<bool> GetEngineExistsAsync(string name, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name));
+        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name), cancellationToken);
         if (response.StatusCode != HttpStatusCode.NotFound)
         {
             await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
@@ -57,9 +60,9 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return response.StatusCode != HttpStatusCode.NotFound;
     }
 
-    public async Task<Engine> GetEngineAsync(string name)
+    public async Task<Engine> GetEngineAsync(string name, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name));
+        var response = await GetHttpClient().GetAsync(GetEngineEndpoint(name), cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             return null;
@@ -67,10 +70,10 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
-    public async Task<Engine> CreateEngineAsync(string name, string language, string[] sourceEngines = null)
+    public async Task<Engine> CreateEngineAsync(string name, string language, string[] sourceEngines = null, CancellationToken cancellationToken = default)
     {
         var response = await GetHttpClient().PostAsJsonAsync(EnginesEndpoint, new Engine
         {
@@ -78,16 +81,17 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
             Type = sourceEngines.IsNullOrEmpty() ? EngineType.Default : EngineType.Meta,
             Language = language,
             SourceEngines = sourceEngines
-        }, ModuleConstants.Api.JsonSerializerSettings);
+        }, ModuleConstants.Api.JsonSerializerSettings,
+        cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
-    public async Task<DeleteEngineResult> DeleteEngineAsync(string engineName)
+    public async Task<DeleteEngineResult> DeleteEngineAsync(string engineName, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().DeleteAsync(GetEngineEndpoint(engineName));
+        var response = await GetHttpClient().DeleteAsync(GetEngineEndpoint(engineName), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -96,60 +100,62 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<DeleteEngineResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<DeleteEngineResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
 
-    public async Task<Engine> AddSourceEnginesAsync(string engineName, string[] sourceEngines)
+    public async Task<Engine> AddSourceEnginesAsync(string engineName, string[] sourceEngines, CancellationToken cancellationToken = default)
     {
         var response = await GetHttpClient().PostAsJsonAsync(GetSourceEnginesEndpoint(engineName),
-            sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
+            sourceEngines, ModuleConstants.Api.JsonSerializerSettings,
+            cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
-    public async Task<Engine> DeleteSourceEnginesAsync(string engineName, string[] sourceEngines)
+    public async Task<Engine> DeleteSourceEnginesAsync(string engineName, string[] sourceEngines, CancellationToken cancellationToken = default)
     {
         var response = await GetHttpClient().DeleteAsJsonAsync(GetSourceEnginesEndpoint(engineName),
-            sourceEngines, ModuleConstants.Api.JsonSerializerSettings);
+            sourceEngines, ModuleConstants.Api.JsonSerializerSettings,
+            cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Engine>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
     #endregion
 
     #region Documents
 
-    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents)
+    public async Task<CreateOrUpdateDocumentResult[]> CreateOrUpdateDocumentsAsync(string engineName, Document[] documents, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsJsonAsync(GetDocumentsEndpoint(engineName), documents, ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<CreateOrUpdateDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
-    public async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids)
+    public async Task<DeleteDocumentResult[]> DeleteDocumentsAsync(string engineName, string[] ids, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().DeleteAsJsonAsync(GetDocumentsEndpoint(engineName), ids, ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
 
-        return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<DeleteDocumentResult[]>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
     #endregion
 
     #region Schema
 
-    public async Task<Schema> GetSchemaAsync(string engineName)
+    public async Task<Schema> GetSchemaAsync(string engineName, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetSchemaEndpoint(engineName));
+        var response = await GetHttpClient().GetAsync(GetSchemaEndpoint(engineName), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -158,30 +164,30 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>();
 
-        var result = await response.Content.ReadFromJsonAsync<Schema>();
+        var result = await response.Content.ReadFromJsonAsync<Schema>(cancellationToken: cancellationToken);
 
         return result;
     }
 
-    public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema)
+    public async Task<Schema> UpdateSchemaAsync(string engineName, Schema schema, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsJsonAsync(GetSchemaEndpoint(engineName), schema, ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         await response.EnsureSuccessStatusCodeAsync<Result>();
 
-        return await response.Content.ReadFromJsonAsync<Schema>(ModuleConstants.Api.JsonSerializerSettings);
+        return await response.Content.ReadFromJsonAsync<Schema>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
     }
 
     #endregion
 
     #region Search
 
-    public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query)
+    public async Task<SearchResult> SearchAsync(string engineName, SearchQuery query, CancellationToken cancellationToken = default)
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
         var preSearchInfo = PreSearch(payload);
-        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), payload, default);
+        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), payload, cancellationToken);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -191,17 +197,17 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
 
-    public async Task<SearchResult> SearchAsync(string engineName, string rawQuery)
+    public async Task<SearchResult> SearchAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default)
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
         var preSearchInfo = PreSearch(content);
-        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), content, default);
+        var response = await GetHttpClient().PostAsync(GetSearchEndpoint(engineName), content, cancellationToken);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -211,7 +217,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
@@ -220,12 +226,12 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region Search Explain
 
-    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, SearchQuery query)
+    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, SearchQuery query, CancellationToken cancellationToken = default)
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
         var preSearchInfo = PreSearch(payload);
-        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), payload, default);
+        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), payload, cancellationToken);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -235,17 +241,17 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
 
-    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, string rawQuery)
+    public async Task<SearchExplainResult> SearchExplainAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default)
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
         var preSearchInfo = PreSearch(content);
-        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), content, default);
+        var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), content, cancellationToken);
         PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -255,7 +261,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
@@ -264,9 +270,9 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #region GetSearchSettingsAsync
 
-    public async Task<SearchSettings> GetSearchSettingsAsync(string engineName)
+    public async Task<SearchSettings> GetSearchSettingsAsync(string engineName, CancellationToken cancellationToken = default)
     {
-        var response = await GetHttpClient().GetAsync(GetSearchSettingsEndpoint(engineName));
+        var response = await GetHttpClient().GetAsync(GetSearchSettingsEndpoint(engineName), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -275,24 +281,68 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SearchSettings>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SearchSettings>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
 
     #endregion
 
-    public async Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query)
+    #region Curations
+
+    public async Task<CurationSearchResult> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
     {
-        var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
-        var response = await GetHttpClient().PostAsync(GetSuggestionEndpoint(engineName), payload, cancellationToken: default);
+        var response = await GetHttpClient().GetAsync(GetCurationsEndpoint(engineName, skip, take), cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
 
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
-        var result = await response.Content.ReadFromJsonAsync<SuggestionApiResponse>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<PaginatedResponse>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return new CurationSearchResult
+        {
+            Results = result.Results.ToObject<Curation[]>(),
+            TotalCount = result.Meta.Page.TotalResults,
+        };
+    }
+
+    public async Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default)
+    {
+        var response = await GetHttpClient().GetAsync(GetCurationEndpoint(engineName, curationId, skipAnalytics), cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<Curation>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
+
+    #endregion
+
+    #region Suggestions
+
+    public async Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query, CancellationToken cancellationToken = default)
+    {
+        var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsync(GetSuggestionEndpoint(engineName), payload, cancellationToken: cancellationToken);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<SuggestionApiResponse>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    #endregion
 
 
     private static string GetEngineEndpoint(string engineName)
@@ -333,6 +383,21 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private static string GetSearchSettingsEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/search_settings";
+    }
+
+    private static string GetCurationsEndpoint(string engineName, int skip, int take = 1)
+    {
+        if (take <= 0)
+        {
+            take = 1;
+        }
+
+        return $"{GetEngineEndpoint(engineName)}/curations?page%5Bcurrent%5D={skip / take + 1}&page%5Bsize%5D={take}";
+    }
+
+    private static string GetCurationEndpoint(string engineName, string curationName, bool skipAnalytics = true)
+    {
+        return $"{GetEngineEndpoint(engineName)}/curations/{curationName}" + (skipAnalytics ? "?skip_record_analytics=true" : "");
     }
 
     private PreSearchInfo PreSearch(HttpContent payload)

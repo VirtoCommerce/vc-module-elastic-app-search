@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Curations;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
@@ -80,7 +82,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
             var searchRequest = new SearchRequest
             {
                 UseBackupIndex = true,
-                Sorting = new[] { new SortingField { FieldName = KnownDocumentFields.IndexationDate, IsDescending = true } },
+                Sorting = [new SortingField { FieldName = KnownDocumentFields.IndexationDate, IsDescending = true }],
                 Take = 1,
             };
 
@@ -268,14 +270,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
             var succeeded = !documentResult.Errors.Any();
             if (succeeded)
             {
-                return new[]
-                {
+                return
+                [
                     new IndexingResultItem
                     {
                         Id = documentResult.Id,
                         Succeeded = true
                     }
-                };
+                ];
             }
 
             return documentResult.Errors.Select(error => new IndexingResultItem
@@ -536,7 +538,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         SearchCacheRegion.ExpireTokenForKey(name);
 
         return _elasticAppSearch.CreateEngineAsync(name, ModuleConstants.Api.Languages.Universal,
-            !string.IsNullOrEmpty(sourceEngine) ? new[] { sourceEngine } : null);
+            !string.IsNullOrEmpty(sourceEngine) ? [sourceEngine] : null);
     }
 
     protected virtual async Task DeleteEngineAsync(string name)
@@ -551,12 +553,40 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     protected virtual Task AddSourceEngineAsync(string name, string sourceEngine)
     {
-        return _elasticAppSearch.AddSourceEnginesAsync(name, new[] { sourceEngine });
+        return _elasticAppSearch.AddSourceEnginesAsync(name, [sourceEngine]);
     }
 
     protected virtual Task DeleteSourceEngineAsync(string name, string sourceEngine)
     {
-        return _elasticAppSearch.DeleteSourceEnginesAsync(name, new[] { sourceEngine });
+        return _elasticAppSearch.DeleteSourceEnginesAsync(name, [sourceEngine]);
+    }
+
+    #endregion
+
+    #region Curations
+
+    protected virtual Task<CurationSearchResult> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default)
+    {
+        var cacheKey = CacheKey.With(GetType(), nameof(GetCurationsAsync), engineName);
+
+        return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+        {
+            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
+
+            return await _elasticAppSearch.GetCurationsAsync(engineName, skip, take, cancellationToken);
+        });
+    }
+
+    protected virtual Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default)
+    {
+        var cacheKey = CacheKey.With(GetType(), nameof(GetCurationAsync), engineName);
+
+        return _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+        {
+            cacheEntry.AddExpirationToken(SearchCacheRegion.CreateChangeTokenForKey(engineName));
+
+            return await _elasticAppSearch.GetCurationAsync(engineName, curationId, skipAnalytics, cancellationToken);
+        });
     }
 
     #endregion
