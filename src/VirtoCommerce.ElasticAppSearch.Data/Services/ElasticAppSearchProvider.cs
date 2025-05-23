@@ -594,27 +594,27 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
     #region Synonyms
 
-    protected virtual Task<SynonymApiResponse> GetSynonymsAsync(string documentType, SynonymApiQuery query, CancellationToken cancellationToken = default)
+    public virtual Task<SynonymApiResponse> GetSynonymsAsync(string documentType, SynonymApiQuery query, CancellationToken cancellationToken = default)
     {
         return _elasticAppSearch.GetSynonymsAsync(GetEngineName(documentType), query, cancellationToken);
     }
 
-    protected virtual Task<SynonymApiDocument> GetSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
+    public virtual Task<SynonymApiDocument> GetSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
     {
         return _elasticAppSearch.GetSynonymSetAsync(GetEngineName(documentType), id, cancellationToken);
     }
 
-    protected virtual Task<SynonymApiDocument> CreateSynonymSetAsync(string documentType, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    public virtual Task<SynonymApiDocument> CreateSynonymSetAsync(string documentType, SynonymSet synonymSet, CancellationToken cancellationToken = default)
     {
         return _elasticAppSearch.CreateSynonymSetAsync(GetEngineName(documentType), synonymSet, cancellationToken);
     }
 
-    protected virtual Task<SynonymApiDocument> UpdateSynonymSetAsync(string documentType, string id, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    public virtual Task<SynonymApiDocument> UpdateSynonymSetAsync(string documentType, string id, SynonymSet synonymSet, CancellationToken cancellationToken = default)
     {
         return _elasticAppSearch.UpdateSynonymSetAsync(GetEngineName(documentType), id, synonymSet, cancellationToken);
     }
 
-    protected virtual Task<DeleteDocumentResult> DeleteSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
+    public virtual Task<DeleteDocumentResult> DeleteSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
     {
         return _elasticAppSearch.DeleteSynonymSetAsync(GetEngineName(documentType), id, cancellationToken);
     }
