@@ -13,6 +13,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
@@ -587,6 +588,35 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
             return await _elasticAppSearch.GetCurationAsync(engineName, curationId, skipAnalytics, cancellationToken);
         });
+    }
+
+    #endregion
+
+    #region Synonyms
+
+    public virtual Task<SynonymApiResponse> GetSynonymsAsync(string documentType, SynonymApiQuery query, CancellationToken cancellationToken = default)
+    {
+        return _elasticAppSearch.GetSynonymsAsync(GetEngineName(documentType), query, cancellationToken);
+    }
+
+    public virtual Task<SynonymApiDocument> GetSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
+    {
+        return _elasticAppSearch.GetSynonymSetAsync(GetEngineName(documentType), id, cancellationToken);
+    }
+
+    public virtual Task<SynonymApiDocument> CreateSynonymSetAsync(string documentType, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    {
+        return _elasticAppSearch.CreateSynonymSetAsync(GetEngineName(documentType), synonymSet, cancellationToken);
+    }
+
+    public virtual Task<SynonymApiDocument> UpdateSynonymSetAsync(string documentType, string id, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    {
+        return _elasticAppSearch.UpdateSynonymSetAsync(GetEngineName(documentType), id, synonymSet, cancellationToken);
+    }
+
+    public virtual Task<DeleteDocumentResult> DeleteSynonymSetAsync(string documentType, string id, CancellationToken cancellationToken = default)
+    {
+        return _elasticAppSearch.DeleteSynonymSetAsync(GetEngineName(documentType), id, cancellationToken);
     }
 
     #endregion

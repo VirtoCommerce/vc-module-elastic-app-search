@@ -8,6 +8,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using Document = VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents.Document;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Services;
@@ -49,4 +50,14 @@ public interface IElasticAppSearchApiClient
     Task<CurationSearchResult> GetCurationsAsync(string engineName, int skip, int take, CancellationToken cancellationToken = default);
 
     Task<Curation> GetCurationAsync(string engineName, string curationId, bool skipAnalytics = true, CancellationToken cancellationToken = default);
+
+    Task<SynonymApiResponse> GetSynonymsAsync(string engineName, SynonymApiQuery query, CancellationToken cancellationToken = default);
+
+    Task<SynonymApiDocument> GetSynonymSetAsync(string engineName, string id, CancellationToken cancellationToken = default);
+
+    Task<SynonymApiDocument> CreateSynonymSetAsync(string engineName, SynonymSet synonymSet, CancellationToken cancellationToken = default);
+
+    Task<SynonymApiDocument> UpdateSynonymSetAsync(string engineName, string id, SynonymSet synonymSet, CancellationToken cancellationToken = default);
+
+    Task<DeleteDocumentResult> DeleteSynonymSetAsync(string engineName, string id, CancellationToken cancellationToken = default);
 }

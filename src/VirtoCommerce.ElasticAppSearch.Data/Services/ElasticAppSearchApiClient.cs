@@ -19,6 +19,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.Platform.Core.Common;
@@ -344,6 +345,84 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
 
     #endregion
 
+    #region Synonyms
+
+    public async Task<SynonymApiResponse> GetSynonymsAsync(string engineName, SynonymApiQuery query, CancellationToken cancellationToken = default)
+    {
+        var request = new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = new Uri(GetSynonymsEndpoint(engineName), UriKind.RelativeOrAbsolute),
+            Content = query?.ToJson(ModuleConstants.Api.JsonSerializerSettings),
+        };
+
+        var response = await GetHttpClient().SendAsync(request, cancellationToken: cancellationToken);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SynonymApiResponse>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    public async Task<SynonymApiDocument> GetSynonymSetAsync(string engineName, string id, CancellationToken cancellationToken = default)
+    {
+        var response = await GetHttpClient().GetAsync(GetSynonymsEndpoint(engineName, id), cancellationToken: cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SynonymApiDocument>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    public async Task<SynonymApiDocument> CreateSynonymSetAsync(string engineName, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    {
+        var payload = synonymSet.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PostAsync(GetSynonymsEndpoint(engineName), payload, cancellationToken: cancellationToken);
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SynonymApiDocument>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    public async Task<SynonymApiDocument> UpdateSynonymSetAsync(string engineName, string id, SynonymSet synonymSet, CancellationToken cancellationToken = default)
+    {
+        var payload = synonymSet.ToJson(ModuleConstants.Api.JsonSerializerSettings);
+        var response = await GetHttpClient().PutAsync(GetSynonymsEndpoint(engineName, id), payload, cancellationToken: cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+        var result = await response.Content.ReadFromJsonAsync<SynonymApiDocument>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    public async Task<DeleteDocumentResult> DeleteSynonymSetAsync(string engineName, string id, CancellationToken cancellationToken = default)
+    {
+        var response = await GetHttpClient().DeleteAsync(GetSynonymsEndpoint(engineName, id), cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new DeleteDocumentResult { Deleted = true };
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<DeleteDocumentResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    #endregion
 
     private static string GetEngineEndpoint(string engineName)
     {
@@ -400,6 +479,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return $"{GetEngineEndpoint(engineName)}/curations/{curationName}" + (skipAnalytics ? "?skip_record_analytics=true" : "");
     }
 
+    private static string GetSynonymsEndpoint(string engineName, string id = null)
+    {
+        return $"{GetEngineEndpoint(engineName)}/synonyms{(!string.IsNullOrEmpty(id) ? $"/{id}" : null)}";
+    }
+
     private PreSearchInfo PreSearch(HttpContent payload)
     {
         var preSearchInfo = new PreSearchInfo();
@@ -443,6 +527,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         return _httpClientFactory.CreateClient(ModuleConstants.ModuleName);
     }
+
     private sealed class PreSearchInfo
     {
         public string RequestId { get; set; }

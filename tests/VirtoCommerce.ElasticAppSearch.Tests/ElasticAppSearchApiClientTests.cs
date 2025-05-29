@@ -10,6 +10,7 @@ using Moq;
 using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Models;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
 using Xunit;
@@ -43,6 +44,43 @@ public class ElasticAppSearchApiClientTests
         var response = await client.SearchExplainAsync(engineName, new SearchQuery { Query = "Red" });
 
         Assert.NotNull(response);
+    }
+
+    [Fact]
+    public async Task CanGetSynonymsWithoutPage()
+    {
+        var engineName = Environment.GetEnvironmentVariable("TestElasticAppSearchEngineName") ?? "default-product";
+
+        var client = GetSearchClient();
+
+        var response = await client.GetSynonymsAsync(engineName, new SynonymApiQuery());
+
+        Assert.NotNull(response);
+    }
+
+    [Fact]
+    public async Task CanGetSynonymsWithPage()
+    {
+        var engineName = Environment.GetEnvironmentVariable("TestElasticAppSearchEngineName") ?? "default-product";
+
+        var client = GetSearchClient();
+
+        var response = await client.GetSynonymsAsync(engineName, new SynonymApiQuery(1, 10));
+
+        Assert.NotNull(response);
+    }
+
+    [Fact]
+    public async Task CanCreateSynonym()
+    {
+        var engineName = Environment.GetEnvironmentVariable("TestElasticAppSearchEngineName") ?? "default-product";
+
+        var client = GetSearchClient();
+
+        var response = await client.CreateSynonymSetAsync(engineName, new SynonymSet(["kilogram", "kg"]));
+
+        Assert.NotNull(response);
+        Assert.NotEmpty(response.Id);
     }
 
     protected static IElasticAppSearchApiClient GetSearchClient()
