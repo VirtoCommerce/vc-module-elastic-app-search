@@ -338,30 +338,30 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
                 SearchResult = searchResult,
             }).ToList();
 
-            response = ToSearchResponse(engineName, request, searchQueries, searchResults);
+            response = await ToSearchResponseAsync(engineName, request, searchQueries, searchResults);
         }
         else
         {
             var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
 
-            response = ToSearchResponse(engineName, request, searchResult);
+            response = await ToSearchResponseAsync(engineName, request, searchResult);
         }
 
         return response;
     }
 
-    protected virtual SearchResponse ToSearchResponse(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries, List<SearchResultAggregationWrapper> searchResults)
+    protected virtual Task<SearchResponse> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries, List<SearchResultAggregationWrapper> searchResults)
     {
         var response = _searchResponseBuilder.ToSearchResponse(searchResults, searchRequest.Aggregations);
 
-        return response;
+        return Task.FromResult(response);
     }
 
-    protected virtual SearchResponse ToSearchResponse(string engineName, SearchRequest searchRequest, SearchResult searchResult)
+    protected virtual Task<SearchResponse> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, SearchResult searchResult)
     {
         var response = _searchResponseBuilder.ToSearchResponse(searchResult);
 
-        return response;
+        return Task.FromResult(response);
     }
 
     #endregion
@@ -409,7 +409,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         }
     }
 
-    private static bool SchemaChanged(Schema oldSchema, Schema newSchema)
+    protected static bool SchemaChanged(Schema oldSchema, Schema newSchema)
     {
         // added fields
         if (oldSchema is null || newSchema.Fields.Count > oldSchema.Fields.Count)
