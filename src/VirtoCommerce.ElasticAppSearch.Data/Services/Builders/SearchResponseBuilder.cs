@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
@@ -22,30 +23,24 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
     public virtual SearchResponse ToSearchResponse(SearchResult searchResult)
     {
-        var searchResponse = new SearchResponse
-        {
-            Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList(),
-            TotalCount = searchResult.Meta.Page.TotalResults,
-            Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResult),
-        };
+        var searchResponse = OverridenType<SearchResponse>.New();
+        searchResponse.Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList();
+        searchResponse.TotalCount = searchResult.Meta.Page.TotalResults;
+        searchResponse.Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResult);
+
         return searchResponse;
     }
 
-    public SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
+    public virtual SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
         // create request based on main request
         var searchResult = searchResults?.FirstOrDefault()?.SearchResult;
         if (searchResult == null)
         {
-            return new SearchResponse();
+            return OverridenType<SearchResponse>.New();
         }
 
-        var searchResponse = new SearchResponse
-        {
-            Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList(),
-            TotalCount = searchResult.Meta.Page.TotalResults,
-            Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations),
-        };
+        var searchResponse = ToSearchResponse(searchResult);
 
         return searchResponse;
     }

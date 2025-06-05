@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ElasticAppSearch.Core;
+using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Curations;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
@@ -73,9 +75,6 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         try
         {
-            // Do not delete engine by default
-            string deleteEngineName = null;
-
             var metaEngineName = GetEngineName(documentType);
             var metaEngine = await GetMetaEngineAsync(metaEngineName, required: true);
             var (activeEngineName, stagingEngineName) = GetAliases(sourceEngineName, metaEngine);
@@ -96,17 +95,11 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
             if (activeEngineName != null && activeEngineName != stagingEngineName)
             {
                 await DeleteSourceEngineAsync(metaEngineName, activeEngineName);
-                deleteEngineName = activeEngineName;
             }
 
             if (activeEngineName == null || activeEngineName != stagingEngineName)
             {
                 await AddSourceEngineAsync(metaEngineName, stagingEngineName);
-            }
-
-            if (deleteEngineName != null)
-            {
-                await DeleteEngineAsync(deleteEngineName);
             }
         }
         catch (SearchException)
@@ -318,14 +311,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         if (schema is null)
         {
-            return new SearchResponse();
+            return OverridenType<SearchResponse>.New();
         }
 
         var searchSettings = await GetSearchSettingsAsync(engineName);
 
         if (searchSettings is null)
         {
-            return new SearchResponse();
+            return OverridenType<SearchResponse>.New();
         }
 
         SearchResponse response;
@@ -336,7 +329,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
             var searchTasks =
                 searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
-                ?? new List<Task<SearchResult>>();
+                ?? [];
             var searchResponses = await Task.WhenAll(searchTasks);
 
             var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
@@ -345,17 +338,31 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
                 SearchResult = searchResult,
             }).ToList();
 
-            response = _searchResponseBuilder.ToSearchResponse(searchResults, request.Aggregations);
+            response = ToSearchResponse(engineName, request, searchQueries, searchResults);
         }
         else
         {
             var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
-            response = _searchResponseBuilder.ToSearchResponse(searchResult);
+
+            response = ToSearchResponse(engineName, request, searchResult);
         }
 
         return response;
     }
 
+    protected virtual SearchResponse ToSearchResponse(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries, List<SearchResultAggregationWrapper> searchResults)
+    {
+        var response = _searchResponseBuilder.ToSearchResponse(searchResults, searchRequest.Aggregations);
+
+        return response;
+    }
+
+    protected virtual SearchResponse ToSearchResponse(string engineName, SearchRequest searchRequest, SearchResult searchResult)
+    {
+        var response = _searchResponseBuilder.ToSearchResponse(searchResult);
+
+        return response;
+    }
 
     #endregion
 
