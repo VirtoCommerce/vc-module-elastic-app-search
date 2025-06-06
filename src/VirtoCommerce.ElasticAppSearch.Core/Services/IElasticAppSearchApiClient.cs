@@ -43,6 +43,8 @@ public interface IElasticAppSearchApiClient
 
     Task<SearchExplainResult> SearchExplainAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default);
 
+    Task<ElasticSearchExplainResult> ElasticSearchExplainAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default);
+
     Task<SearchSettings> GetSearchSettingsAsync(string engineName, CancellationToken cancellationToken = default);
 
     Task<SuggestionApiResponse> GetSuggestionsAsync(string engineName, SuggestionApiQuery query, CancellationToken cancellationToken = default);
