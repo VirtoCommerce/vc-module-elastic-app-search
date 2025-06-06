@@ -265,6 +265,25 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return result;
     }
 
+    public async Task<ElasticSearchExplainResult> ElasticSearchExplainAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default)
+    {
+        var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+
+        // SearchQueryDebug in PreSearch(content) does not affect ElasticSearch request
+        var response = await GetHttpClient().PostAsync($"{GetElasticSearchEndpoint(engineName)}?explain=true", content, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<ElasticSearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
     #endregion
 
     #region GetSearchSettingsAsync
@@ -455,6 +474,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private static string GetSearchExplainEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/search_explain";
+    }
+
+    private static string GetElasticSearchEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/elasticsearch/_search";
     }
 
     private static string GetSearchSettingsEndpoint(string engineName)
