@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
@@ -33,14 +33,18 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
     public virtual SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
+        var searchResponse = OverridenType<SearchResponse>.New();
+
         // create request based on main request
         var searchResult = searchResults?.FirstOrDefault()?.SearchResult;
         if (searchResult == null)
         {
-            return OverridenType<SearchResponse>.New();
+            return searchResponse;
         }
 
-        var searchResponse = ToSearchResponse(searchResult);
+        searchResponse.Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList();
+        searchResponse.TotalCount = searchResult.Meta.Page.TotalResults;
+        searchResponse.Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations);
 
         return searchResponse;
     }

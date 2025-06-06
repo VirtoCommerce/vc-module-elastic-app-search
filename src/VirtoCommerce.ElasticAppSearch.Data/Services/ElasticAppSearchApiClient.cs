@@ -231,9 +231,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
-        var preSearchInfo = PreSearch(payload);
+        // SearchQueryDebug in PreSearch(payload) is not working with SearchExplain
         var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), payload, cancellationToken);
-        PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -251,9 +250,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
-        var preSearchInfo = PreSearch(content);
+        // SearchQueryDebug in PreSearch(content) is not working with SearchExplain
         var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), content, cancellationToken);
-        PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
