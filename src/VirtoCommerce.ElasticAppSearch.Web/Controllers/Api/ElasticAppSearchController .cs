@@ -57,6 +57,14 @@ namespace VirtoCommerce.ElasticAppSearch.Web.Controllers.Api
         }
 
         [HttpGet]
+        [Route("diagnostic/{engineName}/elasticsearch_explain")]
+        [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
+        public Task<ElasticSearchExplainResult> ElasticSearchExplain(string engineName, string query)
+        {
+            return _appSearchApiClient.ElasticSearchExplainAsync(engineName, query);
+        }
+
+        [HttpGet]
         [Route("diagnostic/{engineName}/search")]
         [Authorize(ModuleConstants.Security.Permissions.Diagnostic)]
         public Task<SearchResult> Search(string engineName, string query)
