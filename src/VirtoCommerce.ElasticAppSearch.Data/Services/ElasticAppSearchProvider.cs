@@ -327,41 +327,43 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         {
             var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema, searchSettings);
 
-            var searchTasks =
-                searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
-                ?? [];
-            var searchResponses = await Task.WhenAll(searchTasks);
-
-            var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
-            {
-                AggregationId = searchQueries?[i].AggregationId,
-                SearchResult = searchResult,
-            }).ToList();
-
-            response = await ToSearchResponseAsync(engineName, request, searchQueries, searchResults);
+            (response, _) = await ToSearchResponseAsync(engineName, request, searchQueries);
         }
         else
         {
-            var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
-
-            response = await ToSearchResponseAsync(engineName, request, searchResult);
+            (response, _) = await ToSearchResponseAsync(engineName, request);
         }
 
         return response;
     }
 
-    protected virtual Task<SearchResponse> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries, List<SearchResultAggregationWrapper> searchResults)
+    protected virtual async Task<(SearchResponse, IList<SearchResultAggregationWrapper>)> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries)
     {
+        var searchTasks =
+            searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
+            ?? [];
+        var searchResponses = await Task.WhenAll(searchTasks);
+
+        var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
+        {
+            AggregationId = searchQueries?[i].AggregationId,
+            SearchResult = searchResult,
+        }).ToList();
+
         var response = _searchResponseBuilder.ToSearchResponse(searchResults, searchRequest.Aggregations);
 
-        return Task.FromResult(response);
+        // Search results may be required in overridden methods
+        return (response, searchResults);
     }
 
-    protected virtual Task<SearchResponse> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, SearchResult searchResult)
+    protected virtual async Task<(SearchResponse, SearchResult)> ToSearchResponseAsync(string engineName, SearchRequest searchRequest)
     {
+        var searchResult = await _elasticAppSearch.SearchAsync(engineName, searchRequest.RawQuery);
+
         var response = _searchResponseBuilder.ToSearchResponse(searchResult);
 
-        return Task.FromResult(response);
+        // Search result may be required in overridden methods
+        return (response, searchResult);
     }
 
     #endregion
