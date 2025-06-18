@@ -270,7 +270,7 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
         // SearchQueryDebug in PreSearch(content) does not affect ElasticSearch request
-        var response = await GetHttpClient().PostAsync($"{GetElasticSearchEndpoint(engineName)}?explain=true", content, cancellationToken);
+        var response = await GetHttpClient().PostAsync(GetElasticSearchExplainEndpoint(engineName), content, cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -476,9 +476,9 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         return $"{GetEngineEndpoint(engineName)}/search_explain";
     }
 
-    private static string GetElasticSearchEndpoint(string engineName)
+    private static string GetElasticSearchExplainEndpoint(string engineName)
     {
-        return $"{GetEngineEndpoint(engineName)}/elasticsearch/_search";
+        return $"{GetEngineEndpoint(engineName)}/elasticsearch/_search?explain=true";
     }
 
     private static string GetSearchSettingsEndpoint(string engineName)

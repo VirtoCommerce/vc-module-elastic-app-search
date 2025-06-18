@@ -23,7 +23,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
     public virtual SearchResponse ToSearchResponse(SearchResult searchResult)
     {
-        var searchResponse = OverridenType<SearchResponse>.New();
+        var searchResponse = OverridableType<SearchResponse>.New();
         searchResponse.Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList();
         searchResponse.TotalCount = searchResult.Meta.Page.TotalResults;
         searchResponse.Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResult);
@@ -33,7 +33,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
     public virtual SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
-        var searchResponse = OverridenType<SearchResponse>.New();
+        var searchResponse = OverridableType<SearchResponse>.New();
 
         // create request based on main request
         var searchResult = searchResults?.FirstOrDefault()?.SearchResult;

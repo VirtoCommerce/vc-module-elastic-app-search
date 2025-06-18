@@ -311,14 +311,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         if (schema is null)
         {
-            return OverridenType<SearchResponse>.New();
+            return OverridableType<SearchResponse>.New();
         }
 
         var searchSettings = await GetSearchSettingsAsync(engineName);
 
         if (searchSettings is null)
         {
-            return OverridenType<SearchResponse>.New();
+            return OverridableType<SearchResponse>.New();
         }
 
         SearchResponse response;
