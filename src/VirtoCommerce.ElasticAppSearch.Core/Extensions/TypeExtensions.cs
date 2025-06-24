@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace VirtoCommerce.ElasticAppSearch.Core.Extensions;
 
@@ -14,7 +13,7 @@ public static class TypeExtensions
 
         if (type.IsGenericType)
         {
-            return type.GenericTypeArguments.First();
+            return type.GenericTypeArguments[0];
         }
 
         return typeof(object);

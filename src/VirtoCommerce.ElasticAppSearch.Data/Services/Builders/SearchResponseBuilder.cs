@@ -4,6 +4,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
@@ -22,30 +23,28 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
     public virtual SearchResponse ToSearchResponse(SearchResult searchResult)
     {
-        var searchResponse = new SearchResponse
-        {
-            Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList(),
-            TotalCount = searchResult.Meta.Page.TotalResults,
-            Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResult),
-        };
+        var searchResponse = OverridableType<SearchResponse>.New();
+        searchResponse.Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList();
+        searchResponse.TotalCount = searchResult.Meta.Page.TotalResults;
+        searchResponse.Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResult);
+
         return searchResponse;
     }
 
-    public SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
+    public virtual SearchResponse ToSearchResponse(IList<SearchResultAggregationWrapper> searchResults, IList<AggregationRequest> aggregations)
     {
+        var searchResponse = OverridableType<SearchResponse>.New();
+
         // create request based on main request
         var searchResult = searchResults?.FirstOrDefault()?.SearchResult;
         if (searchResult == null)
         {
-            return new SearchResponse();
+            return searchResponse;
         }
 
-        var searchResponse = new SearchResponse
-        {
-            Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList(),
-            TotalCount = searchResult.Meta.Page.TotalResults,
-            Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations),
-        };
+        searchResponse.Documents = searchResult.Results.Select(_documentConverter.ToSearchDocument).ToList();
+        searchResponse.TotalCount = searchResult.Meta.Page.TotalResults;
+        searchResponse.Aggregations = _aggregationsResponseBuilder.ToAggregationResult(searchResults, aggregations);
 
         return searchResponse;
     }

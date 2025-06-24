@@ -231,9 +231,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var payload = query.ToJson(ModuleConstants.Api.JsonSerializerSettings);
 
-        var preSearchInfo = PreSearch(payload);
+        // SearchQueryDebug in PreSearch(payload) is not working with SearchExplain
         var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), payload, cancellationToken);
-        PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -251,9 +250,8 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     {
         var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
 
-        var preSearchInfo = PreSearch(content);
+        // SearchQueryDebug in PreSearch(content) is not working with SearchExplain
         var response = await GetHttpClient().PostAsync(GetSearchExplainEndpoint(engineName), content, cancellationToken);
-        PostSearch(preSearchInfo);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -263,6 +261,25 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
         await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
 
         var result = await response.Content.ReadFromJsonAsync<SearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
+
+        return result;
+    }
+
+    public async Task<ElasticSearchExplainResult> ElasticSearchExplainAsync(string engineName, string rawQuery, CancellationToken cancellationToken = default)
+    {
+        var content = new StringContent(rawQuery, Encoding.UTF8, "application/json");
+
+        // SearchQueryDebug in PreSearch(content) does not affect ElasticSearch request
+        var response = await GetHttpClient().PostAsync(GetElasticSearchExplainEndpoint(engineName), content, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        await response.EnsureSuccessStatusCodeAsync<Result>(ModuleConstants.Api.JsonSerializerSettings);
+
+        var result = await response.Content.ReadFromJsonAsync<ElasticSearchExplainResult>(ModuleConstants.Api.JsonSerializerSettings, cancellationToken: cancellationToken);
 
         return result;
     }
@@ -457,6 +474,11 @@ public class ElasticAppSearchApiClient : IElasticAppSearchApiClient
     private static string GetSearchExplainEndpoint(string engineName)
     {
         return $"{GetEngineEndpoint(engineName)}/search_explain";
+    }
+
+    private static string GetElasticSearchExplainEndpoint(string engineName)
+    {
+        return $"{GetEngineEndpoint(engineName)}/elasticsearch/_search?explain=true";
     }
 
     private static string GetSearchSettingsEndpoint(string engineName)

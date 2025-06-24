@@ -12,12 +12,14 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Documents;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Engines;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search;
+using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Synonyms;
 using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Caching;
+using VirtoCommerce.ElasticAppSearch.Data.Extensions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -73,9 +75,6 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         try
         {
-            // Do not delete engine by default
-            string deleteEngineName = null;
-
             var metaEngineName = GetEngineName(documentType);
             var metaEngine = await GetMetaEngineAsync(metaEngineName, required: true);
             var (activeEngineName, stagingEngineName) = GetAliases(sourceEngineName, metaEngine);
@@ -96,17 +95,11 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
             if (activeEngineName != null && activeEngineName != stagingEngineName)
             {
                 await DeleteSourceEngineAsync(metaEngineName, activeEngineName);
-                deleteEngineName = activeEngineName;
             }
 
             if (activeEngineName == null || activeEngineName != stagingEngineName)
             {
                 await AddSourceEngineAsync(metaEngineName, stagingEngineName);
-            }
-
-            if (deleteEngineName != null)
-            {
-                await DeleteEngineAsync(deleteEngineName);
             }
         }
         catch (SearchException)
@@ -318,14 +311,14 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
 
         if (schema is null)
         {
-            return new SearchResponse();
+            return OverridableType<SearchResponse>.New();
         }
 
         var searchSettings = await GetSearchSettingsAsync(engineName);
 
         if (searchSettings is null)
         {
-            return new SearchResponse();
+            return OverridableType<SearchResponse>.New();
         }
 
         SearchResponse response;
@@ -334,28 +327,44 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         {
             var searchQueries = _searchQueryBuilder.ToSearchQueries(request, schema, searchSettings);
 
-            var searchTasks =
-                searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
-                ?? new List<Task<SearchResult>>();
-            var searchResponses = await Task.WhenAll(searchTasks);
-
-            var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
-            {
-                AggregationId = searchQueries?[i].AggregationId,
-                SearchResult = searchResult,
-            }).ToList();
-
-            response = _searchResponseBuilder.ToSearchResponse(searchResults, request.Aggregations);
+            (response, _) = await ToSearchResponseAsync(engineName, request, searchQueries);
         }
         else
         {
-            var searchResult = await _elasticAppSearch.SearchAsync(engineName, request.RawQuery);
-            response = _searchResponseBuilder.ToSearchResponse(searchResult);
+            (response, _) = await ToSearchResponseAsync(engineName, request);
         }
 
         return response;
     }
 
+    protected virtual async Task<(SearchResponse, IList<SearchResultAggregationWrapper>)> ToSearchResponseAsync(string engineName, SearchRequest searchRequest, IList<SearchQueryAggregationWrapper> searchQueries)
+    {
+        var searchTasks =
+            searchQueries?.Select(searchQuery => _elasticAppSearch.SearchAsync(engineName, searchQuery.SearchQuery))
+            ?? [];
+        var searchResponses = await Task.WhenAll(searchTasks);
+
+        var searchResults = searchResponses.Select((searchResult, i) => new SearchResultAggregationWrapper
+        {
+            AggregationId = searchQueries?[i].AggregationId,
+            SearchResult = searchResult,
+        }).ToList();
+
+        var response = _searchResponseBuilder.ToSearchResponse(searchResults, searchRequest.Aggregations);
+
+        // Search results may be required in overridden methods
+        return (response, searchResults);
+    }
+
+    protected virtual async Task<(SearchResponse, SearchResult)> ToSearchResponseAsync(string engineName, SearchRequest searchRequest)
+    {
+        var searchResult = await _elasticAppSearch.SearchAsync(engineName, searchRequest.RawQuery);
+
+        var response = _searchResponseBuilder.ToSearchResponse(searchResult);
+
+        // Search result may be required in overridden methods
+        return (response, searchResult);
+    }
 
     #endregion
 
@@ -402,7 +411,7 @@ public class ElasticAppSearchProvider : ISearchProvider, ISupportIndexSwap, ISup
         }
     }
 
-    private static bool SchemaChanged(Schema oldSchema, Schema newSchema)
+    protected static bool SchemaChanged(Schema oldSchema, Schema newSchema)
     {
         // added fields
         if (oldSchema is null || newSchema.Fields.Count > oldSchema.Fields.Count)
