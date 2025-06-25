@@ -15,6 +15,10 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
 public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 {
+    /// <summary>
+    /// By default, Elastic App Search returns 10 facet values for each facet. The maximum number of facet values is 250.
+    /// You can change the number of facet values returned by app_search.engine.total_facet_values_returned.limit.
+    /// </summary>
     protected const int MaxFacetValues = 250;
 
     private readonly ILogger<SearchFacetsQueryBuilder> _logger;
@@ -101,7 +105,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                 result = new ValueFacet
                 {
                     Name = fieldName,
-                    Size = termAggregationRequest.Size == 0 || termAggregationRequest.Size > MaxFacetValues
+                    Size = termAggregationRequest.Size == 0
                         ? MaxFacetValues
                         : termAggregationRequest.Size,
                 };
