@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "ElasticAppSearch-Aktivierung",
         "description": "ElasticAppSearch aktivieren/deaktivieren"
+      },
+      "MaxFacetValueCount": {
+        "title": "Maximale eindeutige Facettenwerte pro Abfrage (Standard)",
+        "description": "Gibt die maximale Anzahl eindeutiger Facettenwerte an, die über alle Facetten in einer einzelnen Suchabfrage zurückgegeben werden können, wenn kein Wert angegeben ist oder auf Null gesetzt wird. Das Standardlimit beträgt 250. Um dies zu ändern, aktualisieren Sie die Einstellung app_search.engine.total_facet_values_returned.limit in der app_search.yml-Konfigurationsdatei."
       }
     }
   }

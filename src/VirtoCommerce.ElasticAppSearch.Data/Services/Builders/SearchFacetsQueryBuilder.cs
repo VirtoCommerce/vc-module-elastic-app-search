@@ -3,35 +3,34 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using VirtoCommerce.ElasticAppSearch.Core;
 using VirtoCommerce.ElasticAppSearch.Core.Extensions;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Facets;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
 
 public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
 {
-    /// <summary>
-    /// By default, Elastic App Search returns 10 facet values for each facet. The maximum number of facet values is 250.
-    /// You can change the number of facet values returned by app_search.engine.total_facet_values_returned.limit.
-    /// </summary>
-    protected const int MaxFacetValues = 250;
-
     private readonly ILogger<SearchFacetsQueryBuilder> _logger;
     private readonly IFieldNameConverter _fieldNameConverter;
     private readonly ISearchFiltersBuilder _searchFiltersBuilder;
+    private readonly ISettingsManager _settingsManager;
 
     public SearchFacetsQueryBuilder(ILogger<SearchFacetsQueryBuilder> logger,
         IFieldNameConverter fieldNameConverter,
-        ISearchFiltersBuilder searchFiltersBuilder)
+        ISearchFiltersBuilder searchFiltersBuilder,
+        ISettingsManager settingsManager)
     {
         _logger = logger;
         _fieldNameConverter = fieldNameConverter;
         _searchFiltersBuilder = searchFiltersBuilder;
+        _settingsManager = settingsManager;
     }
 
     public IList<FacetRequest> GetFacetRequests(IList<AggregationRequest> aggregations, Schema schema)
@@ -106,7 +105,7 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
                 {
                     Name = fieldName,
                     Size = termAggregationRequest.Size == 0
-                        ? MaxFacetValues
+                        ? GetMaxFacetValues()
                         : termAggregationRequest.Size,
                 };
                 break;
@@ -116,6 +115,16 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
         }
 
         return result;
+    }
+
+    protected virtual int GetMaxFacetValues()
+    {
+        if (_settingsManager == null)
+        {
+            return ModuleConstants.MaxFacetValues;
+        }
+
+        return _settingsManager.GetValue<int>(ModuleConstants.Settings.General.MaxFacetValues);
     }
 
     protected virtual Facet AddRangeAggregationRequest(RangeAggregationRequest rangeAggregationRequest, Schema schema)

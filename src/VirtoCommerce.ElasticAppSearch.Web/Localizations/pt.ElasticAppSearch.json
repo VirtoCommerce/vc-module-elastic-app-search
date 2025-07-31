@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "Ativação do ElasticAppSearch",
         "description": "Habilitar/desabilitar ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Máximo de valores únicos de facetas por consulta (padrão)",
+        "description": "Especifica o número máximo de valores únicos de facetas que podem ser retornados em todas as facetas em uma única consulta de pesquisa quando nenhum valor é especificado ou definido como zero. O limite padrão é 250. Para alterar isso, atualize a configuração app_search.engine.total_facet_values_returned.limit no arquivo de configuração app_search.yml."
       }
     }
   }

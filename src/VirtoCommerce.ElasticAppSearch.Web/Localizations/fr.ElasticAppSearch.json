@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "Activation de ElasticAppSearch",
         "description": "Activer/désactiver ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Nombre maximal de valeurs de facettes uniques par requête (par défaut)",
+        "description": "Spécifie le nombre maximal de valeurs de facettes uniques pouvant être retournées pour toutes les facettes dans une seule requête de recherche lorsqu'aucune valeur n'est spécifiée ou définie sur zéro. La limite par défaut est de 250. Pour modifier cela, mettez à jour le paramètre app_search.engine.total_facet_values_returned.limit dans le fichier de configuration app_search.yml."
       }
     }
   }

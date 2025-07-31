@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "ElasticAppSearch 启用",
         "description": "启用/禁用 ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "每个查询的最大唯一 Facet 值数（默认）",
+        "description": "指定在未指定值或设置为零时，单个搜索查询中所有 Facet 可返回的最大唯一 Facet 值数。默认限制为 250。要更改此设置，请在 app_search.yml 配置文件中更新 app_search.engine.total_facet_values_returned.limit 设置。"
       }
     }
   }
