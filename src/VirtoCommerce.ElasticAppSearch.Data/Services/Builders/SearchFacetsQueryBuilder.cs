@@ -121,10 +121,10 @@ public class SearchFacetsQueryBuilder : ISearchFacetsQueryBuilder
     {
         if (_settingsManager == null)
         {
-            return ModuleConstants.MaxFacetValues;
+            return ModuleConstants.ElasticAppSearchMaxFacetValueCount;
         }
 
-        return _settingsManager.GetValue<int>(ModuleConstants.Settings.General.MaxFacetValues);
+        return _settingsManager.GetValue<int>(ModuleConstants.Settings.General.MaxFacetValueCount);
     }
 
     protected virtual Facet AddRangeAggregationRequest(RangeAggregationRequest rangeAggregationRequest, Schema schema)
