@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "Aktywacja ElasticAppSearch",
         "description": "Włącz/wyłącz ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Maksymalna liczba unikalnych wartości faset na zapytanie (domyślnie)",
+        "description": "Określa maksymalną liczbę unikalnych wartości faset, które mogą zostać zwrócone we wszystkich fasetach w pojedynczym zapytaniu wyszukiwania, gdy nie określono wartości lub ustawiono zero. Domyślny limit to 250. Aby to zmienić, zaktualizuj ustawienie app_search.engine.total_facet_values_returned.limit w pliku konfiguracyjnym app_search.yml."
       }
     }
   }

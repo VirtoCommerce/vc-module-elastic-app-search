@@ -22,6 +22,10 @@
       "ElasticAppSearchEnabled": {
         "title": "ElasticAppSearch の有効化",
         "description": "ElasticAppSearch を有効化/無効化する"
+      },
+      "MaxFacetValueCount": {
+        "title": "クエリごとの最大ユニークファセット値数（デフォルト）",
+        "description": "値が指定されていない場合やゼロに設定されている場合、1回の検索クエリで全ファセットにわたって返されるユニークなファセット値の最大数を指定します。デフォルトの上限は250です。これを変更するには、app_search.yml構成ファイルのapp_search.engine.total_facet_values_returned.limit設定を更新してください。"
       }
     }
   }

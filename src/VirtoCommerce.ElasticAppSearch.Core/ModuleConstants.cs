@@ -12,6 +12,12 @@ public static class ModuleConstants
 {
     public const string ModuleName = "ElasticAppSearch";
 
+    /// <summary>
+    /// By default, Elastic App Search returns 10 facet values for each facet. The maximum number of facet values is 250.
+    /// You can change the number of facet values returned by app_search.engine.total_facet_values_returned.limit.
+    /// </summary>
+    public const int ElasticAppSearchMaxFacetValueCount = 250;
+
     public static class Api
     {
         public static readonly JsonSerializerSettings JsonSerializerSettings = new()
@@ -114,6 +120,17 @@ public static class ModuleConstants
 
     public static class Settings
     {
-        public static IEnumerable<SettingDescriptor> AllSettings => [];
+        public static class General
+        {
+            public static SettingDescriptor MaxFacetValueCount { get; } = new SettingDescriptor
+            {
+                Name = "ElasticAppSearch.MaxFacetValueCount",
+                GroupName = "Search|ElasticAppSearch",
+                ValueType = SettingValueType.PositiveInteger,
+                DefaultValue = ElasticAppSearchMaxFacetValueCount,
+            };
+        }
+
+        public static IEnumerable<SettingDescriptor> AllSettings => [General.MaxFacetValueCount];
     }
 }

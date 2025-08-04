@@ -133,7 +133,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var fieldNameConverter = new FieldNameConverter();
             var documentConverter = new DocumentConverter(Mock.Of<ILogger<DocumentConverter>>(), fieldNameConverter);
             var searchFilterBuilder = new SearchFiltersBuilder(Mock.Of<ILogger<SearchFiltersBuilder>>(), fieldNameConverter);
-            var facetsBuilder = new SearchFacetsQueryBuilder(Mock.Of<ILogger<SearchFacetsQueryBuilder>>(), fieldNameConverter, searchFilterBuilder);
+            var facetsBuilder = new SearchFacetsQueryBuilder(Mock.Of<ILogger<SearchFacetsQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, null);
             var boostsBuilder = new SearchBoostsBuilder(appSearchOptionsMock, fieldNameConverter);
             var searchQueryBuilder = new SearchQueryBuilder(Mock.Of<ILogger<SearchQueryBuilder>>(), fieldNameConverter, searchFilterBuilder, facetsBuilder, boostsBuilder);
             var aggregationsResponseBuilder = new AggregationsResponseBuilder(fieldNameConverter);
