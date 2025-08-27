@@ -103,53 +103,6 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         return result;
     }
 
-    private List<SearchQueryAggregationWrapper> GetStatisticsQueries(SearchRequest request, Schema schema, IList<FacetRequest> facetRequests)
-    {
-        if (facetRequests.IsNullOrEmpty())
-        {
-            return [];
-        }
-
-        var statisticsQueries = facetRequests
-            .Where(x => x.Facet is NumberRangeFacet)
-            .SelectMany(x =>
-            {
-                var result = new List<SearchQueryAggregationWrapper>();
-
-                foreach (var statType in new[] { StatTypes.Min, StatTypes.Max })
-                {
-                    var sorting = new SortingField
-                    {
-                        FieldName = x.FieldName,
-                        IsDescending = statType == StatTypes.Max,
-                    };
-
-                    var searchQuery = new SearchQuery
-                    {
-                        Filters = x.Filter,
-                        Sort = GetSorting(new List<SortingField> { sorting }, schema),
-                        Query = request.SearchKeywords ?? string.Empty,
-                        SearchFields = GetSearchFields(request.SearchFields),
-                        ResultFields = GetResultFields(new List<string> { x.FieldName }, schema),
-                        Page = new Page { Current = 1, Size = 1 }
-                    };
-
-                    var wrapper = new SearchQueryAggregationWrapper
-                    {
-                        AggregationId = $"{x.Id}-stats-{statType}",
-                        SearchQuery = searchQuery,
-                    };
-
-                    result.Add(wrapper);
-                }
-
-                return result;
-            })
-            .ToList();
-
-        return statisticsQueries;
-    }
-
     public virtual SuggestionApiQuery ToSuggestionQuery(SuggestionRequest request)
     {
         var apiQuery = new SuggestionApiQuery
@@ -295,6 +248,53 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         }
 
         return result;
+    }
+
+    private List<SearchQueryAggregationWrapper> GetStatisticsQueries(SearchRequest request, Schema schema, IList<FacetRequest> facetRequests)
+    {
+        if (facetRequests.IsNullOrEmpty())
+        {
+            return [];
+        }
+
+        var statisticsQueries = facetRequests
+            .Where(x => x.Facet is NumberRangeFacet)
+            .SelectMany(x =>
+            {
+                var result = new List<SearchQueryAggregationWrapper>();
+
+                foreach (var statType in new[] { StatTypes.Min, StatTypes.Max })
+                {
+                    var sorting = new SortingField
+                    {
+                        FieldName = x.FieldName,
+                        IsDescending = statType == StatTypes.Max,
+                    };
+
+                    var searchQuery = new SearchQuery
+                    {
+                        Filters = x.Filter,
+                        Sort = GetSorting(new List<SortingField> { sorting }, schema),
+                        Query = request.SearchKeywords ?? string.Empty,
+                        SearchFields = GetSearchFields(request.SearchFields),
+                        ResultFields = GetResultFields(new List<string> { x.FieldName }, schema),
+                        Page = new Page { Current = 1, Size = 1 }
+                    };
+
+                    var wrapper = new SearchQueryAggregationWrapper
+                    {
+                        AggregationId = $"{x.Id}-stats-{statType}",
+                        SearchQuery = searchQuery,
+                    };
+
+                    result.Add(wrapper);
+                }
+
+                return result;
+            })
+            .ToList();
+
+        return statisticsQueries;
     }
 
     private IEnumerable<SearchQueryAggregationWrapper> ToSearchQueryAggregationWrappers(IEnumerable<FacetRequest> facets, SearchRequest request)
