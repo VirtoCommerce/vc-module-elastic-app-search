@@ -13,6 +13,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using static VirtoCommerce.ElasticAppSearch.Core.ModuleConstants.Api;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
@@ -104,6 +105,11 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
     private List<SearchQueryAggregationWrapper> GetStatisticsQueries(SearchRequest request, Schema schema, IList<FacetRequest> facetRequests)
     {
+        if (facetRequests.IsNullOrEmpty())
+        {
+            return [];
+        }
+
         var statisticsQueries = facetRequests
             .Where(x => x.Facet is NumberRangeFacet)
             .SelectMany(x =>
