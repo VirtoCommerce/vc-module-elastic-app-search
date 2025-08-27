@@ -234,7 +234,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             }
 
             var value = fields.GetValueOrDefault(fieldName);
-            if (value.Raw != null && value.Raw is JArray jArray)
+            if (value.Raw is JArray jArray)
             {
                 var values = jArray.ToObject<object[]>();
                 if (values != null && values.Length > 0)

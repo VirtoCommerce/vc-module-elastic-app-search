@@ -114,9 +114,6 @@ public class SearchQueryBuilder : ISearchQueryBuilder
             .Where(x => x.Facet is NumberRangeFacet)
             .SelectMany(x =>
             {
-                // max min values for filter
-                var numberRangeFacet = (NumberRangeFacet)x.Facet;
-
                 var result = new List<SearchQueryAggregationWrapper>();
 
                 foreach (var statType in new[] { StatTypes.Min, StatTypes.Max })
