@@ -1,11 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Result;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
+using static VirtoCommerce.ElasticAppSearch.Core.ModuleConstants.Api;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
 {
@@ -69,10 +72,41 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                 }
             }
 
+            var statistics = new Dictionary<string, StatisticsResult[]>();
+            if (aggregations != null)
+            {
+                foreach (var aggregation in aggregations.Where(x => x is RangeAggregationRequest))
+                {
+                    var statMin = GetStatResult(StatTypes.Min, searchResults, aggregation);
+                    var statMax = GetStatResult(StatTypes.Max, searchResults, aggregation);
+
+                    if (statMin != null && statMax != null)
+                    {
+                        statistics.TryAdd(aggregation.FieldName, [statMin, statMax]);
+                    }
+                }
+            }
+
             return aggregations?
-                .Select(x => GetAggregationResponseFromRequest(x, facets))
+                .Select(x => GetAggregationResponseFromRequest(x, facets, statistics))
                 .Where(x => x?.Values.Any() == true)
                 ?? new List<AggregationResponse>();
+        }
+
+        private static StatisticsResult GetStatResult(string statType, IList<SearchResultAggregationWrapper> searchResults, AggregationRequest aggregation)
+        {
+            var statsIdMax = $"{aggregation.Id}-stats-{statType}";
+            var data = searchResults.FirstOrDefault(x => x.AggregationId == statsIdMax)?.SearchResult?.Results?.FirstOrDefault();
+            if (data != null)
+            {
+                return new StatisticsResult
+                {
+                    StatType = statType,
+                    Data = data,
+                };
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -96,7 +130,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                 });
         }
 
-        private AggregationResponse GetAggregationResponseFromRequest(AggregationRequest aggregationRequest, Dictionary<string, FacetResult> facets)
+        private AggregationResponse GetAggregationResponseFromRequest(AggregationRequest aggregationRequest, Dictionary<string, FacetResult> facets, Dictionary<string, StatisticsResult[]> statistics)
         {
             AggregationResponse result = null;
 
@@ -106,7 +140,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                     result = GetAggregationResponseByTerm(termAggregationRequest, facets);
                     break;
                 case RangeAggregationRequest rangeAggregationRequest:
-                    result = GetAggregationResponseByRange(rangeAggregationRequest, facets);
+                    result = GetAggregationResponseByRange(rangeAggregationRequest, facets, statistics);
                     break;
             }
 
@@ -150,7 +184,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             return result;
         }
 
-        private AggregationResponse GetAggregationResponseByRange(RangeAggregationRequest rangeAggregationRequest, Dictionary<string, FacetResult> facets)
+        private AggregationResponse GetAggregationResponseByRange(RangeAggregationRequest rangeAggregationRequest, Dictionary<string, FacetResult> facets, Dictionary<string, StatisticsResult[]> statistics)
         {
             if (string.IsNullOrEmpty(rangeAggregationRequest.FieldName))
             {
@@ -177,7 +211,39 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
                     .Select(x => GetAggregationResponseValue(x.Name, x.Count)).ToList();
             }
 
+            // add statistics for range facets
+            var statistic = statistics.GetValueOrDefault(fieldName);
+            if (statistic != null)
+            {
+                result.Statistics = new AggregationStatistics
+                {
+                    Min = ParseStatistics(fieldName, StatTypes.Min, statistic),
+                    Max = ParseStatistics(fieldName, StatTypes.Max, statistic)
+                };
+            }
+
             return result;
+        }
+
+        private static double? ParseStatistics(string fieldName, string statType, StatisticsResult[] statistic)
+        {
+            var fields = statistic.FirstOrDefault(x => x.StatType == statType)?.Data?.Fields;
+            if (fields == null)
+            {
+                return null;
+            }
+
+            var value = fields.GetValueOrDefault(fieldName);
+            if (value.Raw is JArray jArray)
+            {
+                var values = jArray.ToObject<object[]>();
+                if (values != null && values.Length > 0)
+                {
+                    return Convert.ToDouble(values[0]);
+                }
+            }
+
+            return null;
         }
 
         private static AggregationResponseValue GetAggregationResponseValue(string facetDataName, int? count)

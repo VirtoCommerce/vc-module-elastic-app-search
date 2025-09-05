@@ -104,6 +104,12 @@ public static class ModuleConstants
             public const string Logarithmic = "logarithmic";
             public const string Gaussian = "gaussian";
         }
+
+        public static class StatTypes
+        {
+            public const string Min = "min";
+            public const string Max = "max";
+        }
     }
 
     public static class Security

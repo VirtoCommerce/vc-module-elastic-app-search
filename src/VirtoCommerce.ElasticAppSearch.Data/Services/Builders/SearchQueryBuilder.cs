@@ -13,7 +13,9 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Search.Query.Sorting;
 using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Suggestions;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
+using static VirtoCommerce.ElasticAppSearch.Core.ModuleConstants.Api;
 using ISearchFilter = VirtoCommerce.SearchModule.Core.Model.IFilter;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders;
@@ -47,6 +49,7 @@ public class SearchQueryBuilder : ISearchQueryBuilder
 
         // process aggregates
         var facetRequests = GetFacetRequests(request.Aggregations, schema);
+        var statisticsQueries = GetStatisticsQueries(request, schema, facetRequests);
 
         var groupedFilters = facetRequests?.GroupBy(x => x.FilterName) ?? new List<IGrouping<string, FacetRequest>>();
         foreach (var filterGroup in groupedFilters)
@@ -94,6 +97,8 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 }
             }
         }
+
+        result.AddRange(statisticsQueries);
 
         return result;
     }
@@ -243,6 +248,53 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         }
 
         return result;
+    }
+
+    private List<SearchQueryAggregationWrapper> GetStatisticsQueries(SearchRequest request, Schema schema, IList<FacetRequest> facetRequests)
+    {
+        if (facetRequests.IsNullOrEmpty())
+        {
+            return [];
+        }
+
+        var statisticsQueries = facetRequests
+            .Where(x => x.Facet is NumberRangeFacet)
+            .SelectMany(x =>
+            {
+                var result = new List<SearchQueryAggregationWrapper>();
+
+                foreach (var statType in new[] { StatTypes.Min, StatTypes.Max })
+                {
+                    var sorting = new SortingField
+                    {
+                        FieldName = x.FieldName,
+                        IsDescending = statType == StatTypes.Max,
+                    };
+
+                    var searchQuery = new SearchQuery
+                    {
+                        Filters = x.Filter,
+                        Sort = GetSorting(new List<SortingField> { sorting }, schema),
+                        Query = request.SearchKeywords ?? string.Empty,
+                        SearchFields = GetSearchFields(request.SearchFields),
+                        ResultFields = GetResultFields(new List<string> { x.FieldName }, schema),
+                        Page = new Page { Current = 1, Size = 1 }
+                    };
+
+                    var wrapper = new SearchQueryAggregationWrapper
+                    {
+                        AggregationId = $"{x.Id}-stats-{statType}",
+                        SearchQuery = searchQuery,
+                    };
+
+                    result.Add(wrapper);
+                }
+
+                return result;
+            })
+            .ToList();
+
+        return statisticsQueries;
     }
 
     private IEnumerable<SearchQueryAggregationWrapper> ToSearchQueryAggregationWrappers(IEnumerable<FacetRequest> facets, SearchRequest request)
