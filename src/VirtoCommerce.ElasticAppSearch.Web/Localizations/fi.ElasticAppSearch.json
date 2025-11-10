@@ -1,0 +1,32 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hei maailma -paneeli"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Avaa ElasticAppSearch-valikko",
+    "ElasticAppSearch:create": "Luo ElasticAppSearchiin liittyvää dataa",
+    "ElasticAppSearch:read": "Näytä ElasticAppSearchiin liittyvää dataa",
+    "ElasticAppSearch:update": "Päivitä ElasticAppSearchiin liittyvää dataa",
+    "ElasticAppSearch:delete": "Poista ElasticAppSearchiin liittyvää dataa"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch-salasana",
+        "description": "Aseta ElasticAppSearch-salasana"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch",
+        "description": "Ota käyttöön tai poista käytöstä ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Maksimimäärä yksilöllisiä fasettiarvoja per kysely (oletus)",
+        "description": "Määritä maksimimäärä yksilöllisiä fasettiarvoja, jotka voidaan palauttaa kaikista fasetista yhden hakukyselyn aikana, kun arvoa ei ole määritetty tai se on nolla. Oletusraja on 250. Muuttaaksesi tätä, päivitä asetus app_search.engine.total_facet_values_returned.limit tiedostossa app_search.yml."
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hej världen-blad"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Öppna ElasticAppSearch-menyn",
+    "ElasticAppSearch:create": "Skapa data relaterad till ElasticAppSearch",
+    "ElasticAppSearch:read": "Visa data relaterad till ElasticAppSearch",
+    "ElasticAppSearch:update": "Uppdatera data relaterad till ElasticAppSearch",
+    "ElasticAppSearch:delete": "Radera data relaterad till ElasticAppSearch"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch-lösenord",
+        "description": "Ange ElasticAppSearch-lösenord"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch",
+        "description": "Aktivera/inaktivera ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Maximalt antal unika fasettvärden per fråga (standard)",
+        "description": "Ange det maximala antalet unika fasettvärden som kan returneras över alla fasetter i en enskild sökfråga när inget värde anges eller är satt till noll. Standardgränsen är 250. För att ändra detta, uppdatera inställningen app_search.engine.total_facet_values_returned.limit i konfigurationsfilen app_search.yml."
+      }
+    }
+  }
+}
