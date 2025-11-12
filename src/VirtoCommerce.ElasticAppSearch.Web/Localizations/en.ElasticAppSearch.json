@@ -20,12 +20,12 @@
         "description": "Set ElasticAppSearch password"
       },
       "ElasticAppSearchEnabled": {
-        "title": "ElasticAppSearch activation",
-        "description": "Enable/ disable ElasticAppSearch"
+        "title": "ElasticAppSearch",
+        "description": "Enable/disable ElasticAppSearch"
       },
       "MaxFacetValueCount": {
         "title": "Maximum unique facet values per query (default)",
-        "description": "Specifies the maximum number of unique facet values that can be returned across all facets in a single search query when no value is specified or set to zero. The default limit is 250. To change this, update the app_search.engine.total_facet_values_returned.limit setting in the app_search.yml configuration file."
+        "description": "Specify the maximum number of unique facet values that can be returned across all facets in a single search query when no value is specified or set to zero. The default limit is 250. To change this, update the app_search.engine.total_facet_values_returned.limit setting in the app_search.yml configuration file."
       }
     }
   }

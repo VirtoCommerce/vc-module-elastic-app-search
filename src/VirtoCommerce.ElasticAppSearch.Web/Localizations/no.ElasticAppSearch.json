@@ -1,0 +1,32 @@
+{
+  "ElasticAppSearch": {
+    "blades": {
+      "hello-world": {
+        "title": "Hei verden-blade"
+      }
+    }
+  },
+  "permissions": {
+    "ElasticAppSearch:access": "Åpne ElasticAppSearch-menyen",
+    "ElasticAppSearch:create": "Opprette data relatert til ElasticAppSearch",
+    "ElasticAppSearch:read": "Vise data relatert til ElasticAppSearch",
+    "ElasticAppSearch:update": "Oppdatere data relatert til ElasticAppSearch",
+    "ElasticAppSearch:delete": "Slette data relatert til ElasticAppSearch"
+  },
+  "settings": {
+    "ElasticAppSearch": {
+      "ElasticAppSearchPassword": {
+        "title": "ElasticAppSearch-passord",
+        "description": "Angi ElasticAppSearch-passord"
+      },
+      "ElasticAppSearchEnabled": {
+        "title": "ElasticAppSearch",
+        "description": "Aktiver/deaktiver ElasticAppSearch"
+      },
+      "MaxFacetValueCount": {
+        "title": "Maksimalt antall unike fasettverdier per spørring (standard)",
+        "description": "Angi det maksimale antallet unike fasettverdier som kan returneres på tvers av alle fasetter i en enkelt søkespørring når ingen verdi er angitt eller satt til null. Standardgrensen er 250. For å endre dette, oppdater innstillingen app_search.engine.total_facet_values_returned.limit i konfigurasjonsfilen app_search.yml."
+      }
+    }
+  }
+}
