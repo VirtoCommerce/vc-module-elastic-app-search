@@ -77,7 +77,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
 
         private Boost ToApiBoost(SearchBoost searchBoost)
         {
-            var preset = _boostPresets.FirstOrDefault(x => x.Name.EqualsInvariant(searchBoost.Preset))
+            var preset = _boostPresets.FirstOrDefault(x => x.Name.EqualsIgnoreCase(searchBoost.Preset))
                 ?? _boostPresets.FirstOrDefault(x => x.IsDefault);
 
             if (preset == null)

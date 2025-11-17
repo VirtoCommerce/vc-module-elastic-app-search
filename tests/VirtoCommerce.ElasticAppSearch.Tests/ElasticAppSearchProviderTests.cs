@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -13,7 +14,7 @@ using VirtoCommerce.ElasticAppSearch.Core.Services;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Builders;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.ElasticAppSearch.Data.Services;
-using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.Platform.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 using Xunit;
 
@@ -34,25 +35,17 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
             var documentConverter = new Mock<IDocumentConverter>();
             var searchQueryBuilder = new Mock<ISearchQueryBuilder>();
             var searchResponseBuilder = new Mock<ISearchResponseBuilder>();
-            var platformMemoryCache = new Mock<IPlatformMemoryCache>();
 
             //  setup cache mocks
             var cacheEntry = new Mock<ICacheEntry>();
             cacheEntry.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
 
-            var engineName = string.Join("-", searchOptions.Value.Scope, "testDocumentType").ToLowerInvariant();
-
-            var schemaCacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSchemaAsync", engineName);
-            platformMemoryCache.Setup(pmc => pmc.CreateEntry(schemaCacheKey)).Returns(cacheEntry.Object);
-
-            var settingsCacheKey = CacheKey.With(typeof(ElasticAppSearchProvider), "GetSearchSettingsAsync", engineName);
-            platformMemoryCache.Setup(pmc => pmc.CreateEntry(settingsCacheKey)).Returns(cacheEntry.Object);
-
-            platformMemoryCache.Setup(x => x.GetDefaultCacheEntryOptions()).Returns(() => new MemoryCacheEntryOptions());
-
             searchQueryBuilder
                 .Setup(x => x.ToSearchQueries(It.IsAny<SearchRequest>(), It.IsAny<Schema>(), It.IsAny<SearchSettings>()))
                 .Returns(new List<SearchQueryAggregationWrapper> { new SearchQueryAggregationWrapper() });
+
+            var memoryCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+            var platformMemoryCache = new PlatformMemoryCache(memoryCache, Options.Create(new CachingOptions()), new Mock<ILogger<PlatformMemoryCache>>().Object);
 
             var appSearchProvider = new ElasticAppSearchProvider(
                 searchOptions,
@@ -60,7 +53,7 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
                 documentConverter.Object,
                 searchQueryBuilder.Object,
                 searchResponseBuilder.Object,
-                platformMemoryCache.Object
+                platformMemoryCache
             );
 
             var searchRequest = new SearchRequest

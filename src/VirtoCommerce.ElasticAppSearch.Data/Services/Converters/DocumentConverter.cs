@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -9,7 +8,6 @@ using VirtoCommerce.ElasticAppSearch.Core.Models.Api.Schema;
 using VirtoCommerce.ElasticAppSearch.Core.Services.Converters;
 using VirtoCommerce.SearchModule.Core.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
-using SearchGeoPoint = VirtoCommerce.SearchModule.Core.Model.GeoPoint;
 
 namespace VirtoCommerce.ElasticAppSearch.Data.Services.Converters;
 
@@ -71,27 +69,8 @@ public class DocumentConverter : IDocumentConverter
             IndexDocumentFieldValueType.Byte or IndexDocumentFieldValueType.Short or IndexDocumentFieldValueType.Integer or IndexDocumentFieldValueType.Long or IndexDocumentFieldValueType.Float or IndexDocumentFieldValueType.Double or IndexDocumentFieldValueType.Decimal => FieldType.Number,
             IndexDocumentFieldValueType.DateTime => FieldType.Date,
             IndexDocumentFieldValueType.GeoPoint => FieldType.Geolocation,
-#pragma warning disable CS0618 // Type or member is obsolete
-            IndexDocumentFieldValueType.Undefined => ToProviderFieldType(indexDocumentField.Name, indexDocumentField.Value),
-#pragma warning restore CS0618 // Type or member is obsolete
             _ => FieldType.Text,
         };
-    }
-
-    [Obsolete("Left for backward compatibility")]
-    protected virtual FieldType ToProviderFieldType(string fieldName, object fieldValue)
-    {
-        var fieldType = fieldValue switch
-        {
-            sbyte or byte or ushort or short or uint or int or ulong or long or float or double or decimal or TimeSpan => FieldType.Number,
-            DateTime or DateTimeOffset => FieldType.Date,
-            SearchGeoPoint => FieldType.Geolocation,
-            _ => FieldType.Text
-        };
-
-        _logger.LogInformation("The {FieldName} field has undefined value type. {FieldType} type was detected automatically based on field value object type", fieldName, fieldType);
-
-        return fieldType;
     }
 
     public SearchDocument ToSearchDocument(Core.Models.Api.Search.Result.SearchResultDocument searchResultDocument)
