@@ -177,7 +177,7 @@ namespace VirtoCommerce.ElasticAppSearch.Data.Services.Builders
             else
             {
                 result.Values = facet.Data
-                    .Where(x => termAggregationRequest.Values.Any(v => ToStringInvariant(x.Value).EqualsInvariant(v)) && x.Count > 0)
+                    .Where(x => termAggregationRequest.Values.Any(v => ToStringInvariant(x.Value).EqualsIgnoreCase(v)) && x.Count > 0)
                     .Select(x => GetAggregationResponseValue(x.Value, x.Count)).ToList();
             }
 
