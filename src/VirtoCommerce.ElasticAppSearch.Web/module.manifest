@@ -13,7 +13,7 @@
     <app id="app_search">
       <title>App Search</title>
       <description>Kibana visualization dashboard for Elastic App Search</description>
-      <iconUrl>/apps/app_search/app-search-logo.svg</iconUrl>
+      <iconUrl>/apps/app_search/logo.svg</iconUrl>
       <permission>elasticappsearch:access</permission>
     </app>
   </apps>
