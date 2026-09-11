@@ -107,6 +107,35 @@ namespace VirtoCommerce.ElasticAppSearch.Tests
         }
 
         [Theory]
+        [InlineData("score")]
+        [InlineData("_score")]
+        [InlineData("SCORE")]
+        public void ToSearchQuery_ScoreToken_MapsToRelevanceField(string scoreToken)
+        {
+            // The storefront and the other providers emit "score"; App Search exposes relevance only as the
+            // built-in "_score" field (not part of the schema), so the token must bind to "_score" and survive.
+            Test(
+                () => new SearchRequest { Sorting = new SortingField[] { new(scoreToken, true) } },
+                searchQuery => searchQuery.Sort,
+                new FieldSort[] { new() { FieldName = "_score", Value = SortOrder.Desc } });
+        }
+
+        [Fact]
+        public void ToSearchQuery_ScoreWithSchemaTieBreaker_KeepsRelevanceAndKnownField()
+        {
+            // Featured-style expression: relevance first, then a tie-breaker. Relevance survives as "_score";
+            // schema fields survive as themselves (unknown fields are still dropped by GetSorting).
+            Test(
+                () => new SearchRequest { Sorting = new SortingField[] { new("score", true), new("test1") } },
+                searchQuery => searchQuery.Sort,
+                new FieldSort[]
+                {
+                    new() { FieldName = "_score", Value = SortOrder.Desc },
+                    new() { FieldName = "test1", Value = SortOrder.Asc },
+                });
+        }
+
+        [Theory]
         [MemberData(nameof(SearchFieldsData))]
         public void ToSearchQuery_ConvertValidSearchFields_Successfully(string[] searchFields, object expectedResult)
         {
