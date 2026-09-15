@@ -181,6 +181,16 @@ public class SearchQueryBuilder : ISearchQueryBuilder
                 }
             };
         }
+        else if (IsScoreField(field))
+        {
+            // Relevance sort. Other providers (and the storefront) emit the "score" token; App Search exposes
+            // relevance only as the built-in "_score" field, so bind both spellings to it.
+            result = new FieldSort
+            {
+                FieldName = ModuleConstants.Api.FieldNames.ScoreFieldName,
+                Value = field.IsDescending ? SortOrder.Desc : SortOrder.Asc
+            };
+        }
         else
         {
             result = new FieldSort
@@ -191,6 +201,14 @@ public class SearchQueryBuilder : ISearchQueryBuilder
         }
 
         return result;
+    }
+
+    // True for the relevance ("score") sort. Accepts the cross-provider "score" token (what the storefront sends)
+    // and App Search's own "_score", so a relevance clause is never silently dropped from sorting.
+    protected virtual bool IsScoreField(SortingField field)
+    {
+        return field.FieldName.EqualsIgnoreCase("score") ||
+               field.FieldName.EqualsIgnoreCase(ModuleConstants.Api.FieldNames.ScoreFieldName);
     }
 
     protected virtual Dictionary<string, SearchFieldValue> GetSearchFields(IEnumerable<string> searchFields)
